@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La boutique OVRG - Mode Streetwear Premium à Abidjan</title>
+    <meta name="description"
+        content="Découvrez La boutique OVRG, votre destination pour la mode streetwear premium à Abidjan.">
+    <meta name="theme-color" content="#FF6B35">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+  <script type="module" crossorigin src="/assets/index-BB5MWrtd.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BkWbBP7v.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="header-inner">
+            <a href="#" class="logo">OVRG<span>.</span></a>
+            <nav>
+                <a href="#catalogue">Collection</a>
+                <a href="#contact">Contact</a>
+                <a href="https://www.instagram.com/ovrgapparel" target="_blank">Instagram</a>
+                <a href="https://pin.it/6SwliNSis" target="_blank">Pinterest</a>
+            </nav>
+            <div class="header-actions">
+                <button class="cart-btn" onclick="toggleCart()">🛍 Panier <span class="cart-badge"
+                        id="cartCount">0</span></button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-tag">Nouvelle Collection 2026</div>
+        <h1>OVRG<br><span>Apparel</span></h1>
+        <p>Mode streetwear premium à Abidjan. Livraison rapide, style exclusif.</p>
+        <a href="#catalogue" class="hero-cta">Découvrir la Collection</a>
+    </section>
+
+    <section class="catalogue" id="catalogue">
+        <div class="section-header">
+            <div class="section-label">Notre Collection</div>
+            <h2 class="section-title">CATALOGUE</h2>
+        </div>
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterProducts('all', this)">Tout</button>
+            <button class="filter-tab" onclick="filterProducts('t-shirt', this)">T-Shirts</button>
+            <button class="filter-tab" onclick="filterProducts('ensemble', this)">Ensembles</button>
+        </div>
+        <div class="loading-grid" id="loadingGrid">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+        </div>
+        <div class="products-grid" id="productsGrid" style="display:none"></div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <div class="contact-inner">
+            <div class="contact-info">
+                <h2>OVRG<br><span>Apparel</span></h2>
+                <p>Découvrez notre univers et restez connectés pour les prochaines nouveautés.</p>
+                <div class="contact-links">
+                    <a href="tel:+2250799108108" class="contact-link"><span class="cl-icon">📞</span> +225 07 99 10 81
+                        08</a>
+                    <a href="mailto:ovrg.apparel@gmail.com" class="contact-link"><span class="cl-icon">✉️</span>
+                        ovrg.apparel@gmail.com</a>
+                    <a href="https://wa.me/2250799108108" target="_blank" class="contact-link"><span
+                            class="cl-icon">💬</span> WhatsApp</a>
+                    <a href="https://www.instagram.com/ovrgapparel" target="_blank" class="contact-link"><span
+                            class="cl-icon">📷</span> Instagram</a>
+                </div>
+            </div>
+            <div class="newsletter-form">
+                <h3>Restez Informé</h3>
+                <form onsubmit="handleNewsletter(event)">
+                    <div class="nf-group"><input type="text" name="name" placeholder="Nom complet" required></div>
+                    <div class="nf-group"><input type="email" name="email" placeholder="votre.email@exemple.com"
+                            required></div>
+                    <button type="submit" class="btn-subscribe">S'inscrire</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand"><a href="#" class="logo">OVRG<span>.</span></a>
+                <p>Streetwear premium à Abidjan.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="#catalogue">Produits</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Légal</h4>
+                <ul>
+                    <li><a href="#" onclick="alert('Politique OVRG')">Confidentialité</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom"><span>© 2026 OVRG. Tous droits réservés.</span><span>Made in Abidjan ⚙</span></div>
+    </footer>
+
+    <!-- MODALS -->
+    <div class="overlay" id="productOverlay" onclick="if(event.target===this)closeProduct()">
+        <div class="modal-box">
+            <div class="modal-top">
+                <h3 id="modalNameTop">Détails</h3><button class="btn-close" onclick="closeProduct()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <div class="main-img" id="mainImgWrap"></div>
+                    <div class="thumb-row" id="thumbRow"></div>
+                </div>
+                <div class="modal-info">
+                    <div id="modalCat" style="font-size:0.7rem; color:var(--primary); font-weight:700">T-SHIRT</div>
+                    <h2 id="modalName" style="font-family:'Bebas Neue'; font-size:2.5rem; margin-bottom:1rem">Nom</h2>
+                    <span class="modal-price" id="modalPrice"></span>
+                    <p class="modal-desc" id="modalDesc"></p>
+                    <div style="margin-bottom:1rem">
+                        <div style="font-size:0.8rem; font-weight:700; margin-bottom:0.5rem">Taille</div>
+                        <div class="sizes" id="sizeBtns"></div>
+                    </div>
+                    <div class="qty-ctrl">
+                        <button onclick="changeQty(-1)">−</button><input type="number" id="qtyInput" value="1"
+                            min="1"><button onclick="changeQty(1)">+</button>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-primary" onclick="addToCartFromModal()">🛍 Ajouter au panier</button>
+                        <div class="payment-btns">
+                            <button class="btn-pay btn-paypal" onclick="payWithPayPal()">PayPal</button>
+                            <button class="btn-pay btn-wave" onclick="payWithWave()">Wave</button>
+                            <button class="btn-pay btn-yango" onclick="buyViaYango()">Yango</button>
+                            <button class="btn-pay btn-whatsapp-btn" onclick="buyViaWhatsApp()">WhatsApp</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-panel" id="cartPanel">
+        <div class="cart-header">
+            <h3>Mon Panier</h3><button class="btn-close" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-total"><span>Total</span><span id="cartTotal">0 FCFA</span></div>
+        <button class="btn-checkout-cart" onclick="openCheckout()">Passer commande →</button>
+    </div>
+
+    <div class="checkout-overlay" id="checkoutOverlay">
+        <div class="checkout-box">
+            <h2>Finaliser la Commande</h2>
+            <form onsubmit="submitOrder(event)">
+                <div class="form-grid">
+                    <div class="form-group"><input type="text" name="name" placeholder="Nom complet" required></div>
+                    <div class="form-group"><input type="tel" name="phone" placeholder="Téléphone" required></div>
+                    <div class="form-group full"><input type="text" name="address" placeholder="Commune, Quartier"
+                            required></div>
+                </div>
+                <button class="btn-subscribe" style="margin-top:2rem">Confirmer la commande</button>
+                <button type="button" onclick="closeCheckout()"
+                    style="display:block; margin: 1rem auto; background:none; border:none; color:#888; cursor:pointer">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <form id="paypalCartForm" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank"
+        style="display:none">
+        <input type="hidden" name="business" value="ovrg.apparel@gmail.com">
+        <input type="hidden" name="cmd" value="_cart">
+        <input type="hidden" name="upload" value="1">
+        <input type="hidden" name="currency_code" value="USD">
+    </form>
+
+    <div class="chat-widget" id="chatWidget">
+        <div class="chat-channels" id="chatChannels">
+            <a href="https://wa.me/2250799108108" target="_blank"
+                class="chat-channel-btn btn-whatsapp-float">WhatsApp</a>
+            <a href="https://t.me/+2250799108108" target="_blank"
+                class="chat-channel-btn btn-telegram-float">Telegram</a>
+            <a href="https://m.me/ovrgapparel" target="_blank"
+                class="chat-channel-btn btn-messenger-float">Messenger</a>
+        </div>
+        <button class="chat-toggle" onclick="toggleChat()">💬</button>
+    </div>
+
+    <div class="toast" id="toast">✅ <span id="toastMsg"></span></div>
+
+</body>
+
+</html>
