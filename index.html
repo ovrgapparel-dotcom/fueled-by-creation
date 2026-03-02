@@ -1,258 +1,284 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La boutique OVRG - Mode Streetwear Premium à Abidjan</title>
-<meta name="description" content="Découvrez La boutique OVRG, votre destination pour la mode streetwear premium à Abidjan.">
-<meta name="theme-color" content="#FF6B35">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La boutique OVRG - Mode Streetwear Premium à Abidjan</title>
+    <meta name="description"
+        content="Découvrez La boutique OVRG, votre destination pour la mode streetwear premium à Abidjan.">
+    <meta name="theme-color" content="#FF6B35">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
-<!-- ╔══════════════════════════════════════════════════════════════╗
-     ║  SUPABASE SETUP — Replace with your project credentials     ║
-     ║  Find them at: supabase.com/dashboard → Settings → API     ║
-     ╚══════════════════════════════════════════════════════════════╝ -->
-<script>
-  const SUPABASE_URL    = 'https://mihpdlhbijlvbdcqvzdw.supabase.co';  // ← your project URL
-  const SUPABASE_ANON   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1paHBkbGhiaWpsdmJkY3F2emR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MDkzMTgsImV4cCI6MjA4Nzk4NTMxOH0.X-2XjKKi3enHck1KBtlga-RiVjXN3BS5EhW3fnF3oTE';                  // ← Settings → API → anon public
-  const STORAGE_BUCKET  = 'product-images';                              // ← bucket name you'll create
-  const PRODUCTS_TABLE  = 'products';                                    // ← table name (see SQL below)
-</script>
+    <script>
+        const SUPABASE_URL = 'https://mihpdlhbijlvbdcqvzdw.supabase.co';
+        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1paHBkbGhiaWpsdmJkY3F2emR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MDkzMTgsImV4cCI6MjA4Nzk4NTMxOH0.X-2XjKKi3enHck1KBtlga-RiVjXN3BS5EhW3fnF3oTE';
+        const STORAGE_BUCKET = 'product-images';
+        const PRODUCTS_TABLE = 'products';
+    </script>
 
-<style>
-:root {
-  --primary: #FF6B35;
-  --primary-dark: #e55a2b;
-  --dark: #0d0d0d;
-  --dark2: #1a1a1a;
-  --gray: #888;
-  --light: #f5f4f1;
-  --white: #ffffff;
-  --border: #e8e5e0;
-  --success: #22c55e;
-  --info: #3b82f6;
-}
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #e55a2b;
+            --dark: #0d0d0d;
+            --dark2: #1a1a1a;
+            --gray: #888;
+            --light: #f5f4f1;
+            --white: #ffffff;
+            --border: #e8e5e0;
+            --success: #22c55e;
+            --info: #3b82f6;
+        }
 
-* { margin:0; padding:0; box-sizing:border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--white);
-  color: var(--dark);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--white);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-/* ── HEADER ── */
-header {
-  background: var(--dark);
-  position: sticky; top: 0; z-index: 100;
-  border-bottom: 2px solid var(--primary);
-}
-.header-inner {
-  max-width: 1400px; margin: 0 auto;
-  padding: 0 1.5rem;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 68px;
-}
-.logo {
-  font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
-  color: var(--white); letter-spacing: 0.08em; text-decoration: none;
-}
-.logo span { color: var(--primary); }
-nav a {
-  color: #ccc; text-decoration: none; font-size: 0.85rem;
-  font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
-  margin: 0 1rem; transition: color 0.2s;
-}
-nav a:hover { color: var(--primary); }
-.header-actions { display: flex; align-items: center; gap: 0.6rem; }
+        header {
+            background: var(--dark);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid var(--primary);
+        }
 
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 68px;
+        }
+
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--white);
+            letter-spacing: 0.08em;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        nav a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin: 0 1rem;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
 .btn-icon {
-  background: transparent; border: 1px solid #444; color: #aaa;
-  padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer;
-  font-size: 0.8rem; font-family: 'DM Sans', sans-serif;
-  transition: all 0.2s;
+background: transparent; border: 1px solid #444; color: #aaa;
+padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer;
+font-size: 0.8rem; font-family: 'DM Sans', sans-serif;
+transition: all 0.2s;
 }
 .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
 
 .cart-btn {
-  background: var(--primary); color: white; border: none;
-  padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem;
-  display: flex; align-items: center; gap: 0.4rem; transition: background 0.2s;
+background: var(--primary); color: white; border: none;
+padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
+font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem;
+display: flex; align-items: center; gap: 0.4rem; transition: background 0.2s;
 }
 .cart-btn:hover { background: var(--primary-dark); }
 .cart-badge {
-  background: white; color: var(--primary);
-  border-radius: 50%; width: 18px; height: 18px;
-  font-size: 0.7rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
+background: white; color: var(--primary);
+border-radius: 50%; width: 18px; height: 18px;
+font-size: 0.7rem; font-weight: 700;
+display: flex; align-items: center; justify-content: center;
 }
 
-/* ── HERO ── */
 .hero {
-  background: var(--dark); padding: 4rem 1.5rem 5rem;
-  text-align: center; position: relative; overflow: hidden;
+background: var(--dark); padding: 4rem 1.5rem 5rem;
+text-align: center; position: relative; overflow: hidden;
 }
 .hero::before {
-  content: 'OVRG';
-  position: absolute; font-family: 'Bebas Neue', sans-serif;
-  font-size: 25vw; color: rgba(255,107,53,0.04);
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-  pointer-events: none; letter-spacing: 0.1em;
+content: 'OVRG';
+position: absolute; font-family: 'Bebas Neue', sans-serif;
+font-size: 25vw; color: rgba(255,107,53,0.04);
+top: 50%; left: 50%; transform: translate(-50%, -50%);
+pointer-events: none; letter-spacing: 0.1em;
 }
 .hero-tag {
-  display: inline-block; background: var(--primary); color: white;
-  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
-  text-transform: uppercase; padding: 0.35rem 1rem;
-  border-radius: 20px; margin-bottom: 1.5rem;
+display: inline-block; background: var(--primary); color: white;
+font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
+text-transform: uppercase; padding: 0.35rem 1rem;
+border-radius: 20px; margin-bottom: 1.5rem;
 }
 .hero h1 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3.5rem, 9vw, 7rem); color: var(--white);
-  letter-spacing: 0.05em; line-height: 0.95; margin-bottom: 1.2rem;
+font-family: 'Bebas Neue', sans-serif;
+font-size: clamp(3.5rem, 9vw, 7rem); color: var(--white);
+letter-spacing: 0.05em; line-height: 0.95; margin-bottom: 1.2rem;
 }
 .hero h1 span { color: var(--primary); }
 .hero p { color: #aaa; font-size: 1.05rem; max-width: 500px; margin: 0 auto 2rem; }
 .hero-cta {
-  display: inline-block; background: var(--primary); color: white;
-  padding: 0.9rem 2.5rem; border-radius: 8px; text-decoration: none;
-  font-weight: 700; font-size: 1rem; transition: all 0.2s;
+display: inline-block; background: var(--primary); color: white;
+padding: 0.9rem 2.5rem; border-radius: 8px; text-decoration: none;
+font-weight: 700; font-size: 1rem; transition: all 0.2s;
 }
 .hero-cta:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-/* ── CATALOGUE ── */
 .catalogue { padding: 4rem 1.5rem; background: var(--light); }
 .section-header { text-align: center; margin-bottom: 2.5rem; }
 .section-label {
-  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--primary); margin-bottom: 0.5rem;
+font-size: 0.75rem; font-weight: 700; letter-spacing: 0.18em;
+text-transform: uppercase; color: var(--primary); margin-bottom: 0.5rem;
 }
 .section-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: 0.04em;
-  color: var(--dark); line-height: 1;
+font-family: 'Bebas Neue', sans-serif;
+font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: 0.04em;
+color: var(--dark); line-height: 1;
 }
 
 .filter-tabs {
-  display: flex; justify-content: center; gap: 0.5rem;
-  margin-bottom: 2.5rem; flex-wrap: wrap;
+display: flex; justify-content: center; gap: 0.5rem;
+margin-bottom: 2.5rem; flex-wrap: wrap;
 }
 .filter-tab {
-  background: white; border: 1.5px solid var(--border); color: var(--gray);
-  padding: 0.5rem 1.2rem; border-radius: 30px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
-  transition: all 0.2s;
+background: white; border: 1.5px solid var(--border); color: var(--gray);
+padding: 0.5rem 1.2rem; border-radius: 30px; cursor: pointer;
+font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+transition: all 0.2s;
 }
 .filter-tab:hover, .filter-tab.active {
-  background: var(--primary); border-color: var(--primary); color: white;
+background: var(--primary); border-color: var(--primary); color: white;
 }
 
 .products-grid {
-  max-width: 1400px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+max-width: 1400px; margin: 0 auto;
+display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 1.5rem;
 }
 
 .product-card {
-  background: white; border-radius: 12px; overflow: hidden;
-  cursor: pointer; transition: transform 0.25s, box-shadow 0.25s;
-  border: 1px solid var(--border);
+background: white; border-radius: 12px; overflow: hidden;
+cursor: pointer; transition: transform 0.25s, box-shadow 0.25s;
+border: 1px solid var(--border);
 }
 .product-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
-
 .product-img-wrap {
-  position: relative; height: 280px;
-  background: #f0ede8; overflow: hidden;
+position: relative; height: 280px;
+background: #f0ede8; overflow: hidden;
 }
 .product-img-wrap img {
-  width: 100%; height: 100%; object-fit: cover;
-  transition: transform 0.4s ease;
+width: 100%; height: 100%; object-fit: cover;
+transition: transform 0.4s ease;
 }
 .product-card:hover .product-img-wrap img { transform: scale(1.04); }
 .product-img-placeholder {
-  width: 100%; height: 100%; display: flex; align-items: center;
-  justify-content: center; background: linear-gradient(135deg, #f0ede8, #e8e3dc);
+width: 100%; height: 100%; display: flex; align-items: center;
+justify-content: center; background: linear-gradient(135deg, #f0ede8, #e8e3dc);
 }
 .product-badge {
-  position: absolute; top: 12px; left: 12px;
-  background: var(--primary); color: white;
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 20px;
+position: absolute; top: 12px; left: 12px;
+background: var(--primary); color: white;
+font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 20px;
 }
 .product-quick-view {
-  position: absolute; bottom: -44px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,0.85); color: white; border: none;
-  padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600;
-  white-space: nowrap; transition: bottom 0.25s ease;
+position: absolute; bottom: -44px; left: 50%; transform: translateX(-50%);
+background: rgba(0,0,0,0.85); color: white; border: none;
+padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer;
+font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600;
+white-space: nowrap; transition: bottom 0.25s ease;
 }
 .product-card:hover .product-quick-view { bottom: 12px; }
 
 .product-info { padding: 1.1rem; }
 .product-cat {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--gray); margin-bottom: 0.3rem;
+font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+text-transform: uppercase; color: var(--gray); margin-bottom: 0.3rem;
 }
 .product-name { font-weight: 600; font-size: 1rem; color: var(--dark); margin-bottom: 0.6rem; }
 .product-pricing { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; }
 .product-price { font-size: 1.1rem; font-weight: 700; color: var(--dark); }
 .product-old { font-size: 0.85rem; color: var(--gray); text-decoration: line-through; }
 .product-discount {
-  background: #fff0eb; color: var(--primary);
-  font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 4px;
+background: #fff0eb; color: var(--primary);
+font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 4px;
 }
 .btn-add-cart {
-  width: 100%; background: var(--dark); color: white; border: none;
-  padding: 0.7rem; border-radius: 7px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
-  transition: background 0.2s;
+width: 100%; background: var(--dark); color: white; border: none;
+padding: 0.7rem; border-radius: 7px; cursor: pointer;
+font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
+transition: background 0.2s;
 }
 .btn-add-cart:hover { background: var(--primary); }
 
-/* ── LOADING STATE ── */
 .loading-grid {
-  max-width: 1400px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+max-width: 1400px; margin: 0 auto;
+display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 1.5rem;
 }
 .skeleton {
-  background: white; border-radius: 12px; overflow: hidden;
-  border: 1px solid var(--border);
+background: white; border-radius: 12px; overflow: hidden;
+border: 1px solid var(--border);
 }
-.skeleton-img { height: 280px; background: linear-gradient(90deg, #f0ede8 25%, #e8e3dc 50%, #f0ede8 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-.skeleton-line { height: 14px; margin: 12px; border-radius: 4px; background: linear-gradient(90deg, #f0ede8 25%, #e8e3dc 50%, #f0ede8 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+.skeleton-img { height: 280px; background: linear-gradient(90deg, #f0ede8 25%, #e8e3dc 50%, #f0ede8 75%);
+background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+.skeleton-line { height: 14px; margin: 12px; border-radius: 4px; background: linear-gradient(90deg, #f0ede8 25%, #e8e3dc
+50%, #f0ede8 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
 .skeleton-line.short { width: 60%; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* ── PRODUCT OVERLAY ── */
 .overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); z-index: 200;
-  overflow-y: auto; padding: 1rem;
-  align-items: flex-start; justify-content: center;
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,0.7); z-index: 200;
+overflow-y: auto; padding: 1rem;
+align-items: flex-start; justify-content: center;
 }
 .overlay.open { display: flex; }
 .modal-box {
-  background: white; border-radius: 16px;
-  max-width: 960px; width: 100%; margin: 2rem auto; overflow: hidden;
-  animation: modalIn 0.25s ease;
+background: white; border-radius: 16px;
+max-width: 960px; width: 100%; margin: 2rem auto; overflow: hidden;
+animation: modalIn 0.25s ease;
 }
 @keyframes modalIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+from { opacity: 0; transform: translateY(20px) scale(0.97); }
+to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .modal-top {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+display: flex; justify-content: space-between; align-items: center;
+padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
 }
 .modal-top h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.05em; }
 .btn-close {
-  background: #f0f0f0; border: none; width: 36px; height: 36px;
-  border-radius: 50%; cursor: pointer; font-size: 1.1rem;
-  display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+background: #f0f0f0; border: none; width: 36px; height: 36px;
+border-radius: 50%; cursor: pointer; font-size: 1.1rem;
+display: flex; align-items: center; justify-content: center; transition: background 0.2s;
 }
 .btn-close:hover { background: #e0e0e0; }
 
@@ -261,101 +287,115 @@ nav a:hover { color: var(--primary); }
 
 .modal-gallery { padding: 1.5rem; background: var(--light); }
 .main-img {
-  width: 100%; height: 360px; border-radius: 10px; overflow: hidden;
-  background: #e8e3dc; margin-bottom: 0.75rem;
+width: 100%; height: 360px; border-radius: 10px; overflow: hidden;
+background: #e8e3dc; margin-bottom: 0.75rem;
 }
 .main-img img { width: 100%; height: 100%; object-fit: cover; }
 .main-img-placeholder {
-  width: 100%; height: 100%; display: flex;
-  align-items: center; justify-content: center; font-size: 5rem; opacity: 0.15;
+width: 100%; height: 100%; display: flex;
+align-items: center; justify-content: center; font-size: 5rem; opacity: 0.15;
 }
 .thumb-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
 .thumb {
-  height: 80px; border-radius: 6px; background: #e8e3dc; overflow: hidden;
-  cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s;
+height: 80px; border-radius: 6px; background: #e8e3dc; overflow: hidden;
+cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s;
 }
 .thumb.active { border-color: var(--primary); }
 .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .thumb-placeholder {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; opacity: 0.2;
+width: 100%; height: 100%;
+display: flex; align-items: center; justify-content: center;
+font-size: 1.5rem; opacity: 0.2;
 }
-
 .modal-info { padding: 1.5rem 2rem; overflow-y: auto; max-height: 520px; }
-.modal-cat { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary); margin-bottom: 0.4rem; }
-.modal-name { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.04em; line-height: 1.1; margin-bottom: 1rem; }
+.modal-cat { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color:
+var(--primary); margin-bottom: 0.4rem; }
+.modal-name { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.04em; line-height: 1.1;
+margin-bottom: 1rem; }
 .modal-pricing { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.2rem; }
 .modal-price { font-size: 2rem; font-weight: 700; color: var(--dark); }
 .modal-old { font-size: 1rem; color: var(--gray); text-decoration: line-through; }
-.modal-disc { background: #fff0eb; color: var(--primary); font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 5px; }
-.modal-desc { color: #555; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+.modal-disc { background: #fff0eb; color: var(--primary); font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem;
+border-radius: 5px; }
+.modal-desc { color: #555; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem; border-top: 1px solid
+var(--border); padding-top: 1.2rem; }
 
 .size-section { margin-bottom: 1.5rem; }
-.size-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dark); margin-bottom: 0.5rem; }
+.size-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dark);
+margin-bottom: 0.5rem; }
 .sizes { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .size-btn {
-  border: 1.5px solid var(--border); background: white;
-  padding: 0.4rem 0.9rem; border-radius: 6px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
-  transition: all 0.15s;
+border: 1.5px solid var(--border); background: white;
+padding: 0.4rem 0.9rem; border-radius: 6px; cursor: pointer;
+font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+transition: all 0.15s;
 }
 .size-btn:hover, .size-btn.selected { border-color: var(--primary); background: var(--primary); color: white; }
 
 .qty-section { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .qty-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
-.qty-ctrl { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
-.qty-ctrl button { background: none; border: none; width: 36px; height: 36px; cursor: pointer; font-size: 1.2rem; transition: background 0.15s; }
+.qty-ctrl { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.qty-ctrl button { background: none; border: none; width: 36px; height: 36px; cursor: pointer; font-size: 1.2rem;
+transition: background 0.15s; }
 .qty-ctrl button:hover { background: var(--light); }
-.qty-ctrl input { width: 48px; text-align: center; border: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border); padding: 0.4rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; }
+.qty-ctrl input { width: 48px; text-align: center; border: none; border-left: 1px solid var(--border); border-right: 1px
+solid var(--border); padding: 0.4rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; }
 .qty-ctrl input:focus { outline: none; }
 
 .modal-actions { display: flex; flex-direction: column; gap: 0.6rem; }
-.btn-primary { background: var(--dark); color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.btn-primary { background: var(--dark); color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family:
+'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
 .btn-primary:hover { background: var(--primary); }
-.btn-paypal { background: #003087; color: #00b4d8; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+.btn-paypal { background: #003087; color: #00b4d8; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM
+Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
 .btn-paypal:hover { opacity: 0.9; }
-.btn-wave { background: #1e90ff; color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+.btn-wave { background: #1e90ff; color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM
+Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
 .btn-wave:hover { opacity: 0.9; }
-.btn-yango { background: var(--primary); color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.btn-yango { background: var(--primary); color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family:
+'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
 .btn-yango:hover { background: var(--primary-dark); }
-.btn-whatsapp { background: #25D366; color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: opacity 0.2s; }
+.btn-whatsapp { background: #25D366; color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM
+Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center;
+justify-content: center; gap: 0.5rem; transition: opacity 0.2s; }
 .btn-whatsapp:hover { opacity: 0.9; }
 
-/* ── CART PANEL ── */
 .cart-panel {
-  position: fixed; right: -420px; top: 0; height: 100%;
-  width: 420px; max-width: 100vw; background: white; z-index: 300;
-  box-shadow: -10px 0 40px rgba(0,0,0,0.15); transition: right 0.3s ease;
-  display: flex; flex-direction: column;
+position: fixed; right: -420px; top: 0; height: 100%;
+width: 420px; max-width: 100vw; background: white; z-index: 300;
+box-shadow: -10px 0 40px rgba(0,0,0,0.15); transition: right 0.3s ease;
+display: flex; flex-direction: column;
 }
 .cart-panel.open { right: 0; }
-.cart-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.cart-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content:
+space-between; align-items: center; }
 .cart-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.05em; }
 .cart-items { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
 .cart-empty { text-align: center; padding: 3rem 1rem; color: var(--gray); }
 .cart-empty .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
 .cart-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
-.cart-item-img { width: 72px; height: 72px; border-radius: 8px; background: var(--light); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; opacity: 0.3; }
+.cart-item-img { width: 72px; height: 72px; border-radius: 8px; background: var(--light); flex-shrink: 0; overflow:
+hidden; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; opacity: 0.3; }
 .cart-item-img img { width: 100%; height: 100%; object-fit: cover; opacity: 1; }
 .cart-item-info { flex: 1; }
 .cart-item-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem; }
 .cart-item-meta { font-size: 0.8rem; color: var(--gray); }
 .cart-item-price { font-weight: 700; font-size: 0.95rem; margin-top: 0.4rem; }
-.cart-item-remove { background: none; border: none; color: var(--gray); cursor: pointer; font-size: 1.1rem; align-self: flex-start; transition: color 0.2s; }
+.cart-item-remove { background: none; border: none; color: var(--gray); cursor: pointer; font-size: 1.1rem; align-self:
+flex-start; transition: color 0.2s; }
 .cart-item-remove:hover { color: #e33; }
 .cart-footer { padding: 1.2rem 1.5rem; border-top: 1px solid var(--border); }
 .cart-total { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
 .cart-total-amount { color: var(--primary); font-size: 1.2rem; }
-
-/* ── CHECKOUT OVERLAY ── */
 .checkout-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); z-index: 400;
-  overflow-y: auto; padding: 1rem; align-items: flex-start; justify-content: center;
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,0.7); z-index: 400;
+overflow-y: auto; padding: 1rem; align-items: flex-start; justify-content: center;
 }
 .checkout-overlay.open { display: flex; }
-.checkout-box { background: white; border-radius: 16px; max-width: 700px; width: 100%; margin: 2rem auto; overflow: hidden; animation: modalIn 0.25s ease; }
+.checkout-box { background: white; border-radius: 16px; max-width: 700px; width: 100%; margin: 2rem auto; overflow:
+hidden; animation: modalIn 0.25s ease; }
 .checkout-header { background: var(--dark); padding: 1.5rem 2rem; color: white; }
 .checkout-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.05em; }
 .checkout-header p { color: #aaa; font-size: 0.9rem; margin-top: 0.2rem; }
@@ -364,200 +404,233 @@ nav a:hover { color: var(--primary); }
 @media(max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
 .form-group.full { grid-column: 1 / -1; }
-.form-group label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark); }
-.form-group input, .form-group textarea, .form-group select { padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s; }
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
+.form-group label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color:
+var(--dark); }
+.form-group input, .form-group textarea, .form-group select { padding: 0.75rem 1rem; border: 1.5px solid var(--border);
+border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; transition: border-color 0.2s, box-shadow
+0.2s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color:
+var(--primary); box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
 .payment-section { margin-bottom: 1.5rem; border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; }
-.payment-header { background: var(--light); padding: 0.75rem 1rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dark); }
+.payment-header { background: var(--light); padding: 0.75rem 1rem; font-size: 0.8rem; font-weight: 700; letter-spacing:
+0.1em; text-transform: uppercase; color: var(--dark); }
 .payment-options { padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
-.payment-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+.payment-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border: 1.5px solid
+var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; }
 .payment-option:hover { border-color: var(--primary); }
 .payment-option.selected { border-color: var(--primary); background: #fff5f2; }
 .payment-option input[type=radio] { accent-color: var(--primary); }
 .payment-option .pay-label { font-weight: 600; font-size: 0.9rem; flex: 1; }
 .payment-option .pay-icon { font-size: 1.3rem; }
 .order-summary { background: var(--light); border-radius: 10px; padding: 1.2rem; margin-bottom: 1.5rem; }
-.order-summary h4 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.8rem; }
+.order-summary h4 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+margin-bottom: 0.8rem; }
 .summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.3rem 0; color: #555; }
-.summary-row.total { font-weight: 700; font-size: 1rem; color: var(--dark); border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 0.75rem; }
-.btn-checkout { width: 100%; background: var(--primary); color: white; border: none; padding: 1rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: background 0.2s; letter-spacing: 0.02em; }
+.summary-row.total { font-weight: 700; font-size: 1rem; color: var(--dark); border-top: 1px solid var(--border);
+margin-top: 0.5rem; padding-top: 0.75rem; }
+.btn-checkout { width: 100%; background: var(--primary); color: white; border: none; padding: 1rem; border-radius: 8px;
+font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+letter-spacing: 0.02em; }
 .btn-checkout:hover { background: var(--primary-dark); }
 
-/* ── ADMIN LOGIN OVERLAY ── */
 .login-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.9); z-index: 600;
-  align-items: center; justify-content: center;
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,0.9); z-index: 600;
+align-items: center; justify-content: center;
 }
 .login-overlay.open { display: flex; }
 .login-box {
-  background: var(--dark2); border-radius: 16px;
-  max-width: 420px; width: 90%; padding: 2.5rem;
-  border: 1px solid #333; animation: modalIn 0.25s ease;
-  text-align: center;
+background: var(--dark2); border-radius: 16px;
+max-width: 420px; width: 90%; padding: 2.5rem;
+border: 1px solid #333; animation: modalIn 0.25s ease;
+text-align: center;
 }
-.login-box .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--primary); letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+.login-box .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--primary);
+letter-spacing: 0.1em; margin-bottom: 0.5rem; }
 .login-box h3 { color: white; font-size: 1rem; font-weight: 500; margin-bottom: 2rem; color: #aaa; }
 .login-field { margin-bottom: 1rem; }
-.login-field input { width: 100%; padding: 0.85rem 1rem; background: #111; border: 1.5px solid #333; border-radius: 8px; color: white; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; }
+.login-field input { width: 100%; padding: 0.85rem 1rem; background: #111; border: 1.5px solid #333; border-radius: 8px;
+color: white; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; }
 .login-field input:focus { outline: none; border-color: var(--primary); }
-.btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 0.9rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; transition: background 0.2s; }
+.btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 0.9rem; border-radius: 8px;
+font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; transition:
+background 0.2s; }
 .btn-login:hover { background: var(--primary-dark); }
 .login-error { color: #f87171; font-size: 0.85rem; margin-top: 0.75rem; min-height: 1.2rem; }
-.btn-cancel-login { background: none; border: none; color: #666; font-size: 0.85rem; cursor: pointer; margin-top: 1rem; font-family: 'DM Sans', sans-serif; }
+.btn-cancel-login { background: none; border: none; color: #666; font-size: 0.85rem; cursor: pointer; margin-top: 1rem;
+font-family: 'DM Sans', sans-serif; }
 .btn-cancel-login:hover { color: #aaa; }
 
-/* ── ADMIN PANEL ── */
 .admin-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.9); z-index: 500;
-  overflow-y: auto; padding: 1rem;
-  align-items: flex-start; justify-content: center;
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,0.9); z-index: 500;
+overflow-y: auto; padding: 1rem;
+align-items: flex-start; justify-content: center;
 }
 .admin-overlay.open { display: flex; }
-.admin-box { background: var(--dark2); border-radius: 16px; max-width: 960px; width: 100%; margin: 2rem auto; overflow: hidden; color: white; animation: modalIn 0.25s ease; }
-.admin-hdr { background: var(--dark); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
+.admin-box { background: var(--dark2); border-radius: 16px; max-width: 960px; width: 100%; margin: 2rem auto; overflow:
+hidden; color: white; animation: modalIn 0.25s ease; }
+.admin-hdr { background: var(--dark); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items:
+center; border-bottom: 2px solid var(--primary); }
 .admin-hdr-left { display: flex; align-items: center; gap: 1rem; }
 .admin-hdr h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.05em; color: var(--primary); }
 .admin-user { font-size: 0.8rem; color: #888; }
 .admin-tabs { display: flex; border-bottom: 1px solid #333; padding: 0 2rem; }
-.admin-tab { padding: 1rem 1.2rem; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #888; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.admin-tab { padding: 1rem 1.2rem; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #888; border-bottom:
+2px solid transparent; transition: all 0.2s; }
 .admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 .admin-content { padding: 2rem; }
 .admin-product-list { display: flex; flex-direction: column; gap: 1rem; }
-.admin-product-item { background: #222; border-radius: 10px; padding: 1.2rem; display: flex; gap: 1rem; align-items: center; }
-.admin-product-thumb { width: 60px; height: 60px; border-radius: 8px; background: #333; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; opacity: 0.4; }
+.admin-product-item { background: #222; border-radius: 10px; padding: 1.2rem; display: flex; gap: 1rem; align-items:
+center; }
+.admin-product-thumb { width: 60px; height: 60px; border-radius: 8px; background: #333; flex-shrink: 0; overflow:
+hidden; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; opacity: 0.4; }
 .admin-product-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 1; }
 .admin-product-meta { flex: 1; }
 .admin-product-meta h4 { font-size: 0.95rem; margin-bottom: 0.25rem; }
 .admin-product-meta p { font-size: 0.8rem; color: #aaa; }
 .admin-product-actions { display: flex; gap: 0.5rem; }
-.admin-product-actions button { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600; }
+.admin-product-actions button { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-family:
+'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600; }
 .btn-edit { background: var(--primary); color: white; }
 .btn-delete { background: #333; color: #aaa; transition: all 0.2s; }
 .btn-delete:hover { background: #c33; color: white; }
 
 .admin-form { display: flex; flex-direction: column; gap: 1rem; }
-.admin-form label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; display: block; margin-bottom: 0.3rem; }
-.admin-form input, .admin-form textarea, .admin-form select { width: 100%; padding: 0.75rem 1rem; background: #111; border: 1.5px solid #333; border-radius: 8px; color: white; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; transition: border-color 0.2s; }
-.admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus { outline: none; border-color: var(--primary); }
+.admin-form label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa;
+display: block; margin-bottom: 0.3rem; }
+.admin-form input, .admin-form textarea, .admin-form select { width: 100%; padding: 0.75rem 1rem; background: #111;
+border: 1.5px solid #333; border-radius: 8px; color: white; font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+transition: border-color 0.2s; }
+.admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus { outline: none; border-color:
+var(--primary); }
 .admin-form textarea { min-height: 80px; resize: vertical; }
 .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media(max-width: 600px) { .admin-grid { grid-template-columns: 1fr; } }
 .admin-form-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
-.btn-save { background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.btn-save { background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px;
+font-family: 'DM Sans', sans-serif; font-weight: 700; cursor: pointer; transition: background 0.2s; }
 .btn-save:hover { background: var(--primary-dark); }
-.btn-cancel-admin { background: #333; color: #aaa; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; }
-
-/* Image upload / preview */
+.btn-cancel-admin { background: #333; color: #aaa; border: none; padding: 0.75rem 1.5rem; border-radius: 8px;
+font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; }
 .img-slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem; margin-top: 0.5rem; }
 .img-slot {
-  aspect-ratio: 1; border-radius: 8px; background: #111;
-  border: 2px dashed #444; overflow: hidden; position: relative;
-  cursor: pointer; transition: border-color 0.2s;
+aspect-ratio: 1; border-radius: 8px; background: #111;
+border: 2px dashed #444; overflow: hidden; position: relative;
+cursor: pointer; transition: border-color 0.2s;
 }
 .img-slot:hover { border-color: var(--primary); }
 .img-slot img { width: 100%; height: 100%; object-fit: cover; }
 .img-slot-label {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  text-align: center; font-size: 0.6rem; color: #666;
-  background: rgba(0,0,0,0.5); padding: 2px 0;
+position: absolute; bottom: 0; left: 0; right: 0;
+text-align: center; font-size: 0.6rem; color: #666;
+background: rgba(0,0,0,0.5); padding: 2px 0;
 }
 .img-slot-clear {
-  position: absolute; top: 3px; right: 3px;
-  background: rgba(200,0,0,0.8); color: white; border: none;
-  border-radius: 50%; width: 18px; height: 18px; font-size: 0.6rem;
-  cursor: pointer; display: none; align-items: center; justify-content: center;
-  font-family: 'DM Sans', sans-serif;
+position: absolute; top: 3px; right: 3px;
+background: rgba(200,0,0,0.8); color: white; border: none;
+border-radius: 50%; width: 18px; height: 18px; font-size: 0.6rem;
+cursor: pointer; display: none; align-items: center; justify-content: center;
+font-family: 'DM Sans', sans-serif;
 }
 .img-slot:hover .img-slot-clear { display: flex; }
 .img-slot-icon { font-size: 1.8rem; opacity: 0.2; }
 .upload-progress {
-  display: none; position: absolute; inset: 0;
-  background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
-  font-size: 0.75rem; color: white;
+display: none; position: absolute; inset: 0;
+background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+font-size: 0.75rem; color: white;
 }
 .upload-progress.show { display: flex; }
 
 .supabase-status {
-  display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.75rem; padding: 0.5rem 1rem;
-  border-radius: 6px; margin-bottom: 1rem;
+display: flex; align-items: center; gap: 0.5rem;
+font-size: 0.75rem; padding: 0.5rem 1rem;
+border-radius: 6px; margin-bottom: 1rem;
 }
 .supabase-status.connected { background: rgba(34,197,94,0.1); color: #22c55e; }
 .supabase-status.disconnected { background: rgba(239,68,68,0.1); color: #ef4444; }
 .supabase-status.loading { background: rgba(59,130,246,0.1); color: #3b82f6; }
 
-/* ── CONTACT + FOOTER ── */
 .contact-section { padding: 4rem 1.5rem; background: white; }
-.contact-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+.contact-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+align-items: start; }
 @media(max-width: 768px) { .contact-inner { grid-template-columns: 1fr; gap: 2rem; } }
-.contact-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 0.04em; line-height: 1; margin-bottom: 1rem; }
+.contact-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 0.04em; line-height: 1;
+margin-bottom: 1rem; }
 .contact-info h2 span { color: var(--primary); }
 .contact-info p { color: var(--gray); margin-bottom: 1.5rem; }
 .contact-links { display: flex; flex-direction: column; gap: 0.75rem; }
-.contact-link { display: flex; align-items: center; gap: 0.75rem; color: var(--dark); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+.contact-link { display: flex; align-items: center; gap: 0.75rem; color: var(--dark); text-decoration: none; font-size:
+0.9rem; transition: color 0.2s; }
 .contact-link:hover { color: var(--primary); }
-.contact-link .cl-icon { width: 40px; height: 40px; background: var(--light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
-.newsletter-form h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.contact-link .cl-icon { width: 40px; height: 40px; background: var(--light); border-radius: 8px; display: flex;
+align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.newsletter-form h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-bottom:
+0.5rem; }
 .newsletter-form p { color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem; }
 .nf-group { margin-bottom: 0.75rem; }
-.nf-group input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; }
+.nf-group input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 8px;
+font-family: 'DM Sans', sans-serif; font-size: 0.95rem; }
 .nf-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
-.btn-subscribe { width: 100%; background: var(--primary); color: white; border: none; padding: 0.85rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.btn-subscribe { width: 100%; background: var(--primary); color: white; border: none; padding: 0.85rem; border-radius:
+8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background
+0.2s; }
 .btn-subscribe:hover { background: var(--primary-dark); }
 
 footer { background: var(--dark); padding: 3rem 1.5rem 2rem; color: #aaa; }
-.footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 2rem; }
+.footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem;
+margin-bottom: 2rem; }
 @media(max-width: 768px) { .footer-inner { grid-template-columns: 1fr; gap: 1.5rem; } }
 .footer-brand .logo { font-size: 2.5rem; display: inline-block; margin-bottom: 0.75rem; }
 .footer-brand p { font-size: 0.85rem; line-height: 1.7; }
-.footer-col h4 { color: white; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; }
+.footer-col h4 { color: white; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+margin-bottom: 1rem; }
 .footer-col ul { list-style: none; }
 .footer-col ul li { margin-bottom: 0.5rem; }
 .footer-col a { color: #888; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
 .footer-col a:hover { color: var(--primary); }
-.footer-bottom { max-width: 1200px; margin: 0 auto; padding-top: 1.5rem; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #666; }
+.footer-bottom { max-width: 1200px; margin: 0 auto; padding-top: 1.5rem; border-top: 1px solid #333; display: flex;
+justify-content: space-between; align-items: center; font-size: 0.8rem; color: #666; }
 @media(max-width: 600px) { .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; } }
 
-/* ── TOAST ── */
-.toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--dark); color: white; border-left: 4px solid var(--success); padding: 1rem 1.5rem; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.4s ease; max-width: 320px; }
+.toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--dark); color: white; border-left: 4px solid
+var(--success); padding: 1rem 1.5rem; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 999;
+transform: translateY(100px); opacity: 0; transition: all 0.4s ease; max-width: 320px; }
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast .toast-title { font-weight: 700; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
 .toast .toast-body { font-size: 0.85rem; color: #ccc; }
 
 .paypal-hidden { display: none; }
-/* ── PRIVACY MODAL ── */
 .privacy-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.75); z-index: 600;
-  overflow-y: auto; padding: 1.5rem;
-  align-items: flex-start; justify-content: center;
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,0.75); z-index: 600;
+overflow-y: auto; padding: 1.5rem;
+align-items: flex-start; justify-content: center;
 }
 .privacy-overlay.open { display: flex; }
 .privacy-box {
-  background: white; border-radius: 16px;
-  max-width: 780px; width: 100%;
-  margin: 2rem auto; overflow: hidden;
-  animation: modalIn 0.25s ease;
-  font-size: 0.92rem; line-height: 1.75; color: #333;
+background: white; border-radius: 16px;
+max-width: 780px; width: 100%;
+margin: 2rem auto; overflow: hidden;
+animation: modalIn 0.25s ease;
+font-size: 0.92rem; line-height: 1.75; color: #333;
 }
 .privacy-header {
-  background: var(--dark); padding: 1.8rem 2.5rem;
-  display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 3px solid var(--primary);
+background: var(--dark); padding: 1.8rem 2.5rem;
+display: flex; justify-content: space-between; align-items: center;
+border-bottom: 3px solid var(--primary);
 }
 .privacy-header h2 {
-  font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
-  letter-spacing: 0.06em; color: white;
+font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+letter-spacing: 0.06em; color: white;
 }
 .privacy-header p { color: #aaa; font-size: 0.8rem; margin-top: 0.2rem; }
 .privacy-body { padding: 2.5rem; }
 .privacy-body h3 {
-  font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
-  letter-spacing: 0.05em; color: var(--dark);
-  margin: 1.8rem 0 0.6rem; border-left: 3px solid var(--primary);
-  padding-left: 0.75rem;
+font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
+letter-spacing: 0.05em; color: var(--dark);
+margin: 1.8rem 0 0.6rem; border-left: 3px solid var(--primary);
+padding-left: 0.75rem;
 }
 .privacy-body h3:first-child { margin-top: 0; }
 .privacy-body p { margin-bottom: 0.75rem; color: #444; }
@@ -566,134 +639,736 @@ footer { background: var(--dark); padding: 3rem 1.5rem 2rem; color: #aaa; }
 .privacy-body a { color: var(--primary); text-decoration: none; }
 .privacy-body a:hover { text-decoration: underline; }
 .privacy-footer {
-  background: var(--light); padding: 1.2rem 2.5rem;
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 0.75rem;
+background: var(--light); padding: 1.2rem 2.5rem;
+border-top: 1px solid var(--border);
+display: flex; justify-content: space-between; align-items: center;
+flex-wrap: wrap; gap: 0.75rem;
 }
 .privacy-footer p { font-size: 0.8rem; color: var(--gray); }
 </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="header-inner">
-    <a href="#" class="logo">OVRG<span>.</span></a>
-    <nav>
-      <a href="#catalogue">Collection</a>
-      <a href="#contact">Contact</a>
-      <a href="https://www.instagram.com/ovrgapparel" target="_blank">Instagram</a>
-      <a href="https://pin.it/6SwliNSis" target="_blank">Pinterest</a>
-    </nav>
-    <div class="header-actions">
-      <button class="cart-btn" onclick="toggleCart()">
-        🛍 Panier <span class="cart-badge" id="cartCount">0</span>
-      </button>
-    </div>
-  </div>
-</header>
-
-<!-- HERO -->
+    <header>
+        <div class="header-inner">
+            <a href="#" class="logo">OVRG<span>.</span></a>
+            <nav>
+                <a href="#catalogue"
+                    onclick="event.preventDefault();document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})">Collection</a>
+                <a href="#contact"
+                    onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact</a>
+                <a href="https://www.instagram.com/ovrgapparel" target="_blank">Instagram</a>
+                <a href="https://pin.it/6SwliNSis" target="_blank">Pinterest</a>
+            </nav>
+            <div class="header-actions">
+                <button class="cart-btn" onclick="toggleCart()">
+                    🛍 Panier <span class="cart-badge" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
 <section class="hero">
-  <div class="hero-tag">Nouvelle Collection 2026</div>
-  <h1>OVRG<br><span>Apparel</span></h1>
-  <p>Mode streetwear premium à Abidjan. Livraison rapide, style exclusif.</p>
-  <a href="#catalogue" class="hero-cta">Découvrir la Collection</a>
+    <div class="hero-tag">Nouvelle Collection 2026</div>
+    <h1>OVRG<br><span>Apparel</span></h1>
+    <p>Mode streetwear premium à Abidjan. Livraison rapide, style exclusif.</p>
+    <a href="#catalogue" class="hero-cta"
+        onclick="event.preventDefault();document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})">Découvrir
+        la Collection</a>
 </section>
 
-<!-- CATALOGUE -->
 <section class="catalogue" id="catalogue">
-  <div class="section-header">
-    <div class="section-label">Notre Collection</div>
-    <h2 class="section-title">CATALOGUE</h2>
-  </div>
-  <div class="filter-tabs" id="filterTabs">
-    <button class="filter-tab active" onclick="filterProducts('all', this)">Tout</button>
-    <button class="filter-tab" onclick="filterProducts('t-shirt', this)">T-Shirts</button>
-    <button class="filter-tab" onclick="filterProducts('ensemble', this)">Ensembles</button>
-  </div>
-  <div id="productsGrid" class="products-grid"></div>
+    <div class="section-header">
+        <div class="section-label">Notre Collection</div>
+        <h2 class="section-title">CATALOGUE</h2>
+    </div>
+    <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" onclick="filterProducts('all', this)">Tout</button>
+        <button class="filter-tab" onclick="filterProducts('t-shirt', this)">T-Shirts</button>
+        <button class="filter-tab" onclick="filterProducts('ensemble', this)">Ensembles</button>
+    </div>
+    <div id="productsContainer">
+        <div class="loading-grid" id="loadingGrid">
+            <div class="skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+        </div>
+        <div class="products-grid" id="productsGrid" style="display:none"></div>
+    </div>
 </section>
 
-<!-- CONTACT -->
 <section class="contact-section" id="contact">
-  <div class="contact-inner">
-    <div class="contact-info">
-      <h2>OVRG<br><span>Apparel</span></h2>
-      <p>Mode streetwear premium à Abidjan. Livraison rapide, style exclusif.</p>
-      <div class="contact-links">
-        <a href="tel:+2250799108108" class="contact-link"><span class="cl-icon">📞</span> +225 07 99 10 81 08</a>
-        <a href="mailto:ovrg.apparel@gmail.com" class="contact-link"><span class="cl-icon">✉️</span> ovrg.apparel@gmail.com</a>
-      </div>
+    <div class="contact-inner">
+        <div class="contact-info">
+            <h2>OVRG<br><span>Apparel</span></h2>
+            <p>Nous avons à cœur de vous offrir non seulement des vêtements, mais une véritable expérience d'achat.</p>
+            <div class="contact-links">
+                <a href="tel:+2250799108108" class="contact-link"><span class="cl-icon">📞</span> +225 07 99 10 81
+                    08</a>
+                <a href="mailto:ovrg.apparel@gmail.com" class="contact-link"><span class="cl-icon">✉️</span>
+                    ovrg.apparel@gmail.com</a>
+                <a href="https://wa.me/c/2250799108108" target="_blank" class="contact-link"><span
+                        class="cl-icon">💬</span> WhatsApp</a>
+                <a href="https://www.instagram.com/ovrgapparel" target="_blank" class="contact-link"><span
+                        class="cl-icon">📷</span> @ovrgapparel</a>
+                <a href="https://pin.it/6SwliNSis" target="_blank" class="contact-link"><span class="cl-icon">📌</span>
+                    Pinterest</a>
+                <a href="https://www.facebook.com/OvrgApparel" target="_blank" class="contact-link"><span
+                        class="cl-icon">f</span> Facebook</a>
+            </div>
+        </div>
+        <div class="newsletter-form">
+            <h3>Restez Informé</h3>
+            <p>Inscrivez-vous pour recevoir nos dernières collections et offres exclusives.</p>
+            <form action="https://formsubmit.co/orvg.apparel@gmail.com" method="POST"
+                onsubmit="handleNewsletter(event)">
+                <input type="hidden" name="_subject" value="Nouvelle inscription newsletter - La boutique OVRG">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_autoresponse" value="Merci! Vous êtes inscrit(e) à la newsletter OVRG.">
+                <input type="hidden" name="_captcha" value="false">
+                <div class="nf-group"><input type="text" name="name" placeholder="Nom complet" required></div>
+                <div class="nf-group"><input type="email" name="email" placeholder="votre.email@exemple.com" required>
+                </div>
+                <div class="nf-group"><input type="tel" name="phone" placeholder="+225 XX XX XX XX" required></div>
+                <button type="submit" class="btn-subscribe">S'inscrire</button>
+            </form>
+        </div>
     </div>
-    <div class="newsletter-form">
-      <h3>Newsletter</h3>
-      <p>Inscrivez-vous pour les nouveautés.</p>
-      <form onsubmit="handleNewsletter(event)">
-        <div class="nf-group"><input type="email" placeholder="Votre email" required></div>
-        <button type="submit" class="btn-subscribe">S'inscrire</button>
-      </form>
-    </div>
-  </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
-  <div class="footer-inner">
-    <div class="footer-brand"><a href="#" class="logo">OVRG<span>.</span></a></div>
-    <div class="footer-col">
-      <h4>Légal</h4>
-      <ul><li><a href="#" onclick="openPrivacy()">Confidentialité</a></li></ul>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <a href="#" class="logo">OVRG<span style="color:var(--primary)">.</span></a>
+            <p>La boutique OVRG offre les meilleures créations mode streetwear avec livraison rapide à Abidjan.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Navigation</h4>
+            <ul>
+                <li><a href="#catalogue"
+                        onclick="event.preventDefault();document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})">Produits</a>
+                </li>
+                <li><a href="#contact"
+                        onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact</a>
+                </li>
+                <li><a href="#" onclick="event.preventDefault();openPrivacy()">Confidentialité</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Contact</h4>
+            <ul>
+                <li><a href="tel:+2250799108108">+225 07 99 10 81 08</a></li>
+                <li><a href="mailto:ovrg.apparel@gmail.com">ovrg.apparel@gmail.com</a></li>
+                <li>Abidjan, Côte d'Ivoire</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Suivez-nous</h4>
+            <ul>
+                <li><a href="https://www.instagram.com/ovrgapparel" target="_blank">Instagram</a></li>
+                <li><a href="https://pin.it/6SwliNSis" target="_blank">Pinterest</a></li>
+                <li><a href="https://www.facebook.com/OvrgApparel" target="_blank">Facebook</a></li>
+                <li><a href="https://www.tiktok.com/@ovrgapparel" target="_blank">TikTok</a></li>
+            </ul>
+        </div>
     </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© 2026 OVRG.</span>
-    <span>Made in Abidjan <button onclick="handleAdminClick()" style="background:none; border:none; color:inherit; cursor:pointer; opacity:0.1">⚙</button></span>
-  </div>
+    <div class="footer-bottom">
+        <span>© 2026 La boutique OVRG. Tous droits réservés.</span>
+        <span>Made with ❤ in Abidjan <button id="adminToggleBtn" onclick="handleAdminClick()" title=""
+                style="background:none;border:none;cursor:pointer;color:#1a1a1a;font-size:0.6rem;margin-left:0.5rem;opacity:0.15;transition:opacity 0.3s;padding:2px 4px;border-radius:3px;"
+                onmouseenter="this.style.opacity='0.5'" onmouseleave="this.style.opacity='0.15'">⚙</button></span>
+    </div>
 </footer>
+<div class="overlay" id="productOverlay" onclick="handleOverlayClick(event,'productOverlay')">
+    <div class="modal-box" id="productModalBox">
+        <div class="modal-top">
+            <h3 id="modalCat">Produit</h3>
+            <button class="btn-close" onclick="closeProduct()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-gallery">
+                <div class="main-img" id="mainImgWrap">
+                    <div class="main-img-placeholder" id="mainImgPlaceholder">👕</div>
+                </div>
+                <div class="thumb-row" id="thumbRow"></div>
+            </div>
+            <div class="modal-info">
+                <div class="modal-cat" id="modalCatLabel"></div>
+                <h2 class="modal-name" id="modalName">—</h2>
+                <div class="modal-pricing">
+                    <span class="modal-price" id="modalPrice">—</span>
+                    <span class="modal-old" id="modalOld"></span>
+                    <span class="modal-disc" id="modalDisc"></span>
+                </div>
+                <p class="modal-desc" id="modalDesc">—</p>
+                <div class="size-section" id="sizeSection">
+                    <div class="size-label">Taille</div>
+                    <div class="sizes" id="sizeBtns"></div>
+                </div>
+                <div class="qty-section">
+                    <span class="qty-label">Quantité</span>
+                    <div class="qty-ctrl">
+                        <button onclick="changeQty(-1)">−</button>
+                        <input type="number" id="qtyInput" value="1" min="1" max="99">
+                        <button onclick="changeQty(1)">+</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-primary" onclick="addToCartFromModal()">🛍 Ajouter au panier</button>
+                    <button class="btn-paypal" onclick="payWithPayPal()">💳 Payer avec PayPal</button>
+                    <button class="btn-wave" onclick="payWithWave()">🌊 Payer avec Wave</button>
+                    <button class="btn-yango" onclick="buyViaYango()">🚗 Commander via Yango</button>
+                    <button class="btn-whatsapp" onclick="buyViaWhatsApp()">💬 Commander via WhatsApp</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+        <h3>Mon Panier</h3>
+        <button class="btn-close" onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+        <div class="cart-empty">
+            <div class="empty-icon">🛍</div>
+            <p>Votre panier est vide</p>
+        </div>
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total"><span>Total</span><span class="cart-total-amount" id="cartTotal">0 FCFA</span></div>
+        <button class="btn-checkout" onclick="openCheckout()">Passer la commande →</button>
+    </div>
+</div>
+
+<div class="checkout-overlay" id="checkoutOverlay" onclick="handleOverlayClick(event,'checkoutOverlay')">
+    <div class="checkout-box">
+        <div class="checkout-header">
+            <h2>Finaliser la Commande</h2>
+            <p>La boutique OVRG — Abidjan, Côte d'Ivoire</p>
+        </div>
+        <div class="checkout-body">
+            <form id="checkoutForm" onsubmit="submitOrder(event)">
+                <input type="hidden" name="_subject" id="orderSubject">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_autoresponse" id="orderAutoResponse">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="order_details" id="orderDetails">
+                <input type="hidden" name="payment_method" id="checkoutPaymentMethod">
+                <div class="form-grid">
+                    <div class="form-group"><label>Prénom *</label><input type="text" name="first_name"
+                            placeholder="Prénom" required></div>
+                    <div class="form-group"><label>Nom *</label><input type="text" name="last_name" placeholder="Nom"
+                            required></div>
+                    <div class="form-group"><label>Email *</label><input type="email" name="email"
+                            placeholder="email@exemple.com" required></div>
+                    <div class="form-group"><label>Téléphone *</label><input type="tel" name="phone"
+                            placeholder="+225 XX XX XX XX" required></div>
+                    <div class="form-group full"><label>Adresse de livraison</label><input type="text" name="address"
+                            placeholder="Quartier, commune, Abidjan"></div>
+                    <div class="form-group full"><label>Note (optionnel)</label><input type="text" name="note"
+                            placeholder="Instructions spéciales..."></div>
+                </div>
+                <div class="order-summary">
+                    <h4>Récapitulatif</h4>
+                    <div id="checkoutSummaryItems"></div>
+                    <div class="summary-row total"><span>Total</span><span id="checkoutTotalDisplay">—</span></div>
+                </div>
+                <div class="payment-section">
+                    <div class="payment-header">Mode de paiement</div>
+                    <div class="payment-options">
+                        <label class="payment-option selected" id="payOptPaypal"><input type="radio" name="payment"
+                                value="paypal" checked onchange="selectPayment('paypal')"><span
+                                class="pay-icon">💳</span><span class="pay-label">PayPal</span></label>
+                        <label class="payment-option" id="payOptWave"><input type="radio" name="payment" value="wave"
+                                onchange="selectPayment('wave')"><span class="pay-icon">🌊</span><span
+                                class="pay-label">Wave</span></label>
+                        <label class="payment-option" id="payOptYango"><input type="radio" name="payment" value="yango"
+                                onchange="selectPayment('yango')"><span class="pay-icon">🚗</span><span
+                                class="pay-label">Yango Delivery (payer à la livraison)</span></label>
+                        <label class="payment-option" id="payOptWhatsapp"><input type="radio" name="payment"
+                                value="whatsapp" onchange="selectPayment('whatsapp')"><span
+                                class="pay-icon">💬</span><span class="pay-label">WhatsApp</span></label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-checkout">Confirmer la commande →</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <div class="login-logo">OVRG<span>.</span></div>
+        <h3>ADMINISTRATION</h3>
+        <div class="login-field"><input type="password" id="adminPass" placeholder="Code d'accès"></div>
+        <button class="btn-login" onclick="attemptLogin()">Connexion</button>
+        <div class="login-error" id="loginError"></div>
+        <button class="btn-cancel-login" onclick="closeLogin()">Retour à la boutique</button>
+    </div>
+</div>
+
+<div class="admin-overlay" id="adminOverlay">
+    <div class="admin-box">
+        <div class="admin-hdr">
+            <div class="admin-hdr-left">
+                <h2>ADMIN<span> DASHBOARD</span></h2>
+                <span class="admin-user" id="adminUserDisplay">Admin</span>
+            </div>
+            <button class="btn-close" onclick="closeAdmin()" style="color:white;background:#333;">✕</button>
+        </div>
+        <div class="admin-tabs">
+            <div class="admin-tab active" id="tabProd" onclick="switchAdminTab('products')">Produits</div>
+            <div class="admin-tab" id="tabAdd" onclick="switchAdminTab('add')">Ajouter</div>
+        </div>
+        <div class="admin-content">
+            <div id="adminViewProducts">
+                <div class="admin-product-list" id="adminProductList"></div>
+            </div>
+            <div id="adminViewAdd" style="display:none">
+                <form class="admin-form" id="productForm" onsubmit="handleProductSubmit(event)">
+                    <input type="hidden" id="editProductId">
+                    <div class="admin-grid">
+                        <div class="form-group"><label>Nom du produit</label><input type="text" id="pName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Catégorie</label>
+                            <select id="pCat">
+                                <option value="t-shirt">T-Shirt</option>
+                                <option value="ensemble">Ensemble</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="admin-grid">
+                        <div class="form-group"><label>Prix (FCFA)</label><input type="number" id="pPrice" required>
+                        </div>
+                        <div class="form-group"><label>Ancien Prix (FCFA - optionnel)</label><input type="number"
+                                id="pOldPrice"></div>
+                    </div>
+                    <div class="form-group"><label>Description</label><textarea id="pDesc" required></textarea></div>
+                    <div class="form-group">
+                        <label>Tailles disponibles (séparées par des virgules)</label>
+                        <input type="text" id="pSizes" placeholder="S, M, L, XL">
+                    </div>
+                    <div class="form-group">
+                        <label>Images (Glissez-déposez ou cliquez sur les cases)</label>
+                        <div class="img-slots">
+                            <div class="img-slot" onclick="triggerUpload(0)">
+                                <div class="img-slot-icon">🖼</div>
+                                <div class="img-slot-label">Principale</div><img id="slotImg0"><button
+                                    class="img-slot-clear" onclick="clearSlot(0,event)">✕</button>
+                                <div class="upload-progress" id="p0">0%</div>
+                            </div>
+                            <div class="img-slot" onclick="triggerUpload(1)">
+                                <div class="img-slot-icon">🖼</div><img id="slotImg1"><button class="img-slot-clear"
+                                    onclick="clearSlot(1,event)">✕</button>
+                                <div class="upload-progress" id="p1">0%</div>
+                            </div>
+                            <div class="img-slot" onclick="triggerUpload(2)">
+                                <div class="img-slot-icon">🖼</div><img id="slotImg2"><button class="img-slot-clear"
+                                    onclick="clearSlot(2,event)">✕</button>
+                                <div class="upload-progress" id="p2">0%</div>
+                            </div>
+                            <div class="img-slot" onclick="triggerUpload(3)">
+                                <div class="img-slot-icon">🖼</div><img id="slotImg3"><button class="img-slot-clear"
+                                    onclick="clearSlot(3,event)">✕</button>
+                                <div class="upload-progress" id="p3">0%</div>
+                            </div>
+                            <div class="img-slot" onclick="triggerUpload(4)">
+                                <div class="img-slot-icon">🖼</div><img id="slotImg4"><button class="img-slot-clear"
+                                    onclick="clearSlot(4,event)">✕</button>
+                                <div class="upload-progress" id="p4">0%</div>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" style="display:none" accept="image/*" multiple>
+                    </div>
+                    <div class="admin-form-actions">
+                        <button type="submit" class="btn-save" id="btnSaveProduct">Enregistrer le produit</button>
+                        <button type="button" class="btn-cancel-admin"
+                            onclick="switchAdminTab('products')">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="privacy-overlay" id="privacyOverlay">
+    <div class="privacy-box">
+        <div class="privacy-header">
+            <h2>Politique de Confidentialité</h2>
+            <button class="btn-close" onclick="closePrivacy()" style="color:white;background:#333;">✕</button>
+        </div>
+        <div class="privacy-body">
+            <h3>1. Collecte des données</h3>
+            <p>Nous collectons les informations que vous nous fournissez lors d'une commande (nom, adresse, email,
+                téléphone) uniquement pour traiter votre livraison.</p>
+            <h3>2. Utilisation des informations</h3>
+            <p>Vos données sont utilisées exclusivement pour :</p>
+            <ul>
+                <li>Le traitement et la livraison de vos articles</li>
+                <li>Le service client et suivi de commande</li>
+                <li>L'envoi de newsletters (si vous y êtes inscrit)</li>
+            </ul>
+            <h3>3. Protection des données</h3>
+            <p>Vos données personnelles ne sont jamais vendues ou partagées avec des tiers à des fins commerciales. Le
+                paiement est géré par des plateformes sécurisées (PayPal, Wave).</p>
+            <h3>4. Contact</h3>
+            <p>Pour toute question : <a href="mailto:ovrg.apparel@gmail.com">ovrg.apparel@gmail.com</a></p>
+        </div>
+        <div class="privacy-footer">
+            <p>© 2026 La boutique OVRG</p><button class="btn-primary" style="padding:0.5rem 1rem;font-size:0.8rem;"
+                onclick="closePrivacy()">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <div class="toast-title" id="toastTitle">Succès</div>
+    <div class="toast-body" id="toastBody">Produit ajouté au panier.</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Logic...
+const SB_URL = "https://your-project-url.supabase.co"; // Replace
+const SB_KEY = "your-anon-key"; // Replace
+
+let supabase;
+let products = [];
 let cart = [];
-let products = [
-    { id:1, name:"Classic Tee", cat:"t-shirt", price:15000, description:"Coton bio.", sizes:["M","L","XL"], imgs:[] },
-    { id:2, name:"Premium Set", cat:"ensemble", price:45000, description:"Édition limitée.", sizes:["L","XL"], imgs:[] },
-    { id:3, name:"Street Jacket", cat:"t-shirt", price:25000, description:"Veste premium.", sizes:["S","M","L"], imgs:[] }
+let currentProduct = null;
+let currentSize = '';
+
+const productsGrid = document.getElementById('productsGrid');
+const loadingGrid = document.getElementById('loadingGrid');
+const cartCount = document.getElementById('cartCount');
+const cartItems = document.getElementById('cartItems');
+const cartTotal = document.getElementById('cartTotal');
+
+async function initSupabase() {
+try {
+if (SB_URL === "https://your-project-url.supabase.co") {
+console.warn("Supabase credentials not set. Using demo data.");
+loadDemoData();
+return;
+}
+supabase = window.supabase.createClient(SB_URL, SB_KEY);
+await loadProducts();
+} catch (err) {
+console.error("Supabase init error:", err);
+loadDemoData();
+}
+}
+
+async function loadProducts() {
+try {
+const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+if (error) throw error;
+products = data || [];
+renderProducts(products);
+} catch (err) {
+console.error("Fetch error:", err);
+loadDemoData();
+}
+}
+
+function loadDemoData() {
+products = [
+{ id: 1, name: "T-Shirt OVRG Classic", category: "t-shirt", price: 15000, old_price: 20000, description: "Un classique
+indémodable avec le logo OVRG brodé.", images:
+["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800"], sizes: ["S","M","L","XL"]
+},
+{ id: 2, name: "Ensemble Street Grey", category: "ensemble", price: 35000, old_price: 45000, description: "Ensemble
+confortable pour un style urbain affirmé.", images:
+["https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800"], sizes: ["M","L","XL"] },
+{ id: 3, name: "Veste OVRG Limited", category: "t-shirt", price: 25000, old_price: null, description: "Veste légère
+parfaite pour toutes les occasions.", images:
+["https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800"], sizes: ["S","M","L"] }
 ];
+setTimeout(() => renderProducts(products), 800);
+}
 
-function fmt(n) { return n.toLocaleString('fr-FR') + ' FCFA'; }
-
-function renderCatalogue(filter='all') {
-    const grid = document.getElementById('productsGrid');
-    const filtered = filter === 'all' ? products : products.filter(p => p.cat === filter);
-    grid.innerHTML = filtered.map(p => `
-        <div class="product-card">
-            <div class="product-img-wrap"><div class="product-img-placeholder">👕</div></div>
-            <div class="product-info">
-                <div class="product-cat">${p.cat.toUpperCase()}</div>
-                <div class="product-name">${p.name}</div>
-                <div class="product-price">${fmt(p.price)}</div>
-                <button class="btn-add-cart" onclick="addToCart(${p.id})">+ Ajouter</button>
-            </div>
+function renderProducts(items) {
+loadingGrid.style.display = 'none';
+productsGrid.style.display = 'grid';
+productsGrid.innerHTML = items.map(p => `
+<div class="product-card" onclick="openProduct(${p.id})">
+    <div class="product-img-wrap">
+        ${p.images && p.images[0] ? `<img src="${p.images[0]}" alt="${p.name}">` : '<div
+            class="product-img-placeholder">👕</div>'}
+        ${p.old_price ? '<div class="product-badge">Promo</div>' : ''}
+        <button class="product-quick-view">Aperçu rapide</button>
+    </div>
+    <div class="product-info">
+        <div class="product-cat">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-pricing">
+            <span class="product-price">${formatPrice(p.price)}</span>
+            ${p.old_price ? `<span class="product-old">${formatPrice(p.old_price)}</span>` : ''}
         </div>
-    `).join('');
+        <button class="btn-add-cart" onclick="event.stopPropagation(); quickAdd(${p.id})">Ajouter au panier</button>
+    </div>
+</div>
+`).join('');
+}
+
+function formatPrice(num) {
+return new Intl.NumberFormat('fr-FR').format(num) + ' FCFA';
 }
 
 function filterProducts(cat, btn) {
-    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderCatalogue(cat);
+document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+btn.classList.add('active');
+const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
+renderProducts(filtered);
 }
 
-function addToCart(id) {
-    const p = products.find(x => x.id === id);
-    cart.push(p);
-    document.getElementById('cartCount').textContent = cart.length;
+function openProduct(id) {
+currentProduct = products.find(p => p.id === id);
+if (!currentProduct) return;
+
+document.getElementById('modalName').textContent = currentProduct.name;
+document.getElementById('modalCat').textContent = currentProduct.category;
+document.getElementById('modalCatLabel').textContent = currentProduct.category;
+document.getElementById('modalPrice').textContent = formatPrice(currentProduct.price);
+document.getElementById('modalOld').textContent = currentProduct.old_price ? formatPrice(currentProduct.old_price) : '';
+document.getElementById('modalDisc').textContent = currentProduct.old_price ? `-${Math.round((1 -
+currentProduct.price/currentProduct.old_price)*100)}%` : '';
+document.getElementById('modalDesc').textContent = currentProduct.description;
+
+const imgWrap = document.getElementById('mainImgWrap');
+if (currentProduct.images && currentProduct.images[0]) {
+imgWrap.innerHTML = `<img src="${currentProduct.images[0]}" id="mainModalImg">`;
+} else {
+imgWrap.innerHTML = `<div class="main-img-placeholder">👕</div>`;
 }
 
-window.onload = () => renderCatalogue();
+const thumbRow = document.getElementById('thumbRow');
+thumbRow.innerHTML = (currentProduct.images || []).map((img, i) => `
+<div class="thumb ${i===0?'active':''}" onclick="setMainImg('${img}', this)">
+    <img src="${img}">
+</div>
+`).join('');
+
+const sizeBtns = document.getElementById('sizeBtns');
+const sizes = currentProduct.sizes || ['UNIQUE'];
+sizeBtns.innerHTML = sizes.map(s => `<button class="size-btn"
+    onclick="selectSize('${s}', this)">${s}</button>`).join('');
+currentSize = '';
+document.getElementById('qtyInput').value = 1;
+
+document.getElementById('productOverlay').classList.add('open');
+document.body.style.overflow = 'hidden';
+}
+
+function setMainImg(url, thumb) {
+document.getElementById('mainModalImg').src = url;
+document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+thumb.classList.add('active');
+}
+
+function selectSize(size, btn) {
+currentSize = size;
+document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+btn.classList.add('selected');
+}
+
+function closeProduct() {
+document.getElementById('productOverlay').classList.remove('open');
+document.body.style.overflow = 'auto';
+}
+
+function changeQty(delta) {
+let q = parseInt(document.getElementById('qtyInput').value) + delta;
+if (q < 1) q=1; if (q> 99) q = 99;
+    document.getElementById('qtyInput').value = q;
+    }
+function quickAdd(id) {
+const p = products.find(prod => prod.id === id);
+addToCart(p, p.sizes ? p.sizes[0] : 'UNIQUE', 1);
+}
+
+function addToCartFromModal() {
+if (!currentSize && currentProduct.sizes && currentProduct.sizes.length > 0) {
+showToast("Attention", "Veuillez sélectionner une taille", "disconnected");
+return;
+}
+const qty = parseInt(document.getElementById('qtyInput').value);
+addToCart(currentProduct, currentSize || 'UNIQUE', qty);
+closeProduct();
+}
+
+function addToCart(p, size, qty) {
+const existing = cart.find(item => item.id === p.id && item.size === size);
+if (existing) {
+existing.qty += qty;
+} else {
+cart.push({ ...p, size, qty });
+}
+updateCart();
+showToast("Succès", `${p.name} ajouté au panier`);
+}
+
+function updateCart() {
+const count = cart.reduce((acc, item) => acc + item.qty, 0);
+cartCount.textContent = count;
+renderCart();
+localStorage.setItem('ovrg_cart', JSON.stringify(cart));
+}
+
+function renderCart() {
+if (cart.length === 0) {
+cartItems.innerHTML = '<div class="cart-empty">
+    <div class="empty-icon">🛍</div>
+    <p>Votre panier est vide</p>
+</div>';
+cartTotal.textContent = '0 FCFA';
+return;
+}
+
+cartItems.innerHTML = cart.map((item, idx) => `
+<div class="cart-item">
+    <div class="cart-item-img">
+        ${item.images && item.images[0] ? `<img src="${item.images[0]}">` : '👕'}
+    </div>
+    <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-meta">Taille: ${item.size} | Qté: ${item.qty}</div>
+        <div class="cart-item-price">${formatPrice(item.price * item.qty)}</div>
+    </div>
+    <button class="cart-item-remove" onclick="removeFromCart(${idx})">✕</button>
+</div>
+`).join('');
+
+const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+cartTotal.textContent = formatPrice(total);
+}
+
+function removeFromCart(idx) {
+cart.splice(idx, 1);
+updateCart();
+}
+
+function toggleCart() {
+document.getElementById('cartPanel').classList.toggle('open');
+}
+
+function openCheckout() {
+if (cart.length === 0) {
+showToast("Info", "Votre panier est vide");
+return;
+}
+const summary = document.getElementById('checkoutSummaryItems');
+summary.innerHTML = cart.map(item => `
+<div class="summary-row">
+    <span>${item.name} (${item.size}) x ${item.qty}</span>
+    <span>${formatPrice(item.price * item.qty)}</span>
+</div>
+`).join('');
+
+const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+document.getElementById('checkoutTotalDisplay').textContent = formatPrice(total);
+document.getElementById('checkoutOverlay').classList.add('open');
+toggleCart();
+}
+
+function selectPayment(method) {
+document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+document.getElementById(`payOpt${method.charAt(0).toUpperCase() + method.slice(1)}`).classList.add('selected');
+document.getElementById('checkoutPaymentMethod').value = method;
+}
+
+function submitOrder(e) {
+e.preventDefault();
+const formData = new FormData(e.target);
+const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+const details = cart.map(item => `${item.name} (${item.size}) x${item.qty}`).join(', ');
+document.getElementById('orderDetails').value = details + " | TOTAL: " + formatPrice(total);
+
+const name = formData.get('first_name') + ' ' + formData.get('last_name');
+document.getElementById('orderSubject').value = `Nouvelle commande de ${name} - OVRG`;
+
+// Simulation d'envoi
+showToast("Commande reçue!", "Nous vous contacterons bientôt pour la livraison.");
+cart = [];
+updateCart();
+document.getElementById('checkoutOverlay').classList.remove('open');
+}
+
+function handleAdminClick() {
+document.getElementById('loginOverlay').classList.add('open');
+}
+
+function closeLogin() {
+document.getElementById('loginOverlay').classList.remove('open');
+}
+
+function attemptLogin() {
+const pass = document.getElementById('adminPass').value;
+if (pass === "ovrg2026") {
+document.getElementById('loginOverlay').classList.remove('open');
+document.getElementById('adminOverlay').classList.add('open');
+} else {
+document.getElementById('loginError').textContent = "Accès refusé";
+}
+}
+
+function showToast(title, body, status = "connected") {
+const t = document.getElementById('toast');
+document.getElementById('toastTitle').textContent = title;
+document.getElementById('toastBody').textContent = body;
+t.style.borderLeftColor = status === "connected" ? "var(--success)" : "var(--primary)";
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Global Click Handlers
+function handleOverlayClick(e, id) {
+if (e.target.id === id) {
+if (id === 'productOverlay') closeProduct();
+if (id === 'checkoutOverlay') document.getElementById('checkoutOverlay').classList.remove('open');
+}
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+const saved = localStorage.getItem('ovrg_cart');
+if (saved) {
+cart = JSON.parse(saved);
+updateCart();
+}
+initSupabase();
+});
 </script>
 </body>
+
 </html>
