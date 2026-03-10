@@ -19,6 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+  <script src="content_utils.js"></script>
   <script>
     // DEFCON 1: FORCE UNREGISTER ALL SERVICE WORKERS
     if ('serviceWorker' in navigator) {
@@ -62,7 +63,7 @@
     const STORAGE_BUCKET = 'product-images';
     const PRODUCTS_TABLE = 'products';
   </script>
-  <script type="module" crossorigin src="/assets/index-EnSt3T0S.js"></script>
+  <script type="module" crossorigin src="/assets/index-VyZUMeET.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/index-C4QZQtxx.css">
 </head>
 
@@ -251,6 +252,14 @@
         <div class="threads-list" id="allThreadsList">
           <!-- JS populated -->
         </div>
+      </div>
+      
+      <!-- Community Feedback / Upload CTA -->
+      <div class="trends-upload-cta" style="margin-top:4rem; padding:3rem; background:rgba(255,107,53,0.05); border:1px dashed var(--primary); border-radius:20px; text-align:center">
+         <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; margin-bottom:1rem">FUEL THE CULTURE</h3>
+         <p style="color:var(--gray); margin-bottom:2rem">Have an article, event, or topic the tribe needs to see? Share it now.</p>
+         <button class="btn-primary" onclick="openContentUpload()">Create New Content</button>
+      </div>
       </div>
     </section>
   </div>
@@ -766,6 +775,73 @@
               Analytics</h4>
             <div id="notifAnalytics" style="color:#888;font-size:.85rem">Analytics data will appear here once
               notifications are sent.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONTENT UPLOAD OVERLAY ===== -->
+  <div class="overlay" id="contentUploadOverlay" onclick="handleOverlayClick(event,'contentUploadOverlay')">
+    <div class="modal-box" style="max-width:700px">
+      <div class="modal-top">
+        <h3 id="contentFormTitle" style="font-family:'Bebas Neue',sans-serif; font-size:1.5rem">New Community Submission</h3>
+        <button class="btn-close" onclick="closeContentUpload()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="admin-form" style="padding:0">
+          <div class="admin-grid">
+            <div>
+              <label>Submission Title *</label>
+              <input type="text" id="contentTitle" placeholder="The Next Wave of Afrobeat...">
+            </div>
+            <div>
+              <label>Category *</label>
+              <select id="contentCategory" onchange="toggleContentFields()">
+                <option value="thread">💬 Thread / Discussion</option>
+                <option value="article">📰 Article / Feature</option>
+                <option value="event">🎫 Event / Showcase</option>
+              </select>
+            </div>
+          </div>
+          
+          <div id="eventFields" style="display:none">
+            <div class="admin-grid">
+              <div><label>Event Date & Time</label><input type="datetime-local" id="contentEventDate"></div>
+              <div><label>Venue / Location</label><input type="text" id="contentEventLocation" placeholder="Sofitel Abidjan"></div>
+            </div>
+          </div>
+
+          <div>
+            <label>Detailed Description / Content *</label>
+            <textarea id="contentBody" placeholder="Share the details with the community..." style="min-height:120px"></textarea>
+          </div>
+
+          <div class="admin-grid">
+            <div>
+              <label>External Link (Optional)</label>
+              <input type="url" id="contentExternalLink" placeholder="https://youtube.com/...">
+            </div>
+            <div>
+              <label>Media Type</label>
+              <select id="contentMediaType">
+                <option value="image">Image Attachment</option>
+                <option value="video">Video Link (External)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label>Cover Media Attachment</label>
+            <div class="img-slot" id="contentMediaSlot" style="width:100%; height:180px; margin-top:0.5rem">
+               <div id="contentMediaPreview" class="img-slot-icon">📷 Click to upload image</div>
+               <input type="file" id="contentFileInput" accept="image/*" style="position:absolute; inset:0; opacity:0; cursor:pointer" onchange="handleContentFileSelect(event)">
+               <div class="upload-progress" id="contentUploadProgress">↻ Uploading to Supabase...</div>
+            </div>
+          </div>
+
+          <div class="admin-form-actions" style="margin-top:2rem">
+            <button class="btn-save" id="btnContentSubmit" onclick="submitCommunityContent()" style="width:100%">🚀 Fuel the Community</button>
           </div>
         </div>
       </div>

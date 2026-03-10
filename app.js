@@ -353,6 +353,7 @@ function handleOverlayClick(e, id) {
         if (id === 'productOverlay') closeProduct();
         else if (id === 'checkoutOverlay') closeCheckout();
         else if (id === 'adminOverlay') closeAdmin();
+        else if (id === 'contentUploadOverlay') closeContentUpload();
     }
 }
 
@@ -1449,3 +1450,163 @@ window.shareContent = function (title, link) {
         });
     }
 };
+
+// ===================================================================
+// ===== COMMUNITY CONTENT: UPLOADS & HOT TOPICS ====================
+// ===================================================================
+var contentUploadedUrl = '';
+
+function openContentUpload() {
+    document.getElementById('contentTitle').value = '';
+    document.getElementById('contentCategory').value = 'thread';
+    document.getElementById('contentBody').value = '';
+    document.getElementById('contentExternalLink').value = '';
+    document.getElementById('contentMediaType').value = 'image';
+    document.getElementById('contentEventDate').value = '';
+    document.getElementById('contentEventLocation').value = '';
+    contentUploadedUrl = '';
+    document.getElementById('contentMediaPreview').innerHTML = '📷 Click to upload image';
+    document.getElementById('contentUploadOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    toggleContentFields();
+}
+
+function closeContentUpload() {
+    document.getElementById('contentUploadOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function toggleContentFields() {
+    var cat = document.getElementById('contentCategory').value;
+    document.getElementById('eventFields').style.display = (cat === 'event') ? 'block' : 'none';
+}
+
+async function handleContentFileSelect(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+
+    var progress = document.getElementById('contentUploadProgress');
+    var preview = document.getElementById('contentMediaPreview');
+    progress.classList.add('show');
+    preview.style.opacity = '0.3';
+
+    try {
+        // Ensure user is logged in if RLS requires it, or handle as public if allowed
+        // Note: content_utils.js uses window.sbClient
+        contentUploadedUrl = await window.uploadContentFile(file);
+        preview.innerHTML = '<img src="' + contentUploadedUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px">';
+        showToast('Media Ready ✓', 'Your image has been uploaded to the cloud.');
+    } catch (e) {
+        console.error('Content upload failed:', e);
+        showToast('Upload Failed', e.message || 'Supabase Storage error.', '#ef4444');
+    } finally {
+        progress.classList.remove('show');
+        preview.style.opacity = '1';
+    }
+}
+
+async function submitCommunityContent() {
+    var title = document.getElementById('contentTitle').value.trim();
+    var body = document.getElementById('contentBody').value.trim();
+    var cat = document.getElementById('contentCategory').value;
+
+    if (!title || !body) {
+        showToast('Required Fields', 'Title and Content are required.', '#f59e0b');
+        return;
+    }
+
+    var btn = document.getElementById('btnContentSubmit');
+    var originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+
+    try {
+        var payload = {
+            title: title,
+            content: body,
+            category: cat,
+            media_url: contentUploadedUrl || null,
+            media_type: document.getElementById('contentMediaType').value,
+            external_link: document.getElementById('contentExternalLink').value.trim() || null,
+            user_id: currentUser ? currentUser.id : null // Optional if public
+        };
+
+        if (cat === 'event') {
+            payload.event_date = document.getElementById('contentEventDate').value || null;
+            payload.location = document.getElementById('contentEventLocation').value.trim() || null;
+        }
+
+        await window.saveCommunityTopic(payload);
+        showToast('Success! 🚀', 'Your contribution has been fueled to the tribe.');
+        closeContentUpload();
+        loadHotTopics(); // Refresh the feed
+    } catch (e) {
+        showToast('Error', 'Could not save your submission.', '#ef4444');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+async function loadHotTopics() {
+    var container = document.getElementById('allThreadsList'); // Re-using this container for the unified feed
+    if (!container) return;
+
+    try {
+        var topics = await window.fetchCommunityTopics();
+        if (!topics || topics.length === 0) {
+            // Keep demo threads if no real data 
+            return;
+        }
+
+        container.innerHTML = topics.map(function (t) {
+            var score = (t.likes_count * 2) + t.comments_count + t.views_count;
+            var isHot = score > 10;
+            var catIcon = t.category === 'article' ? '📰' : (t.category === 'event' ? '🎫' : '💬');
+
+            return '<div class="thread-card" style="cursor:pointer" onclick="viewTopicDetail(\'' + t.id + '\')">' +
+                '<div class="thread-tag-wrap">' +
+                '<span class="thread-tag ' + (t.category === 'event' ? 'news' : 'trend') + '">' +
+                (isHot ? '🔥 ' : '') + catIcon + ' ' + t.category.toUpperCase() +
+                '</span>' +
+                '</div>' +
+                '<div class="thread-info">' +
+                '<h4 class="thread-title">' + t.title + '</h4>' +
+                '<p class="thread-hook">' + (t.content.substring(0, 80)) + '...</p>' +
+                '</div>' +
+                '<div class="thread-actions-grid">' +
+                '<button class="thread-action-btn" onclick="event.stopPropagation();handleTopicLike(\'' + t.id + '\')">' +
+                '<span>❤️</span><span class="count">' + (t.likes_count || 0) + '</span>' +
+                '</button>' +
+                '<div class="thread-action-btn"><span>💬</span><span class="count">' + (t.comments_count || 0) + '</span></div>' +
+                '<div class="thread-action-btn"><span>👀</span><span class="count">' + (t.views_count || 0) + '</span></div>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+    } catch (e) {
+        console.error('Error loading hot topics:', e);
+    }
+}
+
+async function handleTopicLike(id) {
+    if (!currentUser) {
+        showToast('Login Required', 'Sign in to like topics.', '#f59e0b');
+        return;
+    }
+    try {
+        await window.toggleTopicLike(id, currentUser.id);
+        loadHotTopics(); // Refresh to update count
+    } catch (e) {
+        console.error('Like failed:', e);
+    }
+}
+
+// Ensure Hot Topics load on trends page switch
+var originalSwitchPage = switchPage;
+switchPage = function (page) {
+    originalSwitchPage(page);
+    if (page === 'trends') loadHotTopics();
+};
+
+// Auto-load if landing on trends
+if (currentPage === 'trends') loadHotTopics();
