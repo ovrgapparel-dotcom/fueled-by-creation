@@ -7,6 +7,7 @@
   <title>Fueled By Creation — Culture · Music · Merch</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
+  <link rel="canonical" href="/">
   <meta name="theme-color" content="#FF6B35">
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
@@ -69,7 +70,9 @@
   <!-- ===== HEADER ===== -->
   <header>
     <div class="header-inner">
-      <a href="#" class="logo" onclick="event.preventDefault();switchPage('home')">FBC<span>.</span></a>
+      <a href="#" class="logo" onclick="event.preventDefault();switchPage('home')">
+        <img src="app_icon.png" alt="FBC">
+      </a>
       <nav id="mainNav">
         <a href="#" class="active" onclick="event.preventDefault();switchPage('home')" data-page="home"
           data-i18n="home">Home</a>
@@ -92,39 +95,75 @@
   <!-- ===== HOME PAGE ===== -->
   <div class="page-section active" id="page-home">
     <section class="hero">
-      <div class="hero-tag">Culture · Music · Merch</div>
-      <h1>FUELED BY<br><span>CREATION</span></h1>
-      <p>Discover artists, trending culture, exclusive merch, and live events — all in one place.</p>
-      <a href="#" class="hero-cta" onclick="event.preventDefault();switchPage('shop')">Explore the Shop →</a>
+      <div class="hero-tag" data-i18n="hero_tag">Culture · Music · Merch</div>
+      <h1 data-i18n="hero_title">FUELED BY<br><span>CREATION</span></h1>
+      <p data-i18n="hero_desc">Discover artists, trending culture, exclusive merch, and live events — all in one place.
+      </p>
+      <a href="#" class="hero-cta" onclick="event.preventDefault();switchPage('shop')" data-i18n="hero_cta">Explore the
+        Shop →</a>
     </section>
 
     <!-- Featured Artists Preview -->
     <section class="artists-section" id="featuredArtistsPreview">
       <div class="section-header">
-        <div class="section-label">Featured Artists</div>
-        <h2 class="section-title">THE ROSTER</h2>
+        <div class="section-label" data-i18n="featured_artists_label">Featured Artists</div>
+        <h2 class="section-title" data-i18n="roster_title">THE ROSTER</h2>
       </div>
       <div class="artists-grid" id="featuredArtistsGrid">
         <!-- JS populated -->
       </div>
     </section>
 
-    <!-- Featured Articles Preview -->
-    <section class="trends-section" id="featuredArticlesPreview">
+    <!-- Featured Articles Preview (Split Block Layout) -->
+    <section class="trends-section section-wrap" id="featuredArticlesPreview">
       <div class="section-header">
-        <div class="section-label">🔥 Trending Now</div>
-        <h2 class="section-title">LATEST DROPS</h2>
+        <div class="section-label" data-i18n="trending_now_label">🔥 Trending Now</div>
+        <h2 class="section-title" data-i18n="latest_drops_title">LATEST DROPS</h2>
       </div>
-      <div class="articles-grid" id="featuredArticlesGrid">
-        <!-- JS populated -->
+      <div id="featuredArticlesGrid">
+        <!-- Replaced via JS with split block layout if articles exist -->
+        <div class="featured-split-block">
+          <div class="featured-split-content">
+            <h3>Feature Block</h3>
+            <p>This is a feature block section. It allows you to place content side-by-side.</p>
+            <button class="btn-primary" onclick="event.preventDefault();switchPage('trends')">Button</button>
+          </div>
+          <div class="featured-split-img"
+            style="background-image: url('https://images.unsplash.com/photo-1531123414780-f05244585149?auto=format&fit=crop&q=80');">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Video Section -->
+    <section class="video-section section-wrap" id="featuredVideoSection">
+      <div class="featured-split-block">
+        <div class="featured-split-img"
+          style="background-image: url('assets/featured_video_thumbnail.png'); display: flex; align-items: center; justify-content: center;">
+          <div class="play-btn-glass"
+            style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.4); cursor: pointer;">
+            <span style="color: white; font-size: 2rem; margin-left: 5px;">▶</span>
+          </div>
+        </div>
+        <div class="featured-split-content">
+          <h3 data-i18n="video_title"
+            style="font-family:'Bebas Neue',sans-serif;font-weight:700;font-size:3rem;margin-bottom:1rem;line-height:1; letter-spacing: 0.05em;">
+            THE CREW IN SESSION</h3>
+          <p data-i18n="video_desc" style="font-size:1.1rem;color:var(--gray);margin-bottom:2rem">Go behind the scenes
+            with the FBC team as we
+            scout the next generation of talent. Watch how culture is being redefined in the heart of the city.</p>
+          <button class="btn-primary" data-i18n="watch_doc"
+            style="background:var(--primary);color:white;width:auto;padding:0.9rem 2.5rem;border-radius:8px;font-weight:700"
+            onclick="event.preventDefault();switchPage('trends')">Watch Documentary</button>
+        </div>
       </div>
     </section>
 
     <!-- Upcoming Events Preview -->
     <section class="events-section" id="featuredEventsPreview">
       <div class="section-header">
-        <div class="section-label">🎫 Don't Miss Out</div>
-        <h2 class="section-title">UPCOMING EVENTS</h2>
+        <div class="section-label" data-i18n="dont_miss_label">🎫 Don't Miss Out</div>
+        <h2 class="section-title" data-i18n="upcoming_events_title">UPCOMING EVENTS</h2>
       </div>
       <div class="events-grid" id="featuredEventsGrid">
         <!-- JS populated -->
@@ -136,13 +175,13 @@
   <div class="page-section" id="page-shop">
     <section class="catalogue" id="catalogue">
       <div class="section-header">
-        <div class="section-label">Official Merch</div>
-        <h2 class="section-title">THE SHOP</h2>
+        <div class="section-label" data-i18n="merch">Official Merch</div>
+        <h2 class="section-title" data-i18n="shop">THE SHOP</h2>
       </div>
       <div class="filter-tabs" id="filterTabs">
-        <button class="filter-tab active" onclick="filterProducts('all', this)">All</button>
-        <button class="filter-tab" onclick="filterProducts('t-shirt', this)">T-Shirts</button>
-        <button class="filter-tab" onclick="filterProducts('ensemble', this)">Sets</button>
+        <button class="filter-tab active" onclick="filterProducts('all', this)" data-i18n="all">All</button>
+        <button class="filter-tab" onclick="filterProducts('t-shirt', this)" data-i18n="tshirts">T-Shirts</button>
+        <button class="filter-tab" onclick="filterProducts('ensemble', this)" data-i18n="sets">Sets</button>
       </div>
       <div id="productsContainer">
         <div class="loading-grid" id="loadingGrid">
@@ -176,8 +215,8 @@
   <div class="page-section" id="page-artists">
     <section class="artists-section">
       <div class="section-header">
-        <div class="section-label">Artist Showcase</div>
-        <h2 class="section-title">THE ROSTER</h2>
+        <div class="section-label" data-i18n="artist_showcase">Artist Showcase</div>
+        <h2 class="section-title" data-i18n="roster_title">THE ROSTER</h2>
       </div>
       <div class="artists-grid" id="allArtistsGrid">
         <!-- JS populated -->
@@ -189,15 +228,15 @@
   <div class="page-section" id="page-trends">
     <section class="trends-section">
       <div class="section-header">
-        <div class="section-label">🔥 Trends & Threads</div>
-        <h2 class="section-title">CULTURE HUB</h2>
+        <div class="section-label" data-i18n="trends_threads">🔥 Trends & Threads</div>
+        <h2 class="section-title" data-i18n="culture_hub">CULTURE HUB</h2>
       </div>
       <div class="filter-tabs" id="trendsFilterTabs">
-        <button class="filter-tab active" onclick="filterTrends('all', this)">All</button>
-        <button class="filter-tab" onclick="filterTrends('article', this)">📰 Articles</button>
-        <button class="filter-tab" onclick="filterTrends('vlog', this)">🎥 Vlogs</button>
-        <button class="filter-tab" onclick="filterTrends('howto', this)">💡 How-To</button>
-        <button class="filter-tab" onclick="filterTrends('hot', this)">🔥 Hot Topics</button>
+        <button class="filter-tab active" onclick="filterTrends('all', this)" data-i18n="all">All</button>
+        <button class="filter-tab" onclick="filterTrends('article', this)" data-i18n="articles">Articles</button>
+        <button class="filter-tab" onclick="filterTrends('vlog', this)" data-i18n="vlogs">Vlogs</button>
+        <button class="filter-tab" onclick="filterTrends('howto', this)" data-i18n="how_to">How-To</button>
+        <button class="filter-tab" onclick="filterTrends('hot', this)" data-i18n="trending">Hot Topics</button>
       </div>
       <div class="articles-grid" id="allArticlesGrid">
         <!-- JS populated -->
@@ -205,8 +244,8 @@
       <!-- Threads section below articles -->
       <div style="margin-top:3rem">
         <div class="section-header">
-          <div class="section-label">💬 Community Threads</div>
-          <h2 class="section-title">HOT TOPICS</h2>
+          <div class="section-label" data-i18n="community_threads_label">💬 Community Threads</div>
+          <h2 class="section-title" data-i18n="hot_topics_title">HOT TOPICS</h2>
         </div>
         <div class="threads-list" id="allThreadsList">
           <!-- JS populated -->
@@ -219,8 +258,8 @@
   <div class="page-section" id="page-events">
     <section class="events-section">
       <div class="section-header">
-        <div class="section-label">🎫 Events & Tickets</div>
-        <h2 class="section-title">UPCOMING EVENTS</h2>
+        <div class="section-label" data-i18n="events_tickets">🎫 Events & Tickets</div>
+        <h2 class="section-title" data-i18n="upcoming_events_title">UPCOMING EVENTS</h2>
       </div>
       <div class="events-grid" id="allEventsGrid">
         <!-- JS populated -->
@@ -228,77 +267,8 @@
     </section>
   </div>
 
-  <!-- ===== CONTACT ===== -->
-  <section class="contact-section" id="contact">
-    <div class="contact-inner">
-      <div class="contact-info">
-        <h2>Fueled By<br><span>Creation</span></h2>
-        <p>We're building a culture gravity system — not just a store.</p>
-        <div class="contact-links">
-          <a href="tel:+2250799108108" class="contact-link"><span class="cl-icon">📞</span> +225 07 99 10 81 08</a>
-          <a href="mailto:contact@fueledbycreation.com" class="contact-link"><span class="cl-icon">✉️</span>
-            contact@fueledbycreation.com</a>
-          <a href="https://wa.me/c/2250799108108" target="_blank" class="contact-link"><span class="cl-icon">💬</span>
-            WhatsApp</a>
-          <a href="https://www.instagram.com/fueledbycreation" target="_blank" class="contact-link"><span
-              class="cl-icon">📷</span> @fueledbycreation</a>
-        </div>
-      </div>
-      <div class="newsletter-form">
-        <h3>Join the Tribe</h3>
-        <p>Get notified about new artist drops, exclusive merch, and trending content.</p>
-        <form onsubmit="handleNewsletter(event)">
-          <div class="nf-group"><input type="text" name="name" placeholder="Full name" required></div>
-          <div class="nf-group"><input type="email" name="email" placeholder="your@email.com" required></div>
-          <div class="nf-group"><input type="tel" name="phone" placeholder="+225 XX XX XX XX"></div>
-          <button type="submit" class="btn-subscribe">Join Now 🔥</button>
-        </form>
-      </div>
-    </div>
-  </section>
 
-  <!-- ===== FOOTER ===== -->
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <a href="#" class="logo">FBC<span style="color:var(--primary)">.</span></a>
-        <p>Fueled By Creation — Culture, music, merch, and community all under one roof.</p>
-      </div>
-      <div class="footer-col">
-        <h4>Navigate</h4>
-        <ul>
-          <li><a href="#" onclick="event.preventDefault();switchPage('shop')">Shop</a></li>
-          <li><a href="#" onclick="event.preventDefault();switchPage('artists')">Artists</a></li>
-          <li><a href="#" onclick="event.preventDefault();switchPage('trends')">Trends</a></li>
-          <li><a href="#" onclick="event.preventDefault();switchPage('events')">Events</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Contact</h4>
-        <ul>
-          <li><a href="tel:+2250799108108">+225 07 99 10 81 08</a></li>
-          <li><a href="mailto:contact@fueledbycreation.com">contact@fueledbycreation.com</a></li>
-          <li>Abidjan, Côte d'Ivoire</li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Follow Us</h4>
-        <ul>
-          <li><a href="https://www.instagram.com/fueledbycreation" target="_blank">Instagram</a></li>
-          <li><a href="#" target="_blank">YouTube</a></li>
-          <li><a href="#" target="_blank">TikTok</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 Fueled By Creation. All rights reserved.</span>
-      <span>Made with 🔥
-        <button id="adminToggleBtn" onclick="handleAdminClick()" title=""
-          style="background:none;border:none;cursor:pointer;color:#1a1a1a;font-size:0.6rem;margin-left:0.5rem;opacity:0.15;transition:opacity 0.3s;padding:2px 4px;border-radius:3px;"
-          onmouseenter="this.style.opacity='0.5'" onmouseleave="this.style.opacity='0.15'">⚙</button>
-      </span>
-    </div>
-  </footer>
+  <!-- Footer merged to bottom -->
 
   <!-- ===== PRODUCT DETAIL OVERLAY ===== -->
   <div class="overlay" id="productOverlay" onclick="handleOverlayClick(event,'productOverlay')">
@@ -804,7 +774,7 @@
   <!-- PayPal Cart Form -->
   <form id="paypalCartForm" target="_blank" action="https://www.paypal.com/cgi-bin/webscr" method="post"
     class="paypal-hidden">
-    <input type="hidden" name="business" value="ovrg.apparel@gmail.com">
+    <input type="hidden" name="business" value="contact@fueledbycreation.com">
     <input type="hidden" name="cmd" value="_cart">
     <input type="hidden" name="upload" value="1">
     <input type="hidden" name="currency_code" value="USD">
@@ -816,69 +786,92 @@
     <div class="toast-body" id="toastBody"></div>
   </div>
 
-  <!-- Chat Widget -->
-  <div class="chat-widget" id="chatWidget">
-    <div class="chat-channels" id="chatChannels">
-      <a class="chat-channel-btn btn-whatsapp-float" href="https://wa.me/2250799108108?text=Hello%20FBC!"
-        target="_blank" rel="noopener">
-        <span class="ch-icon">💬</span><span class="ch-label">WhatsApp<span class="ch-sub">Quick response</span></span>
-      </a>
-      <a class="chat-channel-btn btn-telegram-float" href="https://t.me/+2250799108108" target="_blank" rel="noopener">
-        <span class="ch-icon">✈️</span><span class="ch-label">Telegram<span class="ch-sub">+225 07 99 108
-            108</span></span>
-      </a>
-      <a class="chat-channel-btn btn-messenger-float" href="https://m.me/imakeimage" target="_blank" rel="noopener">
-        <span class="ch-icon">💙</span><span class="ch-label">Messenger<span class="ch-sub">Facebook</span></span>
-      </a>
+
+  <!-- ===== NEWSLETTER SECTION ===== -->
+  <section class="newsletter-section">
+    <div class="newsletter-inner">
+      <div class="newsletter-content">
+        <h2 data-i18n="newsletter_title">JOIN THE TRIBE</h2>
+        <p data-i18n="newsletter_desc">Get notified about new artist drops, exclusive merch, and trending content.</p>
+      </div>
+      <form class="newsletter-form"
+        onsubmit="event.preventDefault(); showToast('Success', 'Welcome to the tribe!', '#FF6B35')">
+        <div class="form-group">
+          <input type="text" data-i18n-placeholder="placeholder_name" placeholder="Full name" required>
+        </div>
+        <div class="form-group">
+          <input type="email" data-i18n-placeholder="placeholder_email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <input type="tel" data-i18n-placeholder="placeholder_phone" placeholder="+225 XX XX XX XX">
+        </div>
+        <button type="submit" class="btn-join" data-i18n="btn_join">Join Now 🔥</button>
+      </form>
     </div>
-    <button class="chat-toggle" id="chatToggle" onclick="toggleChat()" aria-label="Support">
-      <span class="chat-tooltip">Support</span>
-      <span class="icon-chat">💬</span>
-      <span class="icon-close">✕</span>
-    </button>
-  </div>
+  </section>
 
   <!-- ===== FOOTER ===== -->
   <footer>
     <div class="footer-inner">
       <div class="footer-grid">
-        <div class="footer-col">
-          <a href="#" class="logo">FBC<span>.</span></a>
-          <p class="footer-tagline" data-i18n="footer_tagline">Fueled By Creation — Culture · Music · Merch</p>
-          <div class="social-links-footer">
-            <a href="https://www.facebook.com/FueledByCreation" target="_blank" rel="noopener">FB</a>
-            <a href="https://www.instagram.com/offbrandcollectif" target="_blank" rel="noopener">IG</a>
-            <a href="https://x.com/OvrgApparel" target="_blank" rel="noopener">X</a>
-            <a href="https://www.fueledbycreation.com/home" target="_blank" rel="noopener">WEB</a>
-          </div>
+        <div class="footer-col footer-brand">
+          <h2 class="footer-logo">FBC<span>.</span></h2>
+          <p class="footer-tagline" data-i18n="footer_tagline">Fueled By Creation — Culture, music, merch, and community
+            all under one roof.</p>
         </div>
+
         <div class="footer-col">
-          <h4 data-i18n="contact">Contact</h4>
-          <p>📞 +225 07 99 108 108</p>
-          <p>📧 info@fueledbycreation.com</p>
+          <h4 data-i18n="navigate">NAVIGATE</h4>
+          <ul>
+            <li><a href="#" onclick="event.preventDefault();switchPage('shop')" data-i18n="shop">Shop</a></li>
+            <li><a href="#" onclick="event.preventDefault();switchPage('artists')" data-i18n="artists">Artists</a></li>
+            <li><a href="#" onclick="event.preventDefault();switchPage('trends')" data-i18n="trends">Trends</a></li>
+            <li><a href="#" onclick="event.preventDefault();switchPage('events')" data-i18n="events">Events</a></li>
+          </ul>
         </div>
+
         <div class="footer-col">
-          <h4 data-i18n="partners">Partners</h4>
-          <div class="partner-links">
-            <a href="https://facebook.com/ovrgapparel" target="_blank">OVRG Apparel</a>
-            <a href="https://instagram.com/ovrgapparel" target="_blank">OVRG IG</a>
-            <hr style="opacity:0.1; margin: 0.5rem 0;">
-            <a href="#" onclick="event.preventDefault();switchPage('admin')" class="admin-link">
-              <span style="font-size: 1.2rem;">⚙️</span> <span data-i18n="admin_panel">Admin Panel</span>
-            </a>
-          </div>
+          <h4 data-i18n="contact">CONTACT</h4>
+          <p>+225 07 99 10 81 08</p>
+          <p><a href="mailto:contact@fueledbycreation.com"
+              style="color:inherit;text-decoration:none">contact@fueledbycreation.com</a></p>
+          <p>Abidjan, Côte d'Ivoire</p>
+        </div>
+
+        <div class="footer-col">
+          <h4 data-i18n="follow_us">FOLLOW US</h4>
+          <ul>
+            <li><a href="https://instagram.com/offbrandcollectif" target="_blank" rel="noopener">Instagram</a></li>
+            <li><a href="https://youtube.com/@FueledByCreation" target="_blank" rel="noopener">YouTube</a></li>
+            <li><a href="https://tiktok.com/@fueledbycreation" target="_blank" rel="noopener">TikTok</a></li>
+          </ul>
         </div>
       </div>
+
       <div class="footer-bottom">
         <p>&copy; 2026 Fueled By Creation. All rights reserved.</p>
+        <p class="made-with">
+          <button id="adminToggleBtn" onclick="handleAdminClick()" title=""
+            style="background:none;border:none;cursor:pointer;color:#1a1a1a;font-size:0.6rem;margin-right:0.5rem;opacity:0.15;transition:opacity 0.3s;padding:2px 4px;border-radius:3px;"
+            onmouseenter="this.style.opacity='0.5'" onmouseleave="this.style.opacity='0.15'">⚙</button>
+          Made with 🔥
+        </p>
       </div>
     </div>
   </footer>
 
   <!-- Detail Overlays -->
   <div id="artistDetail" class="overlay">
-    <div class="overlay-content premium">
-      <button class="overlay-close" onclick="closeDetail()">✕</button>
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="artist">ARTIST</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn"
+          onclick="shareContent(document.getElementById('artistNameDetail').textContent, window.location.href)">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
+      </div>
       <div id="artistHero" class="artist-hero-detail">
         <div class="artist-hero-inner">
           <img id="artistProfileImgDetail" src="" alt="" class="artist-profile-img-large">
@@ -909,8 +902,16 @@
   </div>
 
   <div id="articleDetail" class="overlay">
-    <div class="overlay-content">
-      <button class="overlay-close" onclick="closeDetail()">✕</button>
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="article">ARTICLE</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn"
+          onclick="shareContent(document.getElementById('articleTitleDetail').textContent, window.location.href)">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
+      </div>
       <img id="articleCoverDetail" src="" alt="Cover" class="article-detail-cover">
       <div class="detail-container">
         <h2 id="articleTitleDetail" class="premium-title"></h2>
@@ -921,8 +922,16 @@
   </div>
 
   <div id="eventDetail" class="overlay">
-    <div class="overlay-content premium">
-      <button class="overlay-close" onclick="closeDetail()">✕</button>
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="event">EVENT</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn"
+          onclick="shareContent(document.getElementById('eventTitleDetail').textContent, window.location.href)">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
+      </div>
       <img id="eventCoverDetail" src="" alt="Event" class="event-detail-cover">
       <div class="detail-container">
         <h2 id="eventTitleDetail" class="premium-title"></h2>
@@ -934,6 +943,26 @@
         <a id="eventTicketBtnDetail" href="#" target="_blank" class="btn-primary btn-full">Get Tickets</a>
       </div>
     </div>
+  </div>
+
+
+  <!-- Chat Widget -->
+  <div class="chat-widget" id="chatWidget">
+    <div class="chat-channels" id="chatChannels">
+      <a href="https://wa.me/2250799108108" target="_blank" class="chat-channel-btn btn-whatsapp-float">
+        <div class="ch-icon">💬</div>
+        <div class="ch-label">WhatsApp<span class="ch-sub">Direct support</span></div>
+      </a>
+      <a href="https://m.me/fueledbycreation" target="_blank" class="chat-channel-btn btn-messenger-float">
+        <div class="ch-icon">✉️</div>
+        <div class="ch-label">Messenger<span class="ch-sub">Send a message</span></div>
+      </a>
+    </div>
+    <button class="chat-toggle" id="chatToggle" onclick="toggleChat()" aria-label="Support">
+      <span class="chat-tooltip">Support</span>
+      <span class="icon-chat">💬</span>
+      <span class="icon-close">✕</span>
+    </button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

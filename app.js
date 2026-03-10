@@ -10,6 +10,41 @@ var currentProduct = null;
 var cart = [];
 var currentPage = 'home';
 
+function localizeDemoData() {
+    if (window.getLang() === 'fr') {
+        // Localize Artists
+        demoArtists[0].bio = "Sensation Afrobeat mêlant culture et rythme.";
+        demoArtists[0].latest_release_title = "Fire & Gold EP";
+        demoArtists[1].bio = "Vocaliste R&B aux mélodies envoûtantes.";
+        demoArtists[1].latest_release_title = "Midnight Session";
+        demoArtists[2].bio = "Beats électroniques et sons définissant la culture.";
+
+        // Localize Articles
+        demoArticles[0].title = "L'essor de l'Afrobeat dans la culture mondiale";
+        demoArticles[0].excerpt = "Comment les rythmes africains deviennent la bande-son d'une génération.";
+        demoArticles[1].title = "5 façons de construire votre marque en tant qu'artiste indépendant";
+        demoArticles[1].excerpt = "Conseils pratiques pour les artistes émergents pour développer leur audience.";
+        demoArticles[2].title = "Coulisses : Session de studio FBC";
+        demoArticles[2].excerpt = "Un regard exclusif sur le processus créatif.";
+
+        // Localize Threads
+        demoThreads[0].title = window.t('underrated_artist');
+        demoThreads[0].hook_text = "Donnez vos choix — la culture a besoin de les entendre.";
+        demoThreads[1].title = window.t('merch_drop');
+        demoThreads[1].hook_text = "Nouvelle collection FBC ce week-end. Quelles pièces visez-vous ?";
+        demoThreads[2].title = window.t('afrobeat_vs_amapiano');
+        demoThreads[2].hook_text = "Le débat qui s'enflamme tout le mois.";
+
+        // Localize Events
+        demoEvents[0].title = "FBC Live: Kwame Blaze en Concert";
+        demoEvents[0].description = "Une nuit électrisante d'Afrobeat, performances live et drops exclusifs.";
+        demoEvents[1].title = "Nuit de la Culture : Art × Musique × Mode";
+        demoEvents[1].description = "Une soirée multidisciplinaire célébrant l'intersection de la culture.";
+        demoEvents[2].title = "Boutique Éphémère FBC";
+        demoEvents[2].description = "Expérience merch exclusive en personne. Drops limités uniquement.";
+    }
+}
+
 // ===== DEMO DATA (used until Supabase tables are populated) =====
 var demoArtists = [
     { id: 'a1', name: 'Kwame Blaze', bio: 'Afrobeat sensation blending culture with rhythm.', profile_image_url: '', banner_image_url: '', promo_video_url: '', latest_release_title: 'Fire & Gold EP', latest_release_cover_url: '', latest_release_listen_url: '#', latest_release_date: '2026-02-15', merch_product_id: '', instagram_url: '#', youtube_url: '#', tiktok_spotify_url: '#', status: 'Published', is_featured: true },
@@ -24,9 +59,9 @@ var demoArticles = [
 ];
 
 var demoThreads = [
-    { id: 't1', title: 'Who is the most underrated artist right now?', tag: 'Hot', hook_text: 'Drop your picks — the culture needs to hear them.', cover_image_url: '', status: 'Active', priority_order: 1, is_pinned: true },
-    { id: 't2', title: 'Merch drop incoming 🔥', tag: 'Trend', hook_text: 'New FBC collection dropping this weekend. What pieces are you eyeing?', cover_image_url: '', status: 'Active', priority_order: 2, is_pinned: false },
-    { id: 't3', title: 'Afrobeat vs Amapiano — which one defines 2026?', tag: 'News', hook_text: 'The debate that\'s been heating up all month.', cover_image_url: '', status: 'Active', priority_order: 3, is_pinned: false },
+    { id: 't1', title: 'Who is the most underrated artist right now?', tag: 'Hot', hook_text: 'Drop your picks — the culture needs to hear them.', cover_image_url: '', status: 'Active', priority_order: 1, is_pinned: true, likes: 124, comments: 45, views: 890 },
+    { id: 't2', title: 'Merch drop incoming 🔥', tag: 'Trend', hook_text: 'New FBC collection dropping this weekend. What pieces are you eyeing?', cover_image_url: '', status: 'Active', priority_order: 2, is_pinned: false, likes: 342, comments: 67, views: '1.2k' },
+    { id: 't3', title: 'Afrobeat vs Amapiano — which one defines 2026?', tag: 'News', hook_text: 'The debate that\'s been heating up all month.', cover_image_url: '', status: 'Active', priority_order: 3, is_pinned: false, likes: 89, comments: 23, views: 456 },
 ];
 
 var demoEvents = [
@@ -159,14 +194,14 @@ function renderCatalogue(filter) {
         var imgHtml = imgSrc ? '<img src="' + imgSrc + '" alt="' + p.name + '" loading="lazy">' : '<div class="product-img-placeholder"><span style="font-size:4rem;opacity:0.15">👕</span></div>';
         var badgeHtml = p.badge ? '<span class="product-badge">' + p.badge + '</span>' : '';
         var discHtml = p.old_price ? '<span class="product-old">' + fmt(p.old_price) + '</span><span class="product-discount">-' + disc + '%</span>' : '';
-        return '<article class="product-card" onclick="openProduct(' + p.id + ')" tabindex="0">' +
+        return '<article class="product-card" onclick="openProduct(\'' + p.id + '\')" tabindex="0">' +
             '<div class="product-img-wrap">' + imgHtml + badgeHtml +
-            '<button class="product-quick-view" onclick="event.stopPropagation();openProduct(' + p.id + ')">View Details →</button></div>' +
+            '<button class="product-quick-view" onclick="event.stopPropagation();openProduct(\'' + p.id + '\')">' + window.t('view_details') + '</button></div>' +
             '<div class="product-info">' +
-            '<div class="product-cat">' + (p.cat === 't-shirt' ? 'T-Shirts' : 'Sets') + '</div>' +
+            '<div class="product-cat">' + (p.category === 't-shirt' ? window.t('tshirts') : window.t('sets')) + '</div>' +
             '<h3 class="product-name">' + p.name + '</h3>' +
             '<div class="product-pricing"><span class="product-price">' + fmt(p.price) + '</span>' + discHtml + '</div>' +
-            '<button class="btn-add-cart" onclick="event.stopPropagation();quickAddToCart(' + p.id + ')">+ Add to Cart</button>' +
+            '<button class="btn-add-cart" onclick="event.stopPropagation();quickAddToCart(\'' + p.id + '\')">' + window.t('add_to_cart') + '</button>' +
             '</div></article>';
     }).join('');
 }
@@ -176,15 +211,15 @@ function renderArtists(targetGridId, artistList) {
     if (!artistList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎤</div><p>No artists to display yet.</p></div>'; return; }
     grid.innerHTML = artistList.map(function (a) {
         var imgHtml = a.profile_image_url ? '<img src="' + a.profile_image_url + '" alt="' + a.name + '" loading="lazy">' : '';
-        var featuredBadge = a.is_featured ? '<span class="featured-badge">⭐ Featured</span>' : '';
+        var featuredBadge = a.is_featured ? '<span class="featured-badge">⭐ ' + window.t('featured_artist') + '</span>' : '';
         return '<div class="artist-card" onclick="openArtistDetail(\'' + a.id + '\')">' +
             '<div class="artist-card-img">' + imgHtml + featuredBadge + '</div>' +
             '<div class="artist-card-body">' +
             '<h3 class="artist-card-name">' + a.name + '</h3>' +
-            '<p class="artist-card-release">🎵 ' + (a.latest_release_title || 'Coming soon') + '</p>' +
+            '<p class="artist-card-release">🎵 ' + (a.latest_release_title || window.t('coming_soon')) + '</p>' +
             '<div class="artist-card-actions">' +
-            '<button class="btn-sm btn-view-profile" onclick="event.stopPropagation();openArtistDetail(\'' + a.id + '\')">View Profile</button>' +
-            (a.latest_release_listen_url && a.latest_release_listen_url !== '#' ? '<a href="' + a.latest_release_listen_url + '" target="_blank" class="btn-sm btn-listen" onclick="event.stopPropagation()">▶ Listen</a>' : '') +
+            '<button class="btn-sm btn-view-profile" onclick="event.stopPropagation();openArtistDetail(\'' + a.id + '\')">' + window.t('view_profile') + '</button>' +
+            (a.latest_release_listen_url && a.latest_release_listen_url !== '#' ? '<a href="' + a.latest_release_listen_url + '" target="_blank" class="btn-sm btn-listen" onclick="event.stopPropagation()">▶ ' + window.t('listen_now') + '</a>' : '') +
             '</div></div></div>';
     }).join('');
 }
@@ -192,18 +227,37 @@ function renderArtists(targetGridId, artistList) {
 function renderArticles(targetGridId, articleList) {
     var grid = document.getElementById(targetGridId); if (!grid) return;
     if (!articleList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📰</div><p>No articles yet.</p></div>'; return; }
+    // Clean any prior classes
+    grid.className = 'articles-grid';
     grid.innerHTML = articleList.map(function (a) {
         var imgHtml = a.cover_image_url ? '<img src="' + a.cover_image_url + '" alt="' + a.title + '" loading="lazy">' : '';
-        var catLabel = { article: '📰 Article', vlog: '🎥 Vlog', howto: '💡 How-To', hot: '🔥 Hot Topic' }[a.category] || a.category;
+        var catKey = a.category === 'howto' ? 'how_to' : (a.category === 'vlog' ? 'vlogs' : a.category);
+        var catLabel = window.t(catKey) || a.category;
         return '<div class="article-card" onclick="openArticleDetail(\'' + a.id + '\')">' +
             '<div class="article-card-img">' + imgHtml + '</div>' +
             '<div class="article-card-body">' +
             '<span class="article-card-tag">' + catLabel + '</span>' +
             '<h3 class="article-card-title">' + a.title + '</h3>' +
             '<p class="article-card-excerpt">' + (a.excerpt || '') + '</p>' +
-            '<div class="article-card-meta"><span>By ' + (a.author || 'FBC') + '</span><span>' + formatDate(a.publish_date) + '</span></div>' +
+            '<div class="article-card-meta"><span>' + window.t('by') + ' ' + (a.author || 'FBC') + '</span><span>' + formatDate(a.publish_date) + '</span></div>' +
             '</div></div>';
     }).join('');
+}
+
+function renderFeaturedArticlesSplit(targetContainerId, articleList) {
+    var container = document.getElementById(targetContainerId); if (!container) return;
+    if (!articleList.length) { container.innerHTML = '<div class="empty-state"><p>No featured articles yet.</p></div>'; return; }
+    // Only show top featured article in split mode
+    var a = articleList[0];
+    var bgImg = a.cover_image_url ? a.cover_image_url : 'https://images.unsplash.com/photo-1531123414780-f05244585149?auto=format&fit=crop&q=80';
+    container.innerHTML = '<div class="featured-split-block">' +
+        '<div class="featured-split-content">' +
+        '<h3>' + a.title + '</h3>' +
+        '<p>' + (a.excerpt || window.t('read_latest_feature')) + '</p>' +
+        '<button class="btn-primary" style="background:#3b82f6;color:white;padding:0.6rem 1.5rem" onclick="openArticleDetail(\'' + a.id + '\')">' + window.t('read_more') + '</button>' +
+        '</div>' +
+        '<div class="featured-split-img" style="background-image: url(\'' + bgImg + '\');"></div>' +
+        '</div>';
 }
 
 function renderThreads(targetListId, threadList) {
@@ -212,10 +266,15 @@ function renderThreads(targetListId, threadList) {
     var sortedThreads = threadList.slice().sort(function (a, b) { return (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0) || a.priority_order - b.priority_order; });
     list.innerHTML = sortedThreads.map(function (t) {
         var tagClass = { Hot: 'hot', Trend: 'trend', News: 'news' }[t.tag] || 'trend';
+        var threadTagText = window.i18n ? window.i18n.t(t.tag.toLowerCase()) : t.tag;
         return '<div class="thread-card">' +
-            '<span class="thread-tag ' + tagClass + '">' + (t.is_pinned ? '📌 ' : '') + t.tag + '</span>' +
+            '<div class="thread-tag-wrap"><span class="thread-tag ' + tagClass + '">' + (t.is_pinned ? '<span style="font-size:0.8rem">📌</span> ' : '') + threadTagText + '</span></div>' +
             '<div class="thread-info"><h4 class="thread-title">' + t.title + '</h4><p class="thread-hook">' + (t.hook_text || '') + '</p></div>' +
-            '<div class="thread-reactions"><span>🔥</span><span>💬</span><span>👀</span></div>' +
+            '<div class="thread-actions-grid">' +
+            '<button class="thread-action-btn"><span>🔥</span><span class="count">' + (t.likes || 0) + '</span></button>' +
+            '<button class="thread-action-btn"><span>💬</span><span class="count">' + (t.comments || 0) + '</span></button>' +
+            '<button class="thread-action-btn"><span>👀</span><span class="count">' + (t.views || 0) + '</span></button>' +
+            '</div>' +
             '</div>';
     }).join('');
 }
@@ -225,7 +284,9 @@ function renderEvents(targetGridId, eventList) {
     if (!eventList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎫</div><p>No events scheduled yet.</p></div>'; return; }
     grid.innerHTML = eventList.map(function (e) {
         var d = new Date(e.event_date);
-        var months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        var enMonths = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        var frMonths = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
+        var months = window.getLang() === 'fr' ? frMonths : enMonths;
         var imgHtml = e.cover_image_url ? '<img src="' + e.cover_image_url + '" alt="' + e.title + '" loading="lazy">' : '';
         return '<div class="event-card">' +
             '<div class="event-card-img">' + imgHtml +
@@ -234,7 +295,7 @@ function renderEvents(targetGridId, eventList) {
             '<div class="event-card-body">' +
             '<h3 class="event-card-title">' + e.title + '</h3>' +
             '<p class="event-card-location">📍 ' + e.location_name + '</p>' +
-            (e.ticketing_url ? '<a href="' + e.ticketing_url + '" target="_blank" class="event-card-cta" onclick="event.stopPropagation()">🎫 Get Tickets</a>' : '') +
+            (e.ticketing_url ? '<a href="' + e.ticketing_url + '" target="_blank" class="event-card-cta" onclick="event.stopPropagation()">' + window.t('get_tickets') + '</a>' : '') +
             '</div></div>';
     }).join('');
 }
@@ -258,7 +319,7 @@ function openProduct(id) {
     var p = products.find(function (x) { return x.id === id; }); if (!p) return;
     currentProduct = p;
     document.getElementById('modalCat').textContent = p.name;
-    document.getElementById('modalCatLabel').textContent = p.cat === 't-shirt' ? 'T-Shirts' : 'Sets';
+    document.getElementById('modalCatLabel').textContent = p.category === 't-shirt' ? window.t('tshirts') : window.t('sets');
     document.getElementById('modalName').textContent = p.name;
     document.getElementById('modalPrice').textContent = fmt(p.price);
     var disc = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
@@ -1134,7 +1195,7 @@ async function refreshFrontendData() {
         var artRes = await sbClient.from('articles').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
         if (!artRes.error && artRes.data) {
             demoArticles = artRes.data;
-            renderArticles('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
+            renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
             renderArticles('allArticlesGrid', demoArticles);
         }
     } catch (e) { /* keep demo data */ }
@@ -1156,7 +1217,7 @@ async function refreshFrontendData() {
 function handleNewsletter(e) {
     e.preventDefault();
     var name = e.target.name.value;
-    fetch('https://formsubmit.co/ajax/ovrg.apparel@gmail.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(e.target) }).catch(function () { });
+    fetch('https://formsubmit.co/ajax/contact@fueledbycreation.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(e.target) }).catch(function () { });
     showToast('Welcome to the Tribe! 🎉', 'Thanks ' + name + '!');
     e.target.reset();
 }
@@ -1171,7 +1232,9 @@ function toggleChat() {
 
 // ===== FRONTEND DETAIL VIEWS (Supporting Deep Links) =====
 async function openArtistDetail(id) {
-    switchPage('artists');
+    // Hide any other details first
+    document.getElementById('articleDetail').style.display = 'none';
+    document.getElementById('eventDetail').style.display = 'none';
     var a = demoArtists.find(x => x.id === id);
     if (!a && sbClient) {
         var res = await sbClient.from('artists').select('*').eq('id', id).single();
@@ -1198,7 +1261,9 @@ async function openArtistDetail(id) {
 }
 
 async function openArticleDetail(id) {
-    switchPage('trends');
+    // Hide any other details first
+    document.getElementById('artistDetail').style.display = 'none';
+    document.getElementById('eventDetail').style.display = 'none';
     var a = demoArticles.find(x => x.id === id);
     if (!a && sbClient) {
         var res = await sbClient.from('articles').select('*').eq('id', id).single();
@@ -1216,7 +1281,9 @@ async function openArticleDetail(id) {
 }
 
 async function openEventDetail(id) {
-    switchPage('events');
+    // Hide any other details first
+    document.getElementById('artistDetail').style.display = 'none';
+    document.getElementById('articleDetail').style.display = 'none';
     var e = demoEvents.find(x => x.id === id);
     if (!e && sbClient) {
         var res = await sbClient.from('events').select('*').eq('id', id).single();
@@ -1248,7 +1315,7 @@ function fmtUSD(n) { return (n / 655).toFixed(2); }
 function formatDate(dateStr) {
     if (!dateStr) return '';
     var d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(window.getLang() === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 function showToast(title, body, borderColor) {
     borderColor = borderColor || '#22c55e';
@@ -1265,7 +1332,13 @@ function applyTranslations() {
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(el => {
         const key = el.getAttribute('data-i18n');
-        el.textContent = window.i18n.t(key);
+        el.innerHTML = window.i18n.t(key);
+    });
+
+    const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+    placeholders.forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        el.placeholder = window.i18n.t(key);
     });
 }
 
@@ -1278,17 +1351,101 @@ document.addEventListener('DOMContentLoaded', function () {
     // Apply translations on load
     applyTranslations();
 
+    // Localize demo data strings
+    localizeDemoData();
+
     // Initial load of content
     initSupabase();
     loadProducts();
     // Render demo data for new sections
     renderArtists('featuredArtistsGrid', demoArtists.filter(function (a) { return a.is_featured; }));
     renderArtists('allArtistsGrid', demoArtists);
-    renderArticles('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
+    renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
     renderArticles('allArticlesGrid', demoArticles);
     renderThreads('allThreadsList', demoThreads);
     renderEvents('featuredEventsGrid', demoEvents.slice(0, 3));
     renderEvents('allEventsGrid', demoEvents);
-    // Initial Route
-    handleRouting();
+
+    // Final translation pass for dynamic content
+    setTimeout(applyTranslations, 100);
 });
+
+// ===== GLOBAL EXPORTS =====
+window.switchPage = switchPage;
+window.toggleMobileMenu = toggleMobileMenu;
+window.toggleCart = toggleCart;
+window.filterProducts = filterProducts;
+window.filterTrends = filterTrends;
+window.openProduct = openProduct;
+window.closeProduct = closeProduct;
+window.changeQty = changeQty;
+window.handleOverlayClick = handleOverlayClick;
+window.quickAddToCart = quickAddToCart;
+window.addToCartFromModal = addToCartFromModal;
+window.removeFromCart = removeFromCart;
+window.openCheckout = openCheckout;
+window.selectPayment = selectPayment;
+window.submitOrder = submitOrder;
+window.payWithPayPal = payWithPayPal;
+window.payWithWave = payWithWave;
+window.buyViaYango = buyViaYango;
+window.buyViaWhatsApp = buyViaWhatsApp;
+window.handleAdminClick = handleAdminClick;
+window.doLogin = doLogin;
+window.closeLogin = closeLogin;
+window.doLogout = doLogout;
+window.closeAdmin = closeAdmin;
+window.showAdminTab = showAdminTab;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.saveProduct = saveProduct;
+window.cancelEditProduct = cancelEditProduct;
+window.clearSlot = clearSlot;
+window.uploadImageToStorage = uploadImageToStorage;
+window.editArtist = editArtist;
+window.deleteArtist = deleteArtist;
+window.saveArtist = saveArtist;
+window.cancelEditArtist = cancelEditArtist;
+window.editArticle = editArticle;
+window.deleteArticle = deleteArticle;
+window.saveArticle = saveArticle;
+window.cancelEditArticle = cancelEditArticle;
+window.editThread = editThread;
+window.deleteThread = deleteThread;
+window.saveThread = saveThread;
+window.cancelEditThread = cancelEditThread;
+window.editEvent = editEvent;
+window.deleteEvent = deleteEvent;
+window.saveEvent = saveEvent;
+window.cancelEditEvent = cancelEditEvent;
+window.editNotification = editNotification;
+window.deleteNotification = deleteNotification;
+window.saveNotification = saveNotification;
+window.sendNotification = sendNotification;
+window.cancelEditNotification = cancelEditNotification;
+window.handleNewsletter = handleNewsletter;
+window.toggleChat = toggleChat;
+window.openArtistDetail = openArtistDetail;
+window.openArticleDetail = openArticleDetail;
+window.openEventDetail = openEventDetail;
+window.closeDetail = closeDetail;
+
+window.shareContent = function (title, link) {
+    var shareText = "Download the app and join the community: ";
+    var shareData = {
+        title: title,
+        text: shareText,
+        url: link
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData).catch(function (err) {
+            console.error('Error sharing', err);
+        });
+    } else {
+        // Fallback or copy to clipboard
+        navigator.clipboard.writeText(shareText + "\n" + link).then(function () {
+            showToast('Link Copied', 'Share link copied to clipboard.', '#3b82f6');
+        });
+    }
+};
