@@ -686,6 +686,10 @@ function showAdminTab(tab, el) {
     Object.values(tabMap).forEach(function (id) { var el2 = document.getElementById(id); if (el2) el2.style.display = 'none'; });
     var target = document.getElementById(tabMap[tab]);
     if (target) target.style.display = '';
+    
+    // UI Initialization for specific tabs
+    if (tab === 'add') renderAdminImgSlots();
+
     // Lazy-load data when switching tabs
     if (tab === 'artists-admin') loadAdminArtists();
     else if (tab === 'articles-admin') loadAdminArticles();
