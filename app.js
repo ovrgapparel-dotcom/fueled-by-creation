@@ -1473,7 +1473,14 @@ async function openEventDetail(id) {
     }
 
     var ticketBtn = document.getElementById('eventTicketBtnDetail');
-    if (ticketBtn) ticketBtn.href = e.ticketing_url || '#';
+    if (ticketBtn) {
+        if (e.ticketing_url) {
+            ticketBtn.href = e.ticketing_url;
+            ticketBtn.style.display = 'block';
+        } else {
+            ticketBtn.style.display = 'none';
+        }
+    }
 
     // Set up the premium payment gate button
     var joinBtn = document.getElementById('eventJoinBtn');

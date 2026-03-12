@@ -1190,11 +1190,14 @@ nav a.active {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, .7);
-  z-index: 200;
+  z-index: 2000;
   overflow-y: auto;
-  padding: 1rem;
-  align-items: flex-start;
-  justify-content: center
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .overlay.open {
@@ -1203,12 +1206,14 @@ nav a.active {
 
 .modal-box {
   background: white;
-  border-radius: 16px;
-  max-width: 960px;
+  border-radius: 20px;
+  max-width: 900px;
   width: 100%;
   margin: auto;
   overflow: hidden;
-  animation: modalIn .25s ease
+  position: relative;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  animation: modalIn .4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modalIn {
