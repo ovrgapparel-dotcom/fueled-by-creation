@@ -75,7 +75,9 @@ const translations = {
         placeholder_name: "Full name",
         placeholder_email: "your@email.com",
         placeholder_phone: "+225 XX XX XX XX",
-        btn_join: "Join Now 🔥"
+        btn_join: "Join Now 🔥",
+        orange_money: "Orange Money",
+        djamo: "Djamo"
     },
     fr: {
         home: "Accueil",
@@ -153,7 +155,9 @@ const translations = {
         placeholder_name: "Nom complet",
         placeholder_email: "votre@email.com",
         placeholder_phone: "+225 XX XX XX XX",
-        btn_join: "Rejoindre Maintenant 🔥"
+        btn_join: "Rejoindre Maintenant 🔥",
+        orange_money: "Orange Money",
+        djamo: "Djamo"
     }
 };
 

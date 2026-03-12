@@ -335,6 +335,8 @@
           <div class="modal-actions">
             <button class="btn-primary" onclick="addToCartFromModal()">🛍 Add to Cart</button>
             <button class="btn-paypal" onclick="payWithPayPal()">💳 Pay with PayPal</button>
+            <button class="btn-orange" onclick="payWithOrange()">🍊 Orange Money</button>
+            <button class="btn-djamo" onclick="payWithDjamo()">💳 Djamo</button>
             <button class="btn-wave" onclick="payWithWave()">🌊 Pay with Wave</button>
             <button class="btn-yango" onclick="buyViaYango()">🚗 Order via Yango</button>
             <button class="btn-whatsapp" onclick="buyViaWhatsApp()">💬 Order via WhatsApp</button>
@@ -430,6 +432,12 @@
               <label class="payment-option selected" id="payOptPaypal"><input type="radio" name="payment" value="paypal"
                   checked onchange="selectPayment('paypal')"><span class="pay-icon">💳</span><span
                   class="pay-label">PayPal</span></label>
+              <label class="payment-option" id="payOptOrange"><input type="radio" name="payment" value="orange"
+                  onchange="selectPayment('orange')"><span class="pay-icon">🍊</span><span
+                  class="pay-label">Orange Money</span></label>
+              <label class="payment-option" id="payOptDjamo"><input type="radio" name="payment" value="djamo"
+                  onchange="selectPayment('djamo')"><span class="pay-icon">💳</span><span
+                  class="pay-label">Djamo</span></label>
               <label class="payment-option" id="payOptWave"><input type="radio" name="payment" value="wave"
                   onchange="selectPayment('wave')"><span class="pay-icon">🌊</span><span
                   class="pay-label">Wave</span></label>
@@ -573,7 +581,7 @@
                 <div class="input-upload-group">
                   <input type="text" id="artistPromoVideo" placeholder="Upload or paste URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('artistPromoVideoFile').click()">🎥</button>
-                  <input type="file" id="artistPromoVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistPromoVideo', 'artists')">
+                  <input type="file" id="artistPromoVideoFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistPromoVideo', 'artists')">
                 </div>
               </div>
             <div style="background:#111;border-radius:10px;padding:1.2rem;margin:.5rem 0">

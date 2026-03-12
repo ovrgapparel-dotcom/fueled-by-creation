@@ -175,7 +175,7 @@ function getDefaultProducts() {
             category: 't-shirt',
             price: 15000,
             old_price: 20000,
-            images: ['/assets/black_classic_tee.png'],
+            imgs: ['/assets/black_classic_tee.png'],
             description: 'The definitive FUELED BY CREATION staple.',
             sizes: ['S', 'M', 'L', 'XL'],
             badge: 'New'
@@ -186,13 +186,13 @@ function getDefaultProducts() {
             category: 'hoodie',
             price: 35000,
             old_price: 45000,
-            images: ['/assets/bone_premium_hoodie.png'],
+            imgs: ['/assets/bone_premium_hoodie.png'],
             description: 'Heavyweight comfort for the culture.',
             sizes: ['M', 'L', 'XL'],
             badge: 'Essentials'
         },
-        { id: 'p3', name: 'Culture Set', category: 'ensemble', price: 35000, old_price: 40000, description: 'Full set for sport and daily life.', badge: 'Limited', sizes: ['S', 'M', 'L', 'XL', 'XXL'], images: [] },
-        { id: 'p4', name: 'Premium Tee', category: 't-shirt', price: 15000, old_price: 20000, description: 'Premium quality cotton tee.', badge: '', sizes: ['S', 'M', 'L', 'XL'], images: [] },
+        { id: 'p3', name: 'Culture Set', category: 'ensemble', price: 35000, old_price: 40000, description: 'Full set for sport and daily life.', badge: 'Limited', sizes: ['S', 'M', 'L', 'XL', 'XXL'], imgs: [] },
+        { id: 'p4', name: 'Premium Tee', category: 't-shirt', price: 15000, old_price: 20000, description: 'Premium quality cotton tee.', badge: '', sizes: ['S', 'M', 'L', 'XL'], imgs: [] },
     ];
 }
 
@@ -358,52 +358,66 @@ function filterTrends(filter, btn) {
 // ===== PRODUCT DETAIL =====
 var currentViewedProduct = null; // Added for the new openProduct logic
 function openProduct(id) {
-    var p = products.find(function (x) { return x.id === id; });
+    var p = products.find(function (x) { return x.id == id; });
     if (!p) return;
 
-    currentViewedProduct = p;
-    // New elements from the instruction
-    var productNameDetailEl = document.getElementById('productNameDetail');
-    if (productNameDetailEl) productNameDetailEl.textContent = p.name;
-    var productPriceDetailEl = document.getElementById('productPriceDetail');
-    if (productPriceDetailEl) productPriceDetailEl.textContent = fmt(p.price); // Using fmt instead of formatPrice
-    var productOldPriceDetailEl = document.getElementById('productOldPriceDetail');
-    if (productOldPriceDetailEl) productOldPriceDetailEl.textContent = p.old_price ? fmt(p.old_price) : ''; // Using fmt instead of formatPrice
-    var productDescDetailEl = document.getElementById('productDescDetail');
-    if (productDescDetailEl) productDescDetailEl.textContent = p.description || '';
+    currentProduct = p;
 
-    var mainImg = p.images && p.images.length > 0 ? p.images[0] : ''; // Using p.images as per instruction
-    var mediaWrap = document.getElementById('productMediaWrap');
+    var mainImg = p.imgs && p.imgs.length > 0 ? p.imgs[0] : '';
+    var mediaWrap = document.getElementById('mainImgWrap'); // Use existing modal gallery container
     if (mediaWrap) {
         var isVideo = mainImg && mainImg.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
         if (isVideo) {
-            mediaWrap.innerHTML = '<video src="' + mainImg + '" autoplay muted loop playsinline class="product-main-large" style="width:100%;height:100%;object-fit:cover;display:block"></video>';
+            mediaWrap.innerHTML = '<video src="' + mainImg + '" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"></video>';
         } else {
-            mediaWrap.innerHTML = '<img id="productMainImg" src="' + (mainImg || 'https://via.placeholder.com/600') + '" alt="Main Product" class="product-main-large" style="width:100%;display:block">';
+            mediaWrap.innerHTML = '<img id="productMainImg" src="' + (mainImg || 'https://via.placeholder.com/600') + '" alt="Main Product" style="width:100%;display:block">';
         }
     }
 
     // Existing elements
-    document.getElementById('modalCat').textContent = p.name;
-    document.getElementById('modalCatLabel').textContent = p.category === 't-shirt' ? window.t('tshirts') : window.t('sets');
-    document.getElementById('modalName').textContent = p.name;
-    document.getElementById('modalPrice').textContent = fmt(p.price);
+    // Field population
+    var modalName = document.getElementById('modalName');
+    if (modalName) modalName.textContent = p.name;
+    
+    var modalPrice = document.getElementById('modalPrice');
+    if (modalPrice) modalPrice.textContent = fmt(p.price);
+    
+    var modalOld = document.getElementById('modalOld');
     var disc = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
-    document.getElementById('modalOld').textContent = p.old_price ? fmt(p.old_price) : '';
-    document.getElementById('modalDisc').textContent = disc ? '-' + disc + '%' : '';
-    document.getElementById('modalDesc').textContent = p.description || '';
-    document.getElementById('qtyInput').value = 1;
-    var mainWrap = document.getElementById('mainImgWrap');
-    mainWrap.innerHTML = p.imgs && p.imgs[0] ? '<img src="' + p.imgs[0] + '" alt="' + p.name + '">' : '<div class="main-img-placeholder">👕</div>';
-    document.getElementById('thumbRow').innerHTML = [0, 1, 2, 3].map(function (i) {
-        var src = p.imgs && p.imgs[i + 1];
-        return '<div class="thumb ' + (i === 0 ? 'active' : '') + '" onclick="selectThumb(this,\'' + (src || '') + '\')">' +
-            (src ? '<img src="' + src + '" alt="Photo ' + (i + 2) + '">' : '<div class="thumb-placeholder">👕</div>') + '</div>';
-    }).join('');
-    document.getElementById('sizeBtns').innerHTML = (p.sizes || []).map(function (s, i) {
-        return '<button class="size-btn' + (i === 0 ? ' selected' : '') + '" onclick="selectSize(this)">' + s + '</button>';
-    }).join('');
-    document.getElementById('sizeSection').style.display = p.sizes && p.sizes.length ? '' : 'none';
+    if (modalOld) modalOld.textContent = p.old_price ? fmt(p.old_price) : '';
+    
+    var modalDisc = document.getElementById('modalDisc');
+    if (modalDisc) modalDisc.textContent = disc ? '-' + disc + '%' : '';
+    
+    var modalDesc = document.getElementById('modalDesc');
+    if (modalDesc) modalDesc.textContent = p.description || '';
+
+    var modalCatLabel = document.getElementById('modalCatLabel');
+    if (modalCatLabel) modalCatLabel.textContent = p.category === 't-shirt' ? window.t('tshirts') : window.t('sets');
+    
+    // Quantity reset
+    var qtyInput = document.getElementById('qtyInput');
+    if (qtyInput) qtyInput.value = 1;
+
+    // Gallery population
+    var thumbRow = document.getElementById('thumbRow');
+    if (thumbRow) {
+        thumbRow.innerHTML = [0, 1, 2, 3].map(function (i) {
+            var src = p.imgs && p.imgs[i + 1];
+            return '<div class="thumb ' + (i === 0 ? 'active' : '') + '" onclick="selectThumb(this,\'' + (src || '') + '\')">' +
+                (src ? '<img src="' + src + '" alt="Photo ' + (i + 2) + '">' : '<div class="thumb-placeholder">👕</div>') + '</div>';
+        }).join('');
+    }
+
+    var sizeBtns = document.getElementById('sizeBtns');
+    if (sizeBtns) {
+        sizeBtns.innerHTML = (p.sizes || []).map(function (s, i) {
+            return '<button class="size-btn' + (i === 0 ? ' selected' : '') + '" onclick="selectSize(this)">' + s + '</button>';
+        }).join('');
+    }
+
+    var sizeSection = document.getElementById('sizeSection');
+    if (sizeSection) sizeSection.style.display = p.sizes && p.sizes.length ? '' : 'none';
     document.getElementById('productOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
@@ -424,7 +438,7 @@ function handleOverlayClick(e, id) {
 }
 
 // ===== CART =====
-function quickAddToCart(id) { var p = products.find(function (x) { return x.id === id; }); if (p) addCartItem(p, 1, p.sizes && p.sizes[0] || ''); }
+function quickAddToCart(id) { var p = products.find(function (x) { return x.id == id; }); if (p) addCartItem(p, 1, p.sizes && p.sizes[0] || ''); }
 function addToCartFromModal() {
     if (!currentProduct) return;
     var qty = parseInt(document.getElementById('qtyInput').value || 1);
@@ -474,9 +488,13 @@ function closeCheckout() { document.getElementById('checkoutOverlay').classList.
 function selectPayment(m) {
     selectedPayment = m;
     document.getElementById('checkoutPaymentMethod').value = m;
-    ['Paypal', 'Wave', 'Yango', 'Whatsapp'].forEach(function (x) { document.getElementById('payOpt' + x).classList.remove('selected'); });
-    var map = { paypal: 'Paypal', wave: 'Wave', yango: 'Yango', whatsapp: 'Whatsapp' };
-    document.getElementById('payOpt' + map[m]).classList.add('selected');
+    ['Paypal', 'Orange', 'Djamo', 'Wave', 'Yango', 'Whatsapp'].forEach(function (x) { 
+        var el = document.getElementById('payOpt' + x);
+        if (el) el.classList.remove('selected'); 
+    });
+    var map = { paypal: 'Paypal', orange: 'Orange', djamo: 'Djamo', wave: 'Wave', yango: 'Yango', whatsapp: 'Whatsapp' };
+    var target = document.getElementById('payOpt' + map[m]);
+    if (target) target.classList.add('selected');
 }
 function submitOrder(e) {
     e.preventDefault();
@@ -488,6 +506,8 @@ function submitOrder(e) {
     var data = new FormData(f);
     fetch('https://formsubmit.co/ajax/orvg.apparel@gmail.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: data }).catch(function () { });
     if (selectedPayment === 'paypal') redirectPayPal(total);
+    else if (selectedPayment === 'orange') { window.open('https://orange.ci/money/', '_blank'); finishOrder(name); }
+    else if (selectedPayment === 'djamo') { window.open('https://djamo.com/pay', '_blank'); finishOrder(name); }
     else if (selectedPayment === 'wave') { window.open('https://pay.wave.com/m/M_ci_1F_--SCMirUC/c/ci/', '_blank'); finishOrder(name); }
     else if (selectedPayment === 'yango') { window.open('https://buy.yango.com/store/caede4e7-d634-4b4f-8a0f-f54e255ed1f7', '_blank'); finishOrder(name); }
     else if (selectedPayment === 'whatsapp') {
@@ -519,6 +539,8 @@ function payWithPayPal() {
     });
     pf.submit();
 }
+function payWithOrange() { window.open('https://orange.ci/money/', '_blank'); }
+function payWithDjamo() { window.open('https://djamo.com/pay', '_blank'); }
 function payWithWave() { window.open('https://pay.wave.com/m/M_ci_1F_--SCMirUC/c/ci/', '_blank'); }
 function buyViaYango() { window.open('https://buy.yango.com/store/caede4e7-d634-4b4f-8a0f-f54e255ed1f7', '_blank'); }
 function buyViaWhatsApp() {
@@ -1588,65 +1610,6 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(applyTranslations, 100);
 });
 
-// ===== GLOBAL EXPORTS =====
-window.switchPage = switchPage;
-window.toggleMobileMenu = toggleMobileMenu;
-window.toggleCart = toggleCart;
-window.filterProducts = filterProducts;
-window.filterTrends = filterTrends;
-window.openProduct = openProduct;
-window.closeProduct = closeProduct;
-window.changeQty = changeQty;
-window.handleOverlayClick = handleOverlayClick;
-window.quickAddToCart = quickAddToCart;
-window.addToCartFromModal = addToCartFromModal;
-window.removeFromCart = removeFromCart;
-window.openCheckout = openCheckout;
-window.selectPayment = selectPayment;
-window.submitOrder = submitOrder;
-window.payWithPayPal = payWithPayPal;
-window.payWithWave = payWithWave;
-window.buyViaYango = buyViaYango;
-window.buyViaWhatsApp = buyViaWhatsApp;
-window.handleAdminClick = handleAdminClick;
-window.doLogin = doLogin;
-window.closeLogin = closeLogin;
-window.doLogout = doLogout;
-window.closeAdmin = closeAdmin;
-window.showAdminTab = showAdminTab;
-window.editProduct = editProduct;
-window.deleteProduct = deleteProduct;
-window.saveProduct = saveProduct;
-window.cancelEditProduct = cancelEditProduct;
-window.clearSlot = clearSlot;
-window.uploadImageToStorage = uploadImageToStorage;
-window.editArtist = editArtist;
-window.deleteArtist = deleteArtist;
-window.saveArtist = saveArtist;
-window.cancelEditArtist = cancelEditArtist;
-window.editArticle = editArticle;
-window.deleteArticle = deleteArticle;
-window.saveArticle = saveArticle;
-window.cancelEditArticle = cancelEditArticle;
-window.editThread = editThread;
-window.deleteThread = deleteThread;
-window.saveThread = saveThread;
-window.cancelEditThread = cancelEditThread;
-window.editEvent = editEvent;
-window.deleteEvent = deleteEvent;
-window.saveEvent = saveEvent;
-window.cancelEditEvent = cancelEditEvent;
-window.editNotification = editNotification;
-window.deleteNotification = deleteNotification;
-window.saveNotification = saveNotification;
-window.sendNotification = sendNotification;
-window.cancelEditNotification = cancelEditNotification;
-window.handleNewsletter = handleNewsletter;
-window.toggleChat = toggleChat;
-window.openArtistDetail = openArtistDetail;
-window.openArticleDetail = openArticleDetail;
-window.openEventDetail = openEventDetail;
-window.closeDetail = closeDetail;
 
 window.shareContent = function (title, link) {
     var shareText = "Download the app and join the community: ";
@@ -1990,6 +1953,8 @@ window.openCheckout = openCheckout;
 window.selectPayment = selectPayment;
 window.submitOrder = submitOrder;
 window.payWithPayPal = payWithPayPal;
+window.payWithOrange = payWithOrange;
+window.payWithDjamo = payWithDjamo;
 window.payWithWave = payWithWave;
 window.buyViaYango = buyViaYango;
 window.buyViaWhatsApp = buyViaWhatsApp;
@@ -2012,6 +1977,23 @@ window.loadHotTopics = loadHotTopics;
 window.filterTrends = filterTrends;
 window.handleTopicLike = handleTopicLike;
 window.viewTopicDetail = viewTopicDetail;
+window.openProduct = openProduct;
+window.closeProduct = closeProduct;
+window.selectThumb = selectThumb;
+window.selectSize = selectSize;
+window.changeQty = changeQty;
+window.quickAddToCart = quickAddToCart;
+window.addToCartFromModal = addToCartFromModal;
+window.removeFromCart = removeFromCart;
+window.toggleCart = toggleCart;
+window.openCheckout = openCheckout;
+window.closeCheckout = closeCheckout;
+window.selectPayment = selectPayment;
+
+window.fmt = fmt;
+window.fmtUSD = fmtUSD;
+window.formatDate = formatDate;
+
 window.openContentUpload = openContentUpload;
 window.closeContentUpload = closeContentUpload;
 window.submitCommunityContent = submitCommunityContent;
