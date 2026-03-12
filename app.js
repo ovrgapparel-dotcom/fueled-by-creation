@@ -561,6 +561,16 @@ function updateAdminUI() {
 
 function openAdmin() {
     closeLogin();
+    document.getElementById('adminOverlay').classList.add('open');
+    
+    // Ensure the default tab is loaded and highlighted
+    var productsTab = document.querySelector('.admin-tabs .admin-tab');
+    if (productsTab) {
+        showAdminTab('products', productsTab);
+    } else {
+        loadAdminProducts();
+    }
+    
     loadAdminThreads();
     loadAdminEvents();
     loadAdminNotifications();
