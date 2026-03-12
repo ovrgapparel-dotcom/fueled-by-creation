@@ -736,17 +736,24 @@ async function uploadImageToStorage(event, slotIndex) {
         var path = 'products/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
         var upRes = await sbClient.storage.from(STORAGE_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
         if (upRes.error) throw upRes.error;
+        
         var urlData = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
         adminImgSlots[slotIndex] = urlData.data.publicUrl;
+        
+        if (prog) prog.classList.remove('show');
         renderAdminImgSlots();
-        showToast('Photo uploaded ✓', 'Image saved to Supabase Storage.');
+        showToast('Photo uploaded ✓', 'Image saved and preview updated.');
     } catch (e) {
         if (prog) prog.classList.remove('show');
         if (e.message && (e.message.includes('bucket') || e.message.includes('Bucket') || e.message.includes('not found'))) {
             var reader = new FileReader();
-            reader.onload = function (ev) { adminImgSlots[slotIndex] = ev.target.result; renderAdminImgSlots(); showToast('Photo loaded (local)', 'Create the "product-images" bucket in Supabase Storage.', '#f59e0b'); };
+            reader.onload = function (ev) { 
+                adminImgSlots[slotIndex] = ev.target.result; 
+                renderAdminImgSlots(); 
+                showToast('Photo loaded (local)', 'Note: Create the "product-images" bucket in Supabase.', '#f59e0b'); 
+            };
             reader.readAsDataURL(file);
-        } else { showToast('Upload error', e.message || 'Check bucket config.', '#ef4444'); }
+        } else { showToast('Upload error', e.message || 'Check storage permissions.', '#ef4444'); }
     }
 }
 
