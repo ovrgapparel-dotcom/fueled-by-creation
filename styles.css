@@ -1206,7 +1206,7 @@ nav a.active {
   border-radius: 16px;
   max-width: 960px;
   width: 100%;
-  margin: 2rem auto;
+  margin: auto;
   overflow: hidden;
   animation: modalIn .25s ease
 }
@@ -3235,4 +3235,5 @@ footer {
   .premium-title {
     font-size: 2.5rem;
   }
-}$css
+}
+$css

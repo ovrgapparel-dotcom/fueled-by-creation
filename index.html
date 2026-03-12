@@ -1113,16 +1113,12 @@
         <h2 id="gateEventTitle">Event Name</h2>
         <p>This is an exclusive FBC showcase. Complete the secured payment to unlock your digital pass.</p>
         
-        <div class="payment-methods-grid">
-          <div class="pay-method active">
-            <span>💳</span> Card
-          </div>
-          <div class="pay-method">
-            <span>🌐</span> PayPal
-          </div>
+        <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1.5rem; margin-bottom: 1.5rem;">
+          <button class="btn-paypal btn-full" onclick="payWithPayPal()">Pay with PayPal</button>
+          <button class="btn-yango btn-full" onclick="payWithOrange()" style="background:#f26829;color:white">Pay with Orange Money</button>
+          <button class="btn-yango btn-full" onclick="payWithDjamo()" style="background:#005e5e;color:white">Pay with Djamo</button>
+          <button class="btn-wave btn-full" onclick="payWithWave()" style="background:#1e90ff;color:white">Pay with Wave</button>
         </div>
-
-        <button id="btnEventPay" class="btn-primary btn-full" onclick="processEventPayment()">Confirm Access — 5,000 FCFA</button>
         <p class="gate-footer">Secure SSL Encryption enabled. FBC Tribe verified.</p>
       </div>
     </div>

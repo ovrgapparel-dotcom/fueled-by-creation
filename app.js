@@ -200,7 +200,7 @@ function getDefaultProducts() {
 function renderCatalogue(filter) {
     filter = filter || 'all'; activeFilter = filter;
     var grid = document.getElementById('productsGrid'); if (!grid) return;
-    var filtered = filter === 'all' ? products : products.filter(function (p) { return p.cat === filter; });
+    var filtered = filter === 'all' ? products : products.filter(function (p) { return p.category === filter; });
     if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No products in this category.</p></div>'; return; }
     grid.innerHTML = filtered.map(function (p) {
         var disc = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
@@ -626,7 +626,7 @@ function renderAdminProductList() {
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + thumb + '</div>' +
             '<div class="admin-product-meta"><h4>' + p.name + badge + '</h4>' +
-            '<p>' + priceInfo + ' · ' + (p.cat === 't-shirt' ? 'T-Shirts' : 'Sets') + ' · ' + ((p.sizes || []).join(', ') || '—') + '</p></div>' +
+            '<p>' + priceInfo + ' · ' + (p.category === 't-shirt' ? 'T-Shirts' : 'Sets') + ' · ' + ((p.sizes || []).join(', ') || '—') + '</p></div>' +
             '<div class="admin-product-actions">' +
             '<button class="btn-edit" onclick="editProduct(' + p.id + ')">✏ Edit</button>' +
             '<button class="btn-delete" onclick="deleteProduct(' + p.id + ')">🗑 Delete</button></div></div>';
@@ -636,7 +636,7 @@ function editProduct(id) {
     var p = products.find(function (x) { return x.id === id; }); if (!p) return;
     document.getElementById('editProductId').value = id;
     document.getElementById('adminName').value = p.name;
-    document.getElementById('adminCat').value = p.cat;
+    document.getElementById('adminCat').value = p.category;
     document.getElementById('adminPrice').value = p.price;
     document.getElementById('adminOldPrice').value = p.old_price || '';
     document.getElementById('adminDesc').value = p.description || '';
@@ -669,7 +669,7 @@ async function saveProduct() {
     var imgs = adminImgSlots.filter(Boolean);
     var editId = document.getElementById('editProductId').value;
     if (!name || !price) { showToast('Required fields', 'Name and price are required.', '#f59e0b'); return; }
-    var payload = { name: name, cat: cat, price: price, old_price: old_price, description: description, badge: badge, sizes: sizes, imgs: imgs };
+    var payload = { name: name, category: cat, price: price, old_price: old_price, description: description, badge: badge, sizes: sizes, imgs: imgs };
     try {
         if (editId) {
             var res = await sbClient.from(PRODUCTS_TABLE).update(payload).eq('id', parseInt(editId));
@@ -1312,32 +1312,51 @@ async function refreshFrontendData() {
     // Re-fetch and re-render all frontend sections from Supabase
     try {
         var aRes = await sbClient.from('artists').select('*').eq('status', 'Published').order('created_at', { ascending: false });
-        if (!aRes.error && aRes.data) {
+        if (!aRes.error && aRes.data && aRes.data.length) {
             demoArtists = aRes.data;
-            renderArtists('featuredArtistsGrid', demoArtists.filter(function (a) { return a.is_featured; }));
-            renderArtists('allArtistsGrid', demoArtists);
         }
+        renderArtists('featuredArtistsGrid', demoArtists.filter(function (a) { return a.is_featured; }));
+        renderArtists('allArtistsGrid', demoArtists);
     } catch (e) { /* keep demo data */ }
+
     try {
         var artRes = await sbClient.from('articles').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
-        if (!artRes.error && artRes.data) {
+        if (!artRes.error && artRes.data && artRes.data.length) {
             demoArticles = artRes.data;
-            renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
-            renderArticles('allArticlesGrid', demoArticles);
         }
+        renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
+        renderArticles('allArticlesGrid', demoArticles);
     } catch (e) { /* keep demo data */ }
+
     try {
         var tRes = await sbClient.from('threads').select('*').eq('status', 'Active').order('priority_order');
-        if (!tRes.error && tRes.data) { demoThreads = tRes.data; renderThreads('allThreadsList', demoThreads); }
+        if (!tRes.error && tRes.data && tRes.data.length) {
+            demoThreads = tRes.data;
+        }
+        renderThreads('allThreadsList', demoThreads);
     } catch (e) { /* keep demo data */ }
+
     try {
         var eRes = await sbClient.from('events').select('*').eq('status', 'Published').order('event_date');
-        if (!eRes.error && eRes.data) {
+        if (!eRes.error && eRes.data && eRes.data.length) {
             demoEvents = eRes.data;
-            renderEvents('featuredEventsGrid', demoEvents.slice(0, 3));
-            renderEvents('allEventsGrid', demoEvents);
         }
+        renderEvents('featuredEventsGrid', demoEvents.slice(0, 3));
+        renderEvents('allEventsGrid', demoEvents);
     } catch (e) { /* keep demo data */ }
+
+    if (currentPage === 'home') loadHeroMedia();
+
+    // Verification check: ensure we show something if Supabase is empty after a delay
+    setTimeout(function() {
+        var threadContainer = document.getElementById('allThreadsList');
+        if (threadContainer && threadContainer.innerHTML === '') {
+            renderThreads('allThreadsList', demoThreads);
+        }
+    }, 2000);
+
+    // Final translation pass
+    setTimeout(applyTranslations, 100);
 }
 
 // ===== NEWSLETTER =====
@@ -1571,44 +1590,6 @@ function applyTranslations() {
     });
 }
 
-// ===== BOOTSTRAP =====
-document.addEventListener('DOMContentLoaded', function () {
-    // Initial Route
-    handleRouting();
-    window.addEventListener('hashchange', handleRouting);
-
-    // Apply translations on load
-    applyTranslations();
-
-    // Localize demo data strings
-    localizeDemoData();
-
-    // Initial load of content
-    initSupabase();
-    loadHeroMedia();
-    loadProducts();
-    // Render demo data for new sections
-    renderArtists('featuredArtistsGrid', demoArtists.filter(function (a) { return a.is_featured; }));
-    renderArtists('allArtistsGrid', demoArtists);
-    renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
-    renderArticles('allArticlesGrid', demoArticles);
-    renderThreads('allThreadsList', demoThreads); // Also triggers loadHotTopics via switchPage logic or manually
-    renderEvents('featuredEventsGrid', demoEvents.slice(0, 3));
-    renderEvents('allEventsGrid', demoEvents);
-
-    if (currentPage === 'home') loadHeroMedia();
-
-    // Verification check: ensure we show something if Supabase is empty
-    setTimeout(function() {
-        var threadContainer = document.getElementById('allThreadsList');
-        if (threadContainer && threadContainer.innerHTML === '') {
-            renderThreads('allThreadsList', demoThreads);
-        }
-    }, 2000);
-
-    // Final translation pass for dynamic content
-    setTimeout(applyTranslations, 100);
-});
 
 
 window.shareContent = function (title, link) {
@@ -1657,8 +1638,8 @@ function closeContentUpload() {
 }
 
 function toggleContentFields() {
-    var cat = document.getElementById('contentCategory').value;
-    document.getElementById('eventFields').style.display = (cat === 'event') ? 'block' : 'none';
+    var category = document.getElementById('contentCategory').value;
+    document.getElementById('eventFields').style.display = (category === 'event') ? 'block' : 'none';
 }
 
 async function handleContentFileSelect(event) {
@@ -1696,7 +1677,7 @@ async function handleContentFileSelect(event) {
 async function submitCommunityContent() {
     var title = document.getElementById('contentTitle').value.trim();
     var body = document.getElementById('contentBody').value.trim();
-    var cat = document.getElementById('contentCategory').value;
+    var category = document.getElementById('contentCategory').value;
 
     if (!title || !body) {
         showToast('Required Fields', 'Title and Content are required.', '#f59e0b');
@@ -1712,7 +1693,7 @@ async function submitCommunityContent() {
         var payload = {
             title: title,
             content: body,
-            category: cat,
+            category: category,
             media_url: contentUploadedUrl || null,
             media_type: document.getElementById('contentMediaType').value,
             external_link: document.getElementById('contentExternalLink').value.trim() || null,
@@ -1720,7 +1701,7 @@ async function submitCommunityContent() {
             is_pinned: false // Initially false
         };
 
-        if (cat === 'event') {
+        if (category === 'event') {
             payload.event_date = document.getElementById('contentEventDate').value || null;
             payload.location = document.getElementById('contentEventLocation').value.trim() || null;
         }
@@ -1929,7 +1910,6 @@ window.currentPage = currentPage;
 window.currentEvent = currentEvent;
 window.unlockedEvents = unlockedEvents;
 
-// Navigation & Essential UI
 window.switchPage = switchPage;
 window.handleRouting = handleRouting;
 window.toggleMobileMenu = toggleMobileMenu;
@@ -1938,18 +1918,21 @@ window.formatDate = formatDate;
 window.toggleChat = toggleChat;
 window.shareContent = shareContent;
 
-// Shop & Products
 window.loadProducts = loadProducts;
 window.showLoadedCatalogue = showLoadedCatalogue;
 window.filterProducts = filterProducts;
 window.handleOverlayClick = handleOverlayClick;
 window.openProduct = openProduct;
 window.closeProduct = closeProduct;
+window.selectThumb = selectThumb;
+window.selectSize = selectSize;
 window.changeQty = changeQty;
+window.quickAddToCart = quickAddToCart;
 window.addToCartFromModal = addToCartFromModal;
 window.toggleCart = toggleCart;
 window.removeFromCart = removeFromCart;
 window.openCheckout = openCheckout;
+window.closeCheckout = closeCheckout;
 window.selectPayment = selectPayment;
 window.submitOrder = submitOrder;
 window.payWithPayPal = payWithPayPal;
@@ -1959,40 +1942,23 @@ window.payWithWave = payWithWave;
 window.buyViaYango = buyViaYango;
 window.buyViaWhatsApp = buyViaWhatsApp;
 
-// Artists & Articles
 window.openArtistDetail = openArtistDetail;
 window.closeArtistDetail = closeArtistDetail;
 window.openArticleDetail = openArticleDetail;
 window.closeArticleDetail = closeArticleDetail;
-
-// Events & Payment Gate
 window.openEventDetail = openEventDetail;
 window.closeDetail = closeDetail;
 window.openEventPaymentGate = openEventPaymentGate;
 window.closeEventPaymentGate = closeEventPaymentGate;
 window.processEventPayment = processEventPayment;
 
-// Trends & Community
 window.loadHotTopics = loadHotTopics;
 window.filterTrends = filterTrends;
 window.handleTopicLike = handleTopicLike;
 window.viewTopicDetail = viewTopicDetail;
-window.openProduct = openProduct;
-window.closeProduct = closeProduct;
-window.selectThumb = selectThumb;
-window.selectSize = selectSize;
-window.changeQty = changeQty;
-window.quickAddToCart = quickAddToCart;
-window.addToCartFromModal = addToCartFromModal;
-window.removeFromCart = removeFromCart;
-window.toggleCart = toggleCart;
-window.openCheckout = openCheckout;
-window.closeCheckout = closeCheckout;
-window.selectPayment = selectPayment;
 
 window.fmt = fmt;
 window.fmtUSD = fmtUSD;
-window.formatDate = formatDate;
 
 window.openContentUpload = openContentUpload;
 window.closeContentUpload = closeContentUpload;
@@ -2000,7 +1966,6 @@ window.submitCommunityContent = submitCommunityContent;
 window.handleContentFileSelect = handleContentFileSelect;
 window.toggleContentFields = toggleContentFields;
 
-// Admin & Auth
 window.openLogin = openLogin;
 window.closeLogin = closeLogin;
 window.doLogin = doLogin;
@@ -2039,15 +2004,28 @@ window.cancelEditNotification = cancelEditNotification;
 window.handleAdminMediaUpload = handleAdminMediaUpload;
 window.updateAdminImgSlotFromInput = updateAdminImgSlotFromInput;
 
-// ===== START THE APPLICATION =====
+// ===== BOOTSTRAP =====
 document.addEventListener('DOMContentLoaded', function () {
     console.log('FBC App Initializing...');
+    
+    // Auth & Supabase
     initSupabase();
-    localizeDemoData();
-    // Load initial data
-    loadProducts();
-    // Handle routing based on hash
-    handleRouting();
-    // Initial UI update
     updateAdminUI();
+
+    // Translations & Locales
+    localizeDemoData();
+    applyTranslations();
+
+    // Data Loading
+    loadHeroMedia();
+    loadProducts();
+    
+    // Initial Render (Demo data as fallback)
+    refreshFrontendData();
+
+    // Routing
+    handleRouting();
+    window.addEventListener('hashchange', handleRouting);
+
+    if (currentPage === 'trends') loadHotTopics();
 });
