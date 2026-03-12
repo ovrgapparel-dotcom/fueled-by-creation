@@ -99,7 +99,20 @@ function switchPage(page) {
     document.getElementById('articleDetail').style.display = 'none';
     document.getElementById('eventDetail').style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // When opening Trends page: ensure pinned item is rendered from demoThreads as fallback
+    if (page === 'trends') {
+        var pinnedWrap = document.getElementById('pinnedArticleWrap');
+        if (pinnedWrap && pinnedWrap.innerHTML.trim() === '') {
+            renderThreads('allThreadsList', demoThreads);
+        }
+        // Also attempt to load live data
+        loadHotTopics();
+    }
+    // When opening Home: refresh hero media
+    if (page === 'home') loadHeroMedia();
 }
+
 
 function handleRouting() {
     const hash = window.location.hash;
@@ -264,12 +277,38 @@ function renderFeaturedArticlesSplit(targetContainerId, articleList) {
 function renderThreads(targetListId, threadList) {
     var list = document.getElementById(targetListId); if (!list) return;
     if (!threadList.length) { list.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>No threads yet.</p></div>'; return; }
-    var sortedThreads = threadList.slice().sort(function (a, b) { return (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0) || a.priority_order - b.priority_order; });
+
+    // Separate pinned from regular
+    var pinnedItem = threadList.find(function(t) { return t.is_pinned; });
+    var regularThreads = threadList.filter(function(t) { return !t.is_pinned; });
+    var sortedThreads = regularThreads.slice().sort(function (a, b) { return a.priority_order - b.priority_order; });
+
+    // Render pinned into the premium card slot
+    var pinnedWrap = document.getElementById('pinnedArticleWrap');
+    if (pinnedWrap) {
+        if (pinnedItem) {
+            var coverStyle = pinnedItem.cover_image_url ? 'style="background-image:url(\'' + pinnedItem.cover_image_url + '\')"' : 'style="background: linear-gradient(135deg,#1a1a1a,#2d1a0e)"';
+            pinnedWrap.innerHTML =
+                '<div class="pinned-article-card">' +
+                    '<div class="pinned-media" ' + coverStyle + '></div>' +
+                    '<div class="pinned-content">' +
+                        '<span class="badge-featured">' + (pinnedItem.tag || 'FEATURED') + '</span>' +
+                        '<h3 class="pinned-title">' + pinnedItem.title + '</h3>' +
+                        '<p class="pinned-hook">' + (pinnedItem.hook_text || '') + '</p>' +
+                        '<span class="pinned-cta">Read the full story &rarr;</span>' +
+                    '</div>' +
+                '</div>';
+        } else {
+            pinnedWrap.innerHTML = '';
+        }
+    }
+
+    // Render regular threads
     list.innerHTML = sortedThreads.map(function (t) {
         var tagClass = { Hot: 'hot', Trend: 'trend', News: 'news' }[t.tag] || 'trend';
         var threadTagText = window.i18n ? window.i18n.t(t.tag.toLowerCase()) : t.tag;
         return '<div class="thread-card">' +
-            '<div class="thread-tag-wrap"><span class="thread-tag ' + tagClass + '">' + (t.is_pinned ? '<span style="font-size:0.8rem">📌</span> ' : '') + threadTagText + '</span></div>' +
+            '<div class="thread-tag-wrap"><span class="thread-tag ' + tagClass + '">' + threadTagText + '</span></div>' +
             '<div class="thread-info"><h4 class="thread-title">' + t.title + '</h4><p class="thread-hook">' + (t.hook_text || '') + '</p></div>' +
             '<div class="thread-actions-grid">' +
             '<button class="thread-action-btn"><span>🔥</span><span class="count">' + (t.likes || 0) + '</span></button>' +
@@ -279,6 +318,7 @@ function renderThreads(targetListId, threadList) {
             '</div>';
     }).join('');
 }
+
 
 function renderEvents(targetGridId, eventList) {
     var grid = document.getElementById(targetGridId); if (!grid) return;
@@ -1515,6 +1555,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (currentPage === 'home') loadHeroMedia();
 
+    // Verification check: ensure we show something if Supabase is empty
+    setTimeout(function() {
+        var threadContainer = document.getElementById('allThreadsList');
+        if (threadContainer && threadContainer.innerHTML === '') {
+            renderThreads('allThreadsList', demoThreads);
+        }
+    }, 2000);
+
     // Final translation pass for dynamic content
     setTimeout(applyTranslations, 100);
 });
@@ -1783,6 +1831,11 @@ async function loadHotTopics() {
 
     } catch (e) {
         console.error('Error loading hot topics:', e);
+        // FALLBACK: Use demo data if table is missing or connection fails
+        if (typeof demoThreads !== 'undefined') {
+            console.log('Falling back to demo threads...');
+            renderThreads('allThreadsList', demoThreads);
+        }
     }
 }
 
