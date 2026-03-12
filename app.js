@@ -78,6 +78,7 @@ function initSupabase() {
         sbClient = _sb.createClient(SUPABASE_URL, SUPABASE_ANON, {
             auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, storage: window.localStorage }
         });
+        window.sbClient = sbClient; // Make it available globally for other modules
         sbClient.auth.onAuthStateChange(function (event, session) { currentUser = session ? session.user : null; updateAdminUI(); });
         return true;
     } catch (e) { console.error('Supabase init error:', e); return false; }
@@ -288,7 +289,7 @@ function renderEvents(targetGridId, eventList) {
         var frMonths = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
         var months = window.getLang() === 'fr' ? frMonths : enMonths;
         var imgHtml = e.cover_image_url ? '<img src="' + e.cover_image_url + '" alt="' + e.title + '" loading="lazy">' : '';
-        return '<div class="event-card">' +
+        return '<div class="event-card" onclick="openEventDetail(\'' + (e.id || '') + '\')">' +
             '<div class="event-card-img">' + imgHtml +
             '<div class="event-date-badge"><div class="edb-month">' + months[d.getMonth()] + '</div><div class="edb-day">' + d.getDate() + '</div></div>' +
             '</div>' +
@@ -466,11 +467,14 @@ function buyViaWhatsApp() {
 // ===== ADMIN =====
 function handleAdminClick() { if (currentUser) openAdmin(); else openLogin(); }
 function openLogin() {
-    document.getElementById('loginEmail').value = ''; document.getElementById('loginPassword').value = '';
-    document.getElementById('loginError').textContent = '';
     document.getElementById('loginOverlay').classList.add('open');
+    document.getElementById('loginEmail').focus();
 }
-function closeLogin() { document.getElementById('loginOverlay').classList.remove('open'); }
+
+function closeLogin() {
+    document.getElementById('loginOverlay').classList.remove('open');
+    document.getElementById('loginError').textContent = '';
+}
 async function doLogin() {
     var email = document.getElementById('loginEmail').value.trim();
     var password = document.getElementById('loginPassword').value;
@@ -491,14 +495,21 @@ function updateAdminUI() {
 }
 
 function openAdmin() {
-    renderAdminImgSlots();
+    closeLogin();
     document.getElementById('adminOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    loadAdminProducts(); checkSupabaseConnection();
-    // Pre-load data for all admin tabs
-    loadAdminArtists(); loadAdminArticles(); loadAdminThreads(); loadAdminEvents(); loadAdminNotifications();
+    updateAdminUI();
+    checkSupabaseConnection();
+    loadAdminProducts();
+    loadAdminArtists();
+    loadAdminArticles();
+    loadAdminThreads();
+    loadAdminEvents();
+    loadAdminNotifications();
 }
-function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
+function closeAdmin() {
+    document.getElementById('adminOverlay').classList.remove('open');
+}
 async function checkSupabaseConnection() {
     try {
         var res = await sbClient.from(PRODUCTS_TABLE).select('id').limit(1);
@@ -618,14 +629,22 @@ function renderAdminImgSlots() {
     var labels = ['Main', 'Photo 2', 'Photo 3', 'Photo 4', 'Photo 5'];
     var slotsEl = document.getElementById('adminImgSlots'); if (!slotsEl) return;
     slotsEl.innerHTML = adminImgSlots.map(function (src, i) {
-        return '<div class="img-slot" id="slot_' + i + '">' +
+        return '<div style="margin-bottom:1rem;display:flex;flex-direction:column;gap:0.5rem;align-items:center;">' +
+            '<div class="img-slot" id="slot_' + i + '">' +
             (src ? '<img src="' + src + '" alt="Slot ' + (i + 1) + '" id="slotImg_' + i + '">' : '<div class="img-slot-icon">📷</div>') +
             '<span class="img-slot-label">' + labels[i] + '</span>' +
             (src ? '<button class="img-slot-clear" onclick="clearSlot(event,' + i + ')">✕</button>' : '') +
             '<div class="upload-progress" id="slotProgress_' + i + '">↻ Upload...</div>' +
             '<input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2" onchange="uploadImageToStorage(event,' + i + ')">' +
+            '</div>' +
+            '<input type="text" placeholder="Upload or paste URL" value="' + (src || '') + '" onchange="updateAdminImgSlotFromInput(event, ' + i + ')" style="width:100%;font-size:0.85rem;padding:0.4rem;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;">' +
             '</div>';
+
     }).join('');
+}
+function updateAdminImgSlotFromInput(e, index) {
+    adminImgSlots[index] = e.target.value.trim();
+    renderAdminImgSlots();
 }
 function clearSlot(e, i) { e.stopPropagation(); adminImgSlots[i] = ''; renderAdminImgSlots(); }
 async function uploadImageToStorage(event, slotIndex) {
@@ -1257,14 +1276,14 @@ async function openArtistDetail(id) {
     document.getElementById('artistInstaDetail').href = a.instagram_url || '#';
     document.getElementById('artistYoutubeDetail').href = a.youtube_url || '#';
 
-    document.getElementById('artistDetail').style.display = 'block';
+    document.getElementById('artistDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function openArticleDetail(id) {
     // Hide any other details first
-    document.getElementById('artistDetail').style.display = 'none';
-    document.getElementById('eventDetail').style.display = 'none';
+    document.getElementById('artistDetail').classList.remove('open');
+    document.getElementById('eventDetail').classList.remove('open');
     var a = demoArticles.find(x => x.id === id);
     if (!a && sbClient) {
         var res = await sbClient.from('articles').select('*').eq('id', id).single();
@@ -1277,14 +1296,14 @@ async function openArticleDetail(id) {
     document.getElementById('articleCoverDetail').src = a.cover_image_url || 'https://via.placeholder.com/800x400';
     document.getElementById('articleBodyDetail').innerHTML = a.body_content || '';
 
-    document.getElementById('articleDetail').style.display = 'block';
+    document.getElementById('articleDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function openEventDetail(id) {
     // Hide any other details first
-    document.getElementById('artistDetail').style.display = 'none';
-    document.getElementById('articleDetail').style.display = 'none';
+    document.getElementById('artistDetail').classList.remove('open');
+    document.getElementById('articleDetail').classList.remove('open');
     var e = demoEvents.find(x => x.id === id);
     if (!e && sbClient) {
         var res = await sbClient.from('events').select('*').eq('id', id).single();
@@ -1297,18 +1316,37 @@ async function openEventDetail(id) {
     document.getElementById('eventLocDetail').innerHTML = `📍 ${e.location_name}`;
     document.getElementById('eventDescDetail').textContent = e.description || '';
     document.getElementById('eventCoverDetail').src = e.cover_image_url || 'https://via.placeholder.com/800x400';
-    document.getElementById('eventTicketBtnDetail').href = e.ticketing_url || '#';
+    var ticketBtn = document.getElementById('eventTicketBtnDetail');
+    if (ticketBtn) ticketBtn.href = e.ticketing_url || '#';
 
-    document.getElementById('eventDetail').style.display = 'block';
+    // Set up the premium payment gate button
+    var joinBtn = document.getElementById('eventJoinBtn');
+    if (joinBtn) {
+        if (unlockedEvents.includes(e.id)) {
+            joinBtn.textContent = '🎟️ Access Granted';
+            joinBtn.disabled = true;
+            joinBtn.classList.add('btn-success');
+        } else {
+            joinBtn.textContent = 'Join Exclusive Event';
+            joinBtn.disabled = false;
+            joinBtn.classList.remove('btn-success');
+            joinBtn.onclick = function() { openEventPaymentGate(e.id); };
+        }
+    }
+
+    document.getElementById('eventDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function closeDetail() {
-    document.getElementById('artistDetail').style.display = 'none';
-    document.getElementById('articleDetail').style.display = 'none';
-    document.getElementById('eventDetail').style.display = 'none';
+    document.getElementById('artistDetail').classList.remove('open');
+    document.getElementById('articleDetail').classList.remove('open');
+    document.getElementById('eventDetail').classList.remove('open');
     window.location.hash = currentPage;
 }
+
+function closeArtistDetail() { closeDetail(); }
+function closeArticleDetail() { closeDetail(); }
 
 // ===== UTILITIES =====
 function fmt(n) { return Number(n).toLocaleString('fr-FR') + ' FCFA'; }
@@ -1318,6 +1356,39 @@ function formatDate(dateStr) {
     var d = new Date(dateStr);
     return d.toLocaleDateString(window.getLang() === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
+async function handleAdminMediaUpload(event, targetInputId, bucket) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const targetInput = document.getElementById(targetInputId);
+    if (!targetInput) return;
+
+    showToast('Uploading...', 'Please wait while we fuel the tribe media.', '#3b82f6');
+
+    try {
+        const userRes = await sbClient.auth.getUser();
+        if (!userRes.data.user) throw new Error('Not authenticated');
+
+        const ext = file.name.split('.').pop();
+        const path = `${bucket}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+        const upRes = await sbClient.storage.from(STORAGE_BUCKET).upload(path, file, { 
+            contentType: file.type, 
+            upsert: false 
+        });
+
+        if (upRes.error) throw upRes.error;
+
+        const urlData = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+        targetInput.value = urlData.data.publicUrl;
+        
+        showToast('Success!', 'Media uploaded successfully.', '#22c55e');
+    } catch (e) {
+        console.error('Admin upload error:', e);
+        showToast('Upload Error', e.message || 'Check connection.', '#ef4444');
+    }
+}
+
 function showToast(title, body, borderColor) {
     borderColor = borderColor || '#22c55e';
     var t = document.getElementById('toast');
@@ -1494,8 +1565,16 @@ async function handleContentFileSelect(event) {
         // Ensure user is logged in if RLS requires it, or handle as public if allowed
         // Note: content_utils.js uses window.sbClient
         contentUploadedUrl = await window.uploadContentFile(file);
-        preview.innerHTML = '<img src="' + contentUploadedUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px">';
-        showToast('Media Ready ✓', 'Your image has been uploaded to the cloud.');
+        
+        if (file.type.startsWith('video/')) {
+            preview.innerHTML = '<video src="' + contentUploadedUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px" controls autoplay muted loop></video>';
+            document.getElementById('contentMediaType').value = 'video';
+            showToast('Media Ready ✓', 'Your video has been uploaded to the cloud.');
+        } else {
+            preview.innerHTML = '<img src="' + contentUploadedUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px">';
+            document.getElementById('contentMediaType').value = 'image';
+            showToast('Media Ready ✓', 'Your image has been uploaded to the cloud.');
+        }
     } catch (e) {
         console.error('Content upload failed:', e);
         showToast('Upload Failed', e.message || 'Supabase Storage error.', '#ef4444');
@@ -1561,18 +1640,29 @@ async function loadHotTopics() {
 
         container.innerHTML = topics.map(function (t) {
             var score = (t.likes_count * 2) + t.comments_count + t.views_count;
-            var isHot = score > 10;
+            var isHot = score > 15;
             var catIcon = t.category === 'article' ? '📰' : (t.category === 'event' ? '🎫' : '💬');
+            
+            var mediaHtml = '';
+            if (t.media_url) {
+                if (t.media_type === 'video') {
+                    mediaHtml = '<div class="thread-media-preview video" style="height: 180px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1rem;"><video src="' + t.media_url + '" style="width:100%; height:100%; object-fit:cover;" controls></video></div>';
+                } else {
+                    mediaHtml = '<div class="thread-media-preview" style="background-image:url(\'' + t.media_url + '\')"></div>';
+                }
+            }
 
-            return '<div class="thread-card" style="cursor:pointer" onclick="viewTopicDetail(\'' + t.id + '\')">' +
+            return '<div class="thread-card ' + (isHot ? 'hot-item' : '') + '" onclick="viewTopicDetail(\'' + t.id + '\')">' +
+                mediaHtml +
+                '<div class="thread-info-wrap">' +
                 '<div class="thread-tag-wrap">' +
-                '<span class="thread-tag ' + (t.category === 'event' ? 'news' : 'trend') + '">' +
+                '<span class="thread-tag ' + (t.category === 'event' ? 'news' : (isHot ? 'hot' : 'trend')) + '">' +
                 (isHot ? '🔥 ' : '') + catIcon + ' ' + t.category.toUpperCase() +
                 '</span>' +
                 '</div>' +
                 '<div class="thread-info">' +
                 '<h4 class="thread-title">' + t.title + '</h4>' +
-                '<p class="thread-hook">' + (t.content.substring(0, 80)) + '...</p>' +
+                '<p class="thread-hook">' + (t.content.substring(0, 100)) + '...</p>' +
                 '</div>' +
                 '<div class="thread-actions-grid">' +
                 '<button class="thread-action-btn" onclick="event.stopPropagation();handleTopicLike(\'' + t.id + '\')">' +
@@ -1581,25 +1671,88 @@ async function loadHotTopics() {
                 '<div class="thread-action-btn"><span>💬</span><span class="count">' + (t.comments_count || 0) + '</span></div>' +
                 '<div class="thread-action-btn"><span>👀</span><span class="count">' + (t.views_count || 0) + '</span></div>' +
                 '</div>' +
+                '</div>' +
                 '</div>';
         }).join('');
+
     } catch (e) {
         console.error('Error loading hot topics:', e);
     }
 }
 
 async function handleTopicLike(id) {
-    if (!currentUser) {
-        showToast('Login Required', 'Sign in to like topics.', '#f59e0b');
-        return;
-    }
+    // If not logged in, we allow "anon" likes if the RLS matches,
+    // otherwise we use a guest session or prompt for login.
+    // For now, let's assume public likes are allowed as per our SQL fix.
     try {
-        await window.toggleTopicLike(id, currentUser.id);
+        const userId = currentUser ? currentUser.id : null;
+        await window.toggleTopicLike(id, userId);
         loadHotTopics(); // Refresh to update count
+        showToast('Liked! ❤️', 'Engagement fuels the tribe.');
     } catch (e) {
         console.error('Like failed:', e);
     }
 }
+
+async function viewTopicDetail(id) {
+    window.incrementTopicViews(id);
+    // Actually opening the detail view
+    const topics = await window.fetchCommunityTopics();
+    const t = topics.find(x => x.id === id);
+    if (!t) return;
+
+    // Repurposing articleDetail or using a new logic 
+    // For now, let's just open the external link if it exists
+    if (t.external_link) {
+        window.open(t.external_link, '_blank');
+    } else {
+        showToast('Topic View', t.title);
+    }
+    loadHotTopics(); // Refresh views count
+}
+
+// ===== EVENT PAYMENT GATE =====
+var currentEvent = null;
+var unlockedEvents = []; // Track paid events in this session
+
+function openEventPaymentGate(id) {
+    currentEvent = demoEvents.find(function(e) { return e.id === id; });
+    if (!currentEvent && sbClient) {
+        // Try searching in products if it's a "ticket" product or similar, 
+        // but here we just use demoEvents for the gate.
+    }
+    if (!currentEvent) return;
+
+    document.getElementById('eventPaymentOverlay').classList.add('open');
+    var titleEl = document.getElementById('gateEventTitle');
+    if (titleEl) titleEl.textContent = currentEvent.title;
+}
+
+function closeEventPaymentGate() {
+    document.getElementById('eventPaymentOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+async function processEventPayment() {
+    const btn = document.getElementById('btnEventPay');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader-dots">Processing</span>';
+
+    // Simulate payment sequence
+    await new Promise(r => setTimeout(r, 2000));
+
+    showToast('Success! 🎟️', 'Payment confirmed. Access granted.');
+    closeEventPaymentGate();
+
+    // Mark as unlocked
+    if (currentEvent && !unlockedEvents.includes(currentEvent.id)) {
+        unlockedEvents.push(currentEvent.id);
+    }
+
+    // Grant access (transition to event detail)
+    openEventDetail(currentEvent.id);
+}
+
 
 // Ensure Hot Topics load on trends page switch
 var originalSwitchPage = switchPage;
@@ -1610,3 +1763,119 @@ switchPage = function (page) {
 
 // Auto-load if landing on trends
 if (currentPage === 'trends') loadHotTopics();
+
+
+// ===== GLOBAL EXPORTS FOR HTML INTERACTION =====
+// This is critical because app.js is a module, but index.html uses inline onclick handlers.
+
+window.sbClient = sbClient;
+window.currentUser = currentUser;
+window.products = products;
+window.cart = cart;
+window.currentPage = currentPage;
+window.currentEvent = currentEvent;
+window.unlockedEvents = unlockedEvents;
+
+// Navigation & Essential UI
+window.switchPage = switchPage;
+window.handleRouting = handleRouting;
+window.toggleMobileMenu = toggleMobileMenu;
+window.showToast = showToast;
+window.formatDate = formatDate;
+window.toggleChat = toggleChat;
+window.shareContent = shareContent;
+
+// Shop & Products
+window.loadProducts = loadProducts;
+window.showLoadedCatalogue = showLoadedCatalogue;
+window.filterProducts = filterProducts;
+window.handleOverlayClick = handleOverlayClick;
+window.openProduct = openProduct;
+window.closeProduct = closeProduct;
+window.changeQty = changeQty;
+window.addToCartFromModal = addToCartFromModal;
+window.toggleCart = toggleCart;
+window.removeFromCart = removeFromCart;
+window.openCheckout = openCheckout;
+window.selectPayment = selectPayment;
+window.submitOrder = submitOrder;
+window.payWithPayPal = payWithPayPal;
+window.payWithWave = payWithWave;
+window.buyViaYango = buyViaYango;
+window.buyViaWhatsApp = buyViaWhatsApp;
+
+// Artists & Articles
+window.openArtistDetail = openArtistDetail;
+window.closeArtistDetail = closeArtistDetail;
+window.openArticleDetail = openArticleDetail;
+window.closeArticleDetail = closeArticleDetail;
+
+// Events & Payment Gate
+window.openEventDetail = openEventDetail;
+window.closeDetail = closeDetail;
+window.openEventPaymentGate = openEventPaymentGate;
+window.closeEventPaymentGate = closeEventPaymentGate;
+window.processEventPayment = processEventPayment;
+
+// Trends & Community
+window.loadHotTopics = loadHotTopics;
+window.filterTrends = filterTrends;
+window.handleTopicLike = handleTopicLike;
+window.viewTopicDetail = viewTopicDetail;
+window.openContentUpload = openContentUpload;
+window.closeContentUpload = closeContentUpload;
+window.submitCommunityContent = submitCommunityContent;
+window.handleContentFileSelect = handleContentFileSelect;
+window.toggleContentFields = toggleContentFields;
+
+// Admin & Auth
+window.openLogin = openLogin;
+window.closeLogin = closeLogin;
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.handleAdminClick = handleAdminClick;
+window.updateAdminUI = updateAdminUI;
+window.openAdmin = openAdmin;
+window.closeAdmin = closeAdmin;
+window.showAdminTab = showAdminTab;
+window.saveProduct = saveProduct;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.cancelEditProduct = cancelEditProduct;
+window.clearSlot = clearSlot;
+window.uploadImageToStorage = uploadImageToStorage;
+window.saveArtist = saveArtist;
+window.editArtist = editArtist;
+window.deleteArtist = deleteArtist;
+window.cancelEditArtist = cancelEditArtist;
+window.saveArticle = saveArticle;
+window.editArticle = editArticle;
+window.deleteArticle = deleteArticle;
+window.cancelEditArticle = cancelEditArticle;
+window.saveThread = saveThread;
+window.editThread = editThread;
+window.deleteThread = deleteThread;
+window.cancelEditThread = cancelEditThread;
+window.saveEvent = saveEvent;
+window.editEvent = editEvent;
+window.deleteEvent = deleteEvent;
+window.cancelEditEvent = cancelEditEvent;
+window.saveNotification = saveNotification;
+window.sendNotification = sendNotification;
+window.deleteNotification = deleteNotification;
+window.cancelEditNotification = cancelEditNotification;
+window.handleAdminMediaUpload = handleAdminMediaUpload;
+window.updateAdminImgSlotFromInput = updateAdminImgSlotFromInput;
+
+// ===== START THE APPLICATION =====
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('FBC App Initializing...');
+    initSupabase();
+    localizeDemoData();
+    // Load initial data
+    loadProducts();
+    // Handle routing based on hash
+    handleRouting();
+    // Initial UI update
+    updateAdminUI();
+});

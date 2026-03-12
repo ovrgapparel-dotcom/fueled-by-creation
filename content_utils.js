@@ -9,7 +9,8 @@
  * @param {string} bucket - The bucket name (default: 'content_uploads').
  * @returns {Promise<string>} - The public URL of the uploaded file.
  */
-async function uploadContentFile(file, bucket = 'content_uploads') {
+async function uploadContentFile(file, bucket = 'media_bucket') {
+
     if (!window.sbClient) throw new Error('Supabase client not initialized');
 
     try {
@@ -111,8 +112,53 @@ async function toggleTopicLike(topicId, userId) {
     }
 }
 
+/**
+ * Submits a comment for a topic.
+ * @param {string} topicId 
+ * @param {string} userId 
+ * @param {string} content 
+ */
+async function submitTopicComment(topicId, userId, content) {
+    if (!window.sbClient) return;
+    try {
+        const { data, error } = await window.sbClient
+            .from('comments')
+            .insert([{ topic_id: topicId, user_id: userId, content: content }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error('Error submitting comment:', error);
+    }
+}
+
+/**
+ * Increments the view count for a topic.
+ * @param {string} topicId 
+ */
+async function incrementTopicViews(topicId) {
+    if (!window.sbClient) return;
+    try {
+        await window.sbClient.rpc('increment_views', { topic_id: topicId });
+    } catch (error) {
+        // Fallback if RPC isn't defined yet, or just ignore for now
+        console.warn('View increment RPC failed, trying manual update');
+        try {
+            const { data } = await window.sbClient.from('topics').select('views_count').eq('id', topicId).single();
+            await window.sbClient.from('topics').update({ views_count: (data.views_count || 0) + 1 }).eq('id', topicId);
+        } catch (e) {
+            console.error('Manual view increment failed:', e);
+        }
+    }
+}
+
 // Export functions to global scope for app.js access
 window.uploadContentFile = uploadContentFile;
 window.saveCommunityTopic = saveCommunityTopic;
 window.fetchCommunityTopics = fetchCommunityTopics;
 window.toggleTopicLike = toggleTopicLike;
+window.submitTopicComment = submitTopicComment;
+window.incrementTopicViews = incrementTopicViews;
+

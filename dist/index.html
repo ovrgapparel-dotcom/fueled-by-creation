@@ -18,8 +18,7 @@
   <meta name="apple-mobile-web-app-title" content="FBC">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet">
-  <script src="content_utils.js"></script>
+    rel="stylesheet">
   <script>
     // DEFCON 1: FORCE UNREGISTER ALL SERVICE WORKERS
     if ('serviceWorker' in navigator) {
@@ -58,13 +57,25 @@
     }
   </script>
   <script>
-    const SUPABASE_URL = 'https://mihpdlhbijlvbdcqvzdw.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1paHBkbGhiaWpsdmJkY3F2emR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MDkzMTgsImV4cCI6MjA4Nzk4NTMxOH0.X-2XjKKi3enHck1KBtlga-RiVjXN3BS5EhW3fnF3oTE';
+    const SUPABASE_URL = 'https://echrowpxjcqyytyxttuy.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjaHJvd3B4amNxeXl0eXh0dHV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTEwNzUsImV4cCI6MjA4ODg4NzA3NX0.EtJYWBJsxkI4pXtm8NZ73HH5jeT1TchUeTO3WaeAXQ8';
+
     const STORAGE_BUCKET = 'product-images';
     const PRODUCTS_TABLE = 'products';
+
+    // DIAGNOSTIC HOOK
+    window.addEventListener('load', () => {
+      console.log('--- FBC DIAGNOSTICS ---');
+      console.log('switchPage defined:', typeof window.switchPage);
+      console.log('handleAdminClick defined:', typeof window.handleAdminClick);
+      console.log('openEventDetail defined:', typeof window.openEventDetail);
+      console.log('adminOverlay:', document.getElementById('adminOverlay'));
+      console.log('loginOverlay:', document.getElementById('loginOverlay'));
+      console.log('eventDetail:', document.getElementById('eventDetail'));
+    });
   </script>
-  <script type="module" crossorigin src="/assets/index-VyZUMeET.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-C4QZQtxx.css">
+  <script type="module" crossorigin src="/assets/index-CSgsg7vU.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BTrZo2TU.css">
 </head>
 
 <body>
@@ -253,15 +264,17 @@
           <!-- JS populated -->
         </div>
       </div>
-      
+
       <!-- Community Feedback / Upload CTA -->
-      <div class="trends-upload-cta" style="margin-top:4rem; padding:3rem; background:rgba(255,107,53,0.05); border:1px dashed var(--primary); border-radius:20px; text-align:center">
-         <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; margin-bottom:1rem">FUEL THE CULTURE</h3>
-         <p style="color:var(--gray); margin-bottom:2rem">Have an article, event, or topic the tribe needs to see? Share it now.</p>
-         <button class="btn-primary" onclick="openContentUpload()">Create New Content</button>
+      <div class="trends-upload-cta"
+        style="margin-top:4rem; padding:3rem; background:rgba(255,107,53,0.05); border:1px dashed var(--primary); border-radius:20px; text-align:center">
+        <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; margin-bottom:1rem">FUEL THE CULTURE</h3>
+        <p style="color:var(--gray); margin-bottom:2rem">Have an article, event, or topic the tribe needs to see? Share
+          it now.</p>
+        <button class="btn-primary" onclick="openContentUpload()">Create New Content</button>
       </div>
-      </div>
-    </section>
+  </div>
+  </section>
   </div>
 
   <!-- ===== EVENTS PAGE ===== -->
@@ -532,14 +545,32 @@
             </div>
             <div><label>Bio</label><textarea id="artistBio" placeholder="Short artist bio (2-3 lines)..."></textarea>
             </div>
-            <div class="admin-grid">
-              <div><label>Profile Image URL</label><input type="text" id="artistProfileImg"
-                  placeholder="Upload or paste URL"></div>
-              <div><label>Banner Image URL</label><input type="text" id="artistBannerImg"
-                  placeholder="Upload or paste URL"></div>
-            </div>
-            <div><label>Promo Video URL</label><input type="text" id="artistPromoVideo"
-                placeholder="Supabase Storage URL for MP4"></div>
+              <div class="admin-grid">
+                <div class="field-with-upload">
+                  <label>Profile Image URL</label>
+                  <div class="input-upload-group">
+                    <input type="text" id="artistProfileImg" placeholder="Upload or paste URL">
+                    <button class="btn-upload-trigger" onclick="document.getElementById('artistProfileImgFile').click()">📷</button>
+                    <input type="file" id="artistProfileImgFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistProfileImg', 'artists')">
+                  </div>
+                </div>
+                <div class="field-with-upload">
+                  <label>Banner Image URL</label>
+                  <div class="input-upload-group">
+                    <input type="text" id="artistBannerImg" placeholder="Upload or paste URL">
+                    <button class="btn-upload-trigger" onclick="document.getElementById('artistBannerImgFile').click()">📷</button>
+                    <input type="file" id="artistBannerImgFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistBannerImg', 'artists')">
+                  </div>
+                </div>
+              </div>
+              <div class="field-with-upload">
+                <label>Promo Video URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="artistPromoVideo" placeholder="Upload or paste URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('artistPromoVideoFile').click()">🎥</button>
+                  <input type="file" id="artistPromoVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistPromoVideo', 'artists')">
+                </div>
+              </div>
             <div style="background:#111;border-radius:10px;padding:1.2rem;margin:.5rem 0">
               <label style="color:var(--primary);margin-bottom:.75rem;display:block;font-size:.9rem">🎵 Latest
                 Release</label>
@@ -549,8 +580,14 @@
                 <div><label>Release Date</label><input type="date" id="artistReleaseDate"></div>
               </div>
               <div class="admin-grid">
-                <div><label>Cover Art URL</label><input type="text" id="artistReleaseCover"
-                    placeholder="Cover image URL"></div>
+                <div class="field-with-upload">
+                  <label>Cover Art URL</label>
+                  <div class="input-upload-group">
+                    <input type="text" id="artistReleaseCover" placeholder="Cover image URL">
+                    <button class="btn-upload-trigger" onclick="document.getElementById('artistReleaseCoverFile').click()">📷</button>
+                    <input type="file" id="artistReleaseCoverFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistReleaseCover', 'artists')">
+                  </div>
+                </div>
                 <div><label>Listen URL (Spotify/Apple)</label><input type="text" id="artistReleaseListen"
                     placeholder="https://open.spotify.com/..."></div>
               </div>
@@ -607,8 +644,14 @@
             </div>
             <div class="admin-grid">
               <div><label>Author</label><input type="text" id="articleAuthor" placeholder="FBC Editorial"></div>
-              <div><label>Cover Image URL</label><input type="text" id="articleCoverImg"
-                  placeholder="Upload or paste URL"></div>
+              <div class="field-with-upload">
+                <label>Cover Image URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="articleCoverImg" placeholder="Upload or paste URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('articleCoverImgFile').click()">📷</button>
+                  <input type="file" id="articleCoverImgFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'articleCoverImg', 'articles')">
+                </div>
+              </div>
             </div>
             <div><label>Excerpt (short summary)</label><textarea id="articleExcerpt"
                 placeholder="Brief 1-2 line summary..." style="min-height:50px"></textarea></div>
@@ -660,8 +703,14 @@
                 placeholder="Drop your picks — the culture needs to hear them." style="min-height:50px"></textarea>
             </div>
             <div class="admin-grid">
-              <div><label>Cover Image URL</label><input type="text" id="threadCoverImg"
-                  placeholder="Optional cover image"></div>
+              <div class="field-with-upload">
+                <label>Cover Image URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="threadCoverImg" placeholder="Optional cover image">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('threadCoverImgFile').click()">📷</button>
+                  <input type="file" id="threadCoverImgFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'threadCoverImg', 'threads')">
+                </div>
+              </div>
               <div><label>External Link</label><input type="text" id="threadExtLink"
                   placeholder="Optional link to external content"></div>
             </div>
@@ -709,8 +758,14 @@
               </div>
             </div>
             <div class="admin-grid">
-              <div><label>Cover Image URL</label><input type="text" id="eventCoverImg"
-                  placeholder="Upload or paste URL"></div>
+              <div class="field-with-upload">
+                <label>Cover Image URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="eventCoverImg" placeholder="Upload or paste URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('eventCoverImgFile').click()">📷</button>
+                  <input type="file" id="eventCoverImgFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'eventCoverImg', 'events')">
+                </div>
+              </div>
               <div><label>Ticketing URL</label><input type="text" id="eventTicketUrl"
                   placeholder="https://tickets.example.com/..."></div>
             </div>
@@ -785,7 +840,8 @@
   <div class="overlay" id="contentUploadOverlay" onclick="handleOverlayClick(event,'contentUploadOverlay')">
     <div class="modal-box" style="max-width:700px">
       <div class="modal-top">
-        <h3 id="contentFormTitle" style="font-family:'Bebas Neue',sans-serif; font-size:1.5rem">New Community Submission</h3>
+        <h3 id="contentFormTitle" style="font-family:'Bebas Neue',sans-serif; font-size:1.5rem">New Community Submission
+        </h3>
         <button class="btn-close" onclick="closeContentUpload()">✕</button>
       </div>
       <div class="modal-body">
@@ -804,17 +860,19 @@
               </select>
             </div>
           </div>
-          
+
           <div id="eventFields" style="display:none">
             <div class="admin-grid">
               <div><label>Event Date & Time</label><input type="datetime-local" id="contentEventDate"></div>
-              <div><label>Venue / Location</label><input type="text" id="contentEventLocation" placeholder="Sofitel Abidjan"></div>
+              <div><label>Venue / Location</label><input type="text" id="contentEventLocation"
+                  placeholder="Sofitel Abidjan"></div>
             </div>
           </div>
 
           <div>
             <label>Detailed Description / Content *</label>
-            <textarea id="contentBody" placeholder="Share the details with the community..." style="min-height:120px"></textarea>
+            <textarea id="contentBody" placeholder="Share the details with the community..."
+              style="min-height:120px"></textarea>
           </div>
 
           <div class="admin-grid">
@@ -826,7 +884,7 @@
               <label>Media Type</label>
               <select id="contentMediaType">
                 <option value="image">Image Attachment</option>
-                <option value="video">Video Link (External)</option>
+                <option value="video">Video Upload / Link</option>
               </select>
             </div>
           </div>
@@ -834,14 +892,16 @@
           <div>
             <label>Cover Media Attachment</label>
             <div class="img-slot" id="contentMediaSlot" style="width:100%; height:180px; margin-top:0.5rem">
-               <div id="contentMediaPreview" class="img-slot-icon">📷 Click to upload image</div>
-               <input type="file" id="contentFileInput" accept="image/*" style="position:absolute; inset:0; opacity:0; cursor:pointer" onchange="handleContentFileSelect(event)">
-               <div class="upload-progress" id="contentUploadProgress">↻ Uploading to Supabase...</div>
+              <div id="contentMediaPreview" class="img-slot-icon">📷 Click to upload image or video</div>
+              <input type="file" id="contentFileInput" accept="image/*,video/*"
+                style="position:absolute; inset:0; opacity:0; cursor:pointer" onchange="handleContentFileSelect(event)">
+              <div class="upload-progress" id="contentUploadProgress">↻ Uploading to Supabase...</div>
             </div>
           </div>
 
           <div class="admin-form-actions" style="margin-top:2rem">
-            <button class="btn-save" id="btnContentSubmit" onclick="submitCommunityContent()" style="width:100%">🚀 Fuel the Community</button>
+            <button class="btn-save" id="btnContentSubmit" onclick="submitCommunityContent()" style="width:100%">🚀 Fuel
+              the Community</button>
           </div>
         </div>
       </div>
@@ -1017,10 +1077,39 @@
           <p id="eventLocDetail"></p>
         </div>
         <p id="eventDescDetail" class="event-desc"></p>
-        <a id="eventTicketBtnDetail" href="#" target="_blank" class="btn-primary btn-full">Get Tickets</a>
+        <a id="eventTicketBtnDetail" href="#" target="_blank" class="btn-secondary btn-full" style="text-decoration:none;display:block;text-align:center;margin-bottom:1rem">🎫 Get Tickets</a>
+        <button id="eventJoinBtn" class="btn-primary btn-full">Join Exclusive Event</button>
       </div>
     </div>
   </div>
+
+  <!-- Event Payment Gate Overlay -->
+  <div id="eventPaymentOverlay" class="overlay">
+    <div class="modal-box premium-gate">
+      <div class="modal-top">
+        <h3>Secure Access</h3>
+        <button class="btn-close" onclick="closeEventPaymentGate()">✕</button>
+      </div>
+      <div class="gate-content">
+        <div class="gate-icon">🔐</div>
+        <h2 id="gateEventTitle">Event Name</h2>
+        <p>This is an exclusive FBC showcase. Complete the secured payment to unlock your digital pass.</p>
+        
+        <div class="payment-methods-grid">
+          <div class="pay-method active">
+            <span>💳</span> Card
+          </div>
+          <div class="pay-method">
+            <span>🌐</span> PayPal
+          </div>
+        </div>
+
+        <button id="btnEventPay" class="btn-primary btn-full" onclick="processEventPayment()">Confirm Access — 5,000 FCFA</button>
+        <p class="gate-footer">Secure SSL Encryption enabled. FBC Tribe verified.</p>
+      </div>
+    </div>
+  </div>
+
 
 
   <!-- Chat Widget -->
@@ -1043,6 +1132,34 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- FINAL EMERGENCY INITIALIZATION & DEBUG -->
+  <script>
+    (function() {
+      console.log('--- FBC SYSTEM CHECK ---');
+      
+      // Monitor for function availability
+      let checkCount = 0;
+      const checker = setInterval(() => {
+        checkCount++;
+        const isReady = typeof window.handleAdminClick === 'function' && typeof window.openEventDetail === 'function';
+        
+        if (isReady) {
+          console.log('✅ Global functions linked successfully after ' + (checkCount * 500) + 'ms');
+          clearInterval(checker);
+        } else if (checkCount > 10) {
+          console.warn('⚠️ Global functions still not linked after 5s. Possible module load failure.');
+          clearInterval(checker);
+        }
+      }, 500);
+
+      // Global error catcher for better debugging
+      window.onerror = function(msg, url, lineNo, columnNo, error) {
+        console.error('🚀 FBC CRASH:', msg, '\nAt:', url, 'line:', lineNo);
+        return false;
+      };
+    })();
+  </script>
 </body>
 
 </html>
