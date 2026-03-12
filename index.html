@@ -108,12 +108,13 @@
   <!-- ===== HOME PAGE ===== -->
   <div class="page-section active" id="page-home">
     <section class="hero">
-      <div class="hero-tag" data-i18n="hero_tag">Culture · Music · Merch</div>
-      <h1 data-i18n="hero_title">FUELED BY<br><span>CREATION</span></h1>
-      <p data-i18n="hero_desc">Discover artists, trending culture, exclusive merch, and live events — all in one place.
-      </p>
-      <a href="#" class="hero-cta" onclick="event.preventDefault();switchPage('shop')" data-i18n="hero_cta">Explore the
-        Shop →</a>
+      <div id="heroMedia" class="hero-media-bg"></div>
+      <div class="hero-content">
+        <div class="hero-tag" data-i18n="hero_tag">Culture · Music · Merch</div>
+        <h1 data-i18n="hero_title">FUELED BY<br><span>CREATION</span></h1>
+        <p data-i18n="hero_desc">Discover artists, trending culture, exclusive merch, and live events — all in one place.</p>
+        <a href="#" class="hero-cta" onclick="event.preventDefault();switchPage('shop')" data-i18n="hero_cta">Explore the Shop →</a>
+      </div>
     </section>
 
     <!-- Featured Artists Preview -->
@@ -240,6 +241,7 @@
   <!-- ===== TRENDS PAGE ===== -->
   <div class="page-section" id="page-trends">
     <section class="trends-section">
+      <div id="pinnedArticleWrap"></div>
       <div class="section-header">
         <div class="section-label" data-i18n="trends_threads">🔥 Trends & Threads</div>
         <h2 class="section-title" data-i18n="culture_hub">CULTURE HUB</h2>
@@ -507,14 +509,15 @@
             </div>
             <div><label>Description</label><textarea id="adminDesc" placeholder="Product description..."></textarea>
             </div>
-            <div><label>Sizes (comma separated)</label><input type="text" id="adminSizes"
-                placeholder="S, M, L, XL, XXL"></div>
-            <div><label>Badge</label><input type="text" id="adminBadge" placeholder="New, Sale, Limited Edition...">
+            <div class="admin-grid">
+              <div><label>Sizes (comma separated)</label><input type="text" id="adminSizes"
+                  placeholder="S, M, L, XL, XXL"></div>
+              <div><label>Badge</label><input type="text" id="adminBadge" placeholder="New, Sale, Limited Edition...">
+              </div>
             </div>
             <div>
-              <label>Photos (1 main + 4 additional)</label>
-              <p style="font-size:0.75rem;color:#666;margin-bottom:0.5rem">Click a slot to upload. Saved to Supabase
-                Storage.</p>
+              <label>Photos & Videos (1 main + 4 additional)</label>
+              <p style="font-size:0.75rem;color:#666;margin-bottom:0.8rem">Click a slot to upload. Supported: images and videos.</p>
               <div class="img-slots" id="adminImgSlots"></div>
             </div>
             <div class="admin-form-actions">
@@ -1010,6 +1013,7 @@
         <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
       </div>
       <div id="artistHero" class="artist-hero-detail">
+        <div id="artistHeroMedia"></div>
         <div class="artist-hero-inner">
           <img id="artistProfileImgDetail" src="" alt="" class="artist-profile-img-large">
           <h2 id="artistNameDetail" class="premium-title"></h2>
@@ -1049,7 +1053,9 @@
         </button>
         <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
       </div>
-      <img id="articleCoverDetail" src="" alt="Cover" class="article-detail-cover">
+      <div id="articleMediaWrap" class="article-detail-media-wrap">
+        <img id="articleCoverDetail" src="" alt="Cover" class="article-detail-cover">
+      </div>
       <div class="detail-container">
         <h2 id="articleTitleDetail" class="premium-title"></h2>
         <p id="articleAuthorDetail" class="article-meta"></p>
@@ -1069,7 +1075,9 @@
         </button>
         <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
       </div>
-      <img id="eventCoverDetail" src="" alt="Event" class="event-detail-cover">
+      <div id="eventMediaWrap" class="event-detail-media-wrap">
+        <img id="eventCoverDetail" src="" alt="Event" class="event-detail-cover">
+      </div>
       <div class="detail-container">
         <h2 id="eventTitleDetail" class="premium-title"></h2>
         <div class="event-meta-grid">

@@ -65,6 +65,17 @@ header {
   display: none;
 }
 
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
 /* Main Nav */
 nav {
   display: flex;
@@ -154,10 +165,33 @@ nav a.active {
 /* ===== HERO ===== */
 .hero {
   background: var(--dark);
-  padding: 4rem 1.5rem 5rem;
+  padding: 8rem 1.5rem 10rem;
   text-align: center;
   position: relative;
-  overflow: hidden
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.hero-media-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.hero-media-bg video, .hero-media-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
 }
 
 .hero::before {
@@ -693,6 +727,23 @@ nav a.active {
   overflow: hidden;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+#artistHeroMedia, .article-detail-media-wrap, .event-detail-media-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 400px; /* Match artist hero height */
+  overflow: hidden;
+  z-index: 0;
+}
+
+.article-detail-media-wrap, .event-detail-media-wrap {
+    position: relative;
+    height: auto;
+    max-height: 400px;
 }
 
 @keyframes slideUp {
@@ -740,6 +791,7 @@ nav a.active {
   display: flex;
   align-items: flex-end;
   padding: 3rem;
+  overflow: hidden;
 }
 
 .artist-hero-detail::after {
@@ -3183,4 +3235,4 @@ footer {
   .premium-title {
     font-size: 2.5rem;
   }
-}
+}$css

@@ -316,9 +316,34 @@ function filterTrends(filter, btn) {
 
 
 // ===== PRODUCT DETAIL =====
+var currentViewedProduct = null; // Added for the new openProduct logic
 function openProduct(id) {
-    var p = products.find(function (x) { return x.id === id; }); if (!p) return;
-    currentProduct = p;
+    var p = products.find(function (x) { return x.id === id; });
+    if (!p) return;
+
+    currentViewedProduct = p;
+    // New elements from the instruction
+    var productNameDetailEl = document.getElementById('productNameDetail');
+    if (productNameDetailEl) productNameDetailEl.textContent = p.name;
+    var productPriceDetailEl = document.getElementById('productPriceDetail');
+    if (productPriceDetailEl) productPriceDetailEl.textContent = fmt(p.price); // Using fmt instead of formatPrice
+    var productOldPriceDetailEl = document.getElementById('productOldPriceDetail');
+    if (productOldPriceDetailEl) productOldPriceDetailEl.textContent = p.old_price ? fmt(p.old_price) : ''; // Using fmt instead of formatPrice
+    var productDescDetailEl = document.getElementById('productDescDetail');
+    if (productDescDetailEl) productDescDetailEl.textContent = p.description || '';
+
+    var mainImg = p.images && p.images.length > 0 ? p.images[0] : ''; // Using p.images as per instruction
+    var mediaWrap = document.getElementById('productMediaWrap');
+    if (mediaWrap) {
+        var isVideo = mainImg && mainImg.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        if (isVideo) {
+            mediaWrap.innerHTML = '<video src="' + mainImg + '" autoplay muted loop playsinline class="product-main-large" style="width:100%;height:100%;object-fit:cover;display:block"></video>';
+        } else {
+            mediaWrap.innerHTML = '<img id="productMainImg" src="' + (mainImg || 'https://via.placeholder.com/600') + '" alt="Main Product" class="product-main-large" style="width:100%;display:block">';
+        }
+    }
+
+    // Existing elements
     document.getElementById('modalCat').textContent = p.name;
     document.getElementById('modalCatLabel').textContent = p.category === 't-shirt' ? window.t('tshirts') : window.t('sets');
     document.getElementById('modalName').textContent = p.name;
@@ -496,12 +521,6 @@ function updateAdminUI() {
 
 function openAdmin() {
     closeLogin();
-    document.getElementById('adminOverlay').classList.add('open');
-    updateAdminUI();
-    checkSupabaseConnection();
-    loadAdminProducts();
-    loadAdminArtists();
-    loadAdminArticles();
     loadAdminThreads();
     loadAdminEvents();
     loadAdminNotifications();
@@ -629,17 +648,22 @@ function renderAdminImgSlots() {
     var labels = ['Main', 'Photo 2', 'Photo 3', 'Photo 4', 'Photo 5'];
     var slotsEl = document.getElementById('adminImgSlots'); if (!slotsEl) return;
     slotsEl.innerHTML = adminImgSlots.map(function (src, i) {
+        var isVideo = src && (src.match(/\.(mp4|webm|ogg|mov)$|^data:video/i));
+        var mediaHtml = src ? (isVideo ? 
+            '<video src="' + src + '" id="slotImg_' + i + '" style="width:100%;height:100%;object-fit:cover"></video>' : 
+            '<img src="' + src + '" alt="Slot ' + (i + 1) + '" id="slotImg_' + i + '">') : 
+            '<div class="img-slot-icon">📷</div>';
+
         return '<div style="margin-bottom:1rem;display:flex;flex-direction:column;gap:0.5rem;align-items:center;">' +
             '<div class="img-slot" id="slot_' + i + '">' +
-            (src ? '<img src="' + src + '" alt="Slot ' + (i + 1) + '" id="slotImg_' + i + '">' : '<div class="img-slot-icon">📷</div>') +
+            mediaHtml +
             '<span class="img-slot-label">' + labels[i] + '</span>' +
             (src ? '<button class="img-slot-clear" onclick="clearSlot(event,' + i + ')">✕</button>' : '') +
             '<div class="upload-progress" id="slotProgress_' + i + '">↻ Upload...</div>' +
-            '<input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2" onchange="uploadImageToStorage(event,' + i + ')">' +
+            '<input type="file" accept="image/*,video/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2" onchange="uploadImageToStorage(event,' + i + ')">' +
             '</div>' +
             '<input type="text" placeholder="Upload or paste URL" value="' + (src || '') + '" onchange="updateAdminImgSlotFromInput(event, ' + i + ')" style="width:100%;font-size:0.85rem;padding:0.4rem;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;">' +
             '</div>';
-
     }).join('');
 }
 function updateAdminImgSlotFromInput(e, index) {
@@ -1253,8 +1277,7 @@ function toggleChat() {
 // ===== FRONTEND DETAIL VIEWS (Supporting Deep Links) =====
 async function openArtistDetail(id) {
     // Hide any other details first
-    document.getElementById('articleDetail').style.display = 'none';
-    document.getElementById('eventDetail').style.display = 'none';
+    document.querySelectorAll('.overlay').forEach(ov => ov.classList.remove('open'));
     var a = demoArtists.find(x => x.id === id);
     if (!a && sbClient) {
         var res = await sbClient.from('artists').select('*').eq('id', id).single();
@@ -1264,7 +1287,21 @@ async function openArtistDetail(id) {
 
     document.getElementById('artistNameDetail').textContent = a.name;
     document.getElementById('artistBioDetail').textContent = a.bio || '';
-    document.getElementById('artistHero').style.backgroundImage = a.banner_image_url ? `url(${a.banner_image_url})` : 'linear-gradient(135deg, #1a1a1a, #0d0d0d)';
+    
+    // Media handling for Hero
+    var heroWrap = document.getElementById('artistHero');
+    var mediaContainer = document.getElementById('artistHeroMedia');
+    if (mediaContainer) {
+        var isVideo = a.banner_image_url && (a.banner_image_url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i) || a.promo_video_url);
+        if (isVideo) {
+            mediaContainer.innerHTML = '<video src="' + (a.promo_video_url || a.banner_image_url) + '" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1"></video>';
+            heroWrap.style.backgroundImage = 'none';
+        } else {
+            mediaContainer.innerHTML = '';
+            heroWrap.style.backgroundImage = a.banner_image_url ? `url(${a.banner_image_url})` : 'linear-gradient(135deg, #1a1a1a, #0d0d0d)';
+        }
+    }
+
     document.getElementById('artistProfileImgDetail').src = a.profile_image_url || 'https://via.placeholder.com/150';
 
     // Release
@@ -1282,8 +1319,7 @@ async function openArtistDetail(id) {
 
 async function openArticleDetail(id) {
     // Hide any other details first
-    document.getElementById('artistDetail').classList.remove('open');
-    document.getElementById('eventDetail').classList.remove('open');
+    document.querySelectorAll('.overlay').forEach(ov => ov.classList.remove('open'));
     var a = demoArticles.find(x => x.id === id);
     if (!a && sbClient) {
         var res = await sbClient.from('articles').select('*').eq('id', id).single();
@@ -1292,18 +1328,26 @@ async function openArticleDetail(id) {
     if (!a) return;
 
     document.getElementById('articleTitleDetail').textContent = a.title;
-    document.getElementById('articleAuthorDetail').textContent = a.author + ' · ' + formatDate(a.publish_date);
-    document.getElementById('articleCoverDetail').src = a.cover_image_url || 'https://via.placeholder.com/800x400';
-    document.getElementById('articleBodyDetail').innerHTML = a.body_content || '';
+    document.getElementById('articleAuthorDetail').textContent = (a.author || 'FBC') + ' · ' + formatDate(a.publish_date);
+    
+    var mediaWrap = document.getElementById('articleMediaWrap');
+    if (mediaWrap) {
+        var isVideo = a.cover_image_url && a.cover_image_url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        if (isVideo) {
+            mediaWrap.innerHTML = '<video src="' + a.cover_image_url + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
+        } else {
+            mediaWrap.innerHTML = '<img id="articleCoverDetail" src="' + (a.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Cover" class="article-detail-cover" style="width:100%;display:block">';
+        }
+    }
 
+    document.getElementById('articleBodyDetail').innerHTML = a.body_content || '';
     document.getElementById('articleDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function openEventDetail(id) {
     // Hide any other details first
-    document.getElementById('artistDetail').classList.remove('open');
-    document.getElementById('articleDetail').classList.remove('open');
+    document.querySelectorAll('.overlay').forEach(ov => ov.classList.remove('open'));
     var e = demoEvents.find(x => x.id === id);
     if (!e && sbClient) {
         var res = await sbClient.from('events').select('*').eq('id', id).single();
@@ -1315,7 +1359,17 @@ async function openEventDetail(id) {
     document.getElementById('eventDateDetail').innerHTML = `📅 ${formatDate(e.event_date)}`;
     document.getElementById('eventLocDetail').innerHTML = `📍 ${e.location_name}`;
     document.getElementById('eventDescDetail').textContent = e.description || '';
-    document.getElementById('eventCoverDetail').src = e.cover_image_url || 'https://via.placeholder.com/800x400';
+    
+    var mediaWrap = document.getElementById('eventMediaWrap');
+    if (mediaWrap) {
+        var isVideo = e.cover_image_url && e.cover_image_url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        if (isVideo) {
+            mediaWrap.innerHTML = '<video src="' + e.cover_image_url + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
+        } else {
+            mediaWrap.innerHTML = '<img id="eventCoverDetail" src="' + (e.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Event" class="event-detail-cover" style="width:100%;display:block">';
+        }
+    }
+
     var ticketBtn = document.getElementById('eventTicketBtnDetail');
     if (ticketBtn) ticketBtn.href = e.ticketing_url || '#';
 
@@ -1363,6 +1417,25 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
     const targetInput = document.getElementById(targetInputId);
     if (!targetInput) return;
 
+    // Direct preview before upload
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const previewUrl = e.target.result;
+        // Find if there's a corresponding preview element
+        const previewBtn = event.target.previousElementSibling;
+        if (previewBtn && previewBtn.classList.contains('btn-upload-trigger')) {
+            if (file.type.startsWith('video/')) {
+                previewBtn.innerHTML = '🎥';
+                previewBtn.style.color = 'var(--primary)';
+            } else {
+                previewBtn.innerHTML = '📷';
+                previewBtn.style.color = 'var(--primary)';
+            }
+        }
+        targetInput.value = 'Uploading...';
+    };
+    reader.readAsDataURL(file);
+
     showToast('Uploading...', 'Please wait while we fuel the tribe media.', '#3b82f6');
 
     try {
@@ -1385,6 +1458,7 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
         showToast('Success!', 'Media uploaded successfully.', '#22c55e');
     } catch (e) {
         console.error('Admin upload error:', e);
+        targetInput.value = '';
         showToast('Upload Error', e.message || 'Check connection.', '#ef4444');
     }
 }
@@ -1428,15 +1502,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initial load of content
     initSupabase();
+    loadHeroMedia();
     loadProducts();
     // Render demo data for new sections
     renderArtists('featuredArtistsGrid', demoArtists.filter(function (a) { return a.is_featured; }));
     renderArtists('allArtistsGrid', demoArtists);
     renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
     renderArticles('allArticlesGrid', demoArticles);
-    renderThreads('allThreadsList', demoThreads);
+    renderThreads('allThreadsList', demoThreads); // Also triggers loadHotTopics via switchPage logic or manually
     renderEvents('featuredEventsGrid', demoEvents.slice(0, 3));
     renderEvents('allEventsGrid', demoEvents);
+
+    if (currentPage === 'home') loadHeroMedia();
 
     // Final translation pass for dynamic content
     setTimeout(applyTranslations, 100);
@@ -1607,7 +1684,8 @@ async function submitCommunityContent() {
             media_url: contentUploadedUrl || null,
             media_type: document.getElementById('contentMediaType').value,
             external_link: document.getElementById('contentExternalLink').value.trim() || null,
-            user_id: currentUser ? currentUser.id : null // Optional if public
+            user_id: currentUser ? currentUser.id : null,
+            is_pinned: false // Initially false
         };
 
         if (cat === 'event') {
@@ -1628,17 +1706,45 @@ async function submitCommunityContent() {
 }
 
 async function loadHotTopics() {
-    var container = document.getElementById('allThreadsList'); // Re-using this container for the unified feed
+    var container = document.getElementById('allThreadsList');
+    var pinnedWrap = document.getElementById('pinnedArticleWrap');
     if (!container) return;
 
     try {
         var topics = await window.fetchCommunityTopics();
-        if (!topics || topics.length === 0) {
-            // Keep demo threads if no real data 
-            return;
+        if (!topics || topics.length === 0) return;
+
+        // Extract Pinned Item
+        var pinnedItem = topics.find(x => x.is_pinned);
+        var regularTopics = topics.filter(x => !x.is_pinned);
+
+        if (pinnedWrap) {
+            if (pinnedItem) {
+                var mediaHtml = '';
+                if (pinnedItem.media_url) {
+                    if (pinnedItem.media_type === 'video') {
+                        mediaHtml = '<video src="' + pinnedItem.media_url + '" autoplay muted loop playsinline></video>';
+                    } else {
+                        mediaHtml = '<img src="' + pinnedItem.media_url + '" alt="Pinned">';
+                    }
+                }
+                pinnedWrap.innerHTML = `
+                    <div class="pinned-article-card" onclick="viewTopicDetail('${pinnedItem.id}')">
+                        <div class="pinned-media">${mediaHtml}</div>
+                        <div class="pinned-content">
+                            <span class="badge-featured">PINNED</span>
+                            <h3 class="pinned-title">${pinnedItem.title}</h3>
+                            <p class="pinned-hook">${pinnedItem.content.substring(0, 150)}...</p>
+                            <span class="pinned-cta">Read the full story →</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                pinnedWrap.innerHTML = '';
+            }
         }
 
-        container.innerHTML = topics.map(function (t) {
+        container.innerHTML = regularTopics.map(function (t) {
             var score = (t.likes_count * 2) + t.comments_count + t.views_count;
             var isHot = score > 15;
             var catIcon = t.category === 'article' ? '📰' : (t.category === 'event' ? '🎫' : '💬');
@@ -1678,6 +1784,16 @@ async function loadHotTopics() {
     } catch (e) {
         console.error('Error loading hot topics:', e);
     }
+}
+
+function loadHeroMedia() {
+    var heroMedia = document.getElementById('heroMedia');
+    if (!heroMedia) return;
+    
+    // We can use a video or high-quality image from our storage or a placeholder
+    // Let's use a premium video background if possible, or a nice culture image
+    var vUrl = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4'; // Placeholder culture video
+    heroMedia.innerHTML = '<video src="' + vUrl + '" autoplay muted loop playsinline></video>';
 }
 
 async function handleTopicLike(id) {
