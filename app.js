@@ -1,5 +1,6 @@
 /* ===== FUELED BY CREATION — Application Logic ===== */
 import './content_utils.js';
+import './translations.js';
 
 var sbClient = null;
 var currentUser = null;
