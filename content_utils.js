@@ -100,13 +100,25 @@ async function toggleTopicLike(topicId, userId) {
             .eq('user_id', userId)
             .single();
 
+        let isLiked = false;
         if (existing) {
             await window.sbClient.from('likes').delete().eq('id', existing.id);
-            return false;
+            isLiked = false;
         } else {
             await window.sbClient.from('likes').insert([{ topic_id: topicId, user_id: userId }]);
-            return true;
+            isLiked = true;
         }
+
+        // Sync count to topics table (as a fallback for triggers)
+        try {
+            const { data: topic } = await window.sbClient.from('topics').select('likes_count').eq('id', topicId).single();
+            const newCount = (topic.likes_count || 0) + (isLiked ? 1 : -1);
+            await window.sbClient.from('topics').update({ likes_count: Math.max(0, newCount) }).eq('id', topicId);
+        } catch (syncErr) {
+            console.warn('Count sync error (non-critical):', syncErr);
+        }
+
+        return isLiked;
     } catch (error) {
         console.error('Error toggling like:', error);
     }

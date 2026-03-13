@@ -811,11 +811,17 @@ async function loadAdminArtists() {
     list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading artists...</p>';
     try {
         var res = await sbClient.from('artists').select('*').order('created_at', { ascending: false });
+        console.log('DEBUG loadAdminArtists: res.error=', res.error, 'res.data length=', res.data ? res.data.length : 'null');
         var liveArtists = (res.data && res.data.length > 0) ? res.data : [];
         // Merge with demo data, avoiding duplicates by ID
         var demo = typeof demoArtists !== 'undefined' ? demoArtists : [];
+        console.log('DEBUG loadAdminArtists: liveArtists=', liveArtists.length, 'demo=', demo.length, 'demoIds=', demo.map(function(d){return d.id;}));
         adminArtists = liveArtists.concat(demo.filter(d => !liveArtists.find(l => l.id === d.id)));
-    } catch (e) { adminArtists = typeof demoArtists !== 'undefined' ? demoArtists.slice() : []; }
+        console.log('DEBUG loadAdminArtists: merged adminArtists=', adminArtists.length, adminArtists.map(function(a){return a.id + ':' + a.name;}));
+    } catch (e) { 
+        console.error('DEBUG loadAdminArtists CATCH:', e);
+        adminArtists = typeof demoArtists !== 'undefined' ? demoArtists.slice() : []; 
+    }
     renderAdminArtistList();
 }
 
@@ -1559,26 +1565,41 @@ async function openArticleDetail(id) {
     }
     if (!a) return;
 
+    // Calculate reading time
+    var words = (a.body_content || '').replace(/<[^>]*>?/gm, '').split(/\s+/).length;
+    var readTime = Math.max(1, Math.ceil(words / 200));
+
     document.getElementById('articleTitleDetail').textContent = a.title;
-    document.getElementById('articleAuthorDetail').textContent = (a.author || 'FBC') + ' · ' + formatDate(a.publish_date);
+    document.getElementById('articleAuthorDetail').innerHTML = 
+        '<span style="color:var(--primary);font-weight:700">' + (a.author || 'FBC Editorial') + '</span> · ' + 
+        formatDate(a.publish_date) + ' · <span style="opacity:0.7">⏱️ ' + readTime + ' min read</span>';
     
     var mediaWrap = document.getElementById('articleMediaWrap');
     if (mediaWrap) {
         var videoUrl = a.promo_video_url || a.cover_image_url;
         var isVideo = videoUrl && videoUrl.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
         if (isVideo) {
-            mediaWrap.innerHTML = '<video src="' + videoUrl + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
+            mediaWrap.innerHTML = '<video src="' + videoUrl + '" autoplay muted loop playsinline style="width:100%;max-height:500px;object-fit:cover;display:block"></video>';
         } else {
-            mediaWrap.innerHTML = '<img id="articleCoverDetail" src="' + (a.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Cover" class="article-detail-cover" style="width:100%;display:block">';
+            mediaWrap.innerHTML = '<img id="articleCoverDetail" src="' + (a.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Cover" class="article-detail-cover" style="width:100%;display:block;border-bottom:1px solid rgba(0,0,0,0.05)">';
         }
     }
 
     // Add External Link if exists
-    var bodyContent = a.body_content || '';
+    var bodyContent = a.body_content || '<p style="color:#888;font-style:italic">No content available for this article.</p>';
     if (a.external_link) {
-        bodyContent += '<div style="margin-top:2rem;text-align:center"><a href="' + a.external_link + '" target="_blank" class="btn-primary" style="display:inline-block;width:auto;padding:0.8rem 2rem">Visit External Link &rarr;</a></div>';
+        bodyContent += '<div style="margin-top:3rem;text-align:center;padding:2rem;background:var(--light);border-radius:12px">' +
+                       '<p style="margin-bottom:1rem;font-weight:600">Want to dive deeper?</p>' +
+                       '<a href="' + a.external_link + '" target="_blank" class="btn-primary" style="display:inline-block;width:auto;padding:1rem 2.5rem;font-size:1.1rem;box-shadow:0 10px 20px rgba(255,107,53,0.3)">Explore More Content &rarr;</a>' +
+                       '</div>';
     }
-    document.getElementById('articleBodyDetail').innerHTML = bodyContent;
+    
+    const bodyEl = document.getElementById('articleBodyDetail');
+    bodyEl.innerHTML = bodyContent;
+    bodyEl.style.fontSize = '1.15rem';
+    bodyEl.style.lineHeight = '1.8';
+    bodyEl.style.color = '#222';
+
     document.getElementById('articleDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
