@@ -3322,3 +3322,105 @@ footer {
   }
 }
 
+
+/* ===== ADMIN MANAGEMENT STYLES ===== */
+.admin-product-item {
+  display: flex !important;
+  align-items: center;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.admin-product-item:hover {
+  background: #252525;
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.admin-product-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.2rem;
+  flex-shrink: 0;
+}
+
+.admin-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-product-meta {
+  flex: 1;
+}
+
+.admin-product-meta h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.2rem;
+}
+
+.admin-product-meta p {
+  font-size: 0.75rem !important;
+  color: #888 !important;
+  margin: 0 !important;
+}
+
+.admin-product-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.btn-edit, .btn-delete {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-edit {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.btn-edit:hover {
+  background: #22c55e;
+  color: white;
+}
+
+.btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* Ensure admin content is visible */
+#adminProductList, #adminArtistList, #adminArticleList, #featuredArticlesAdminList, #adminThreadList, #adminEventList, #adminNotificationList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 50px;
+}

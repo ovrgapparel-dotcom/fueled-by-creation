@@ -952,7 +952,8 @@ function renderAdminFeaturedArticlesList() {
             '<div class="admin-product-meta"><h4>' + a.title + '</h4>' +
             '<p><span style="color:' + statusColor + '">' + a.status + '</span> · ' + (catIcons[a.category] || '') + ' ' + (a.category || '') + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="showAdminTab(\'articles-admin\', document.querySelector(\'[onclick*=\\\'articles-admin\\\']\')); editArticle(\'' + a.id + '\')">✏ Edit</button></div></div>';
+            '<button class="btn-edit" onclick="showAdminTab(\'articles-admin\', document.querySelector(\'[onclick*=\\\'articles-admin\\\']\')); editArticle(\'' + a.id + '\')">✏ Edit</button>' +
+            '<button class="btn-delete" onclick="deleteArticle(\'' + a.id + '\')">🗑 Delete</button></div></div>';
     }).join('');
 }
 
