@@ -662,9 +662,12 @@ function editProduct(id) {
 }
 async function deleteProduct(id) {
     if (!confirm('Delete this product permanently?')) return;
+    var isDemo = isDemoId(id);
     try {
-        var res = await sbClient.from(PRODUCTS_TABLE).delete().eq('id', id);
-        if (res.error) throw res.error;
+        if (!isDemo) {
+            var res = await sbClient.from(PRODUCTS_TABLE).delete().eq('id', id);
+            if (res.error) throw res.error;
+        }
         products = products.filter(function (p) { return p.id !== id; });
         renderAdminProductList(); renderCatalogue(activeFilter);
         showToast('Deleted', 'Product removed from catalogue.');
@@ -680,10 +683,11 @@ async function saveProduct() {
     var badge = document.getElementById('adminBadge').value.trim();
     var imgs = adminImgSlots.filter(Boolean);
     var editId = document.getElementById('editProductId').value;
+    var isDemo = isDemoId(editId);
     if (!name || !price) { showToast('Required fields', 'Name and price are required.', '#f59e0b'); return; }
     var payload = { name: name, category: cat, price: price, old_price: old_price, description: description, badge: badge, sizes: sizes, imgs: imgs };
     try {
-        if (editId) {
+        if (editId && !isDemo) {
             var res = await sbClient.from(PRODUCTS_TABLE).update(payload).eq('id', parseInt(editId));
             if (res.error) throw res.error;
         } else {
@@ -796,6 +800,10 @@ async function uploadImageToStorage(event, slotIndex) {
 // ===================================================================
 // ===== ADMIN CRUD: ARTISTS ========================================
 // ===================================================================
+function isDemoId(id) {
+    return typeof id === 'string' && /^(a|art|t|e|p)\d+$/.test(id);
+}
+
 var adminArtists = [];
 
 async function loadAdminArtists() {
@@ -878,13 +886,17 @@ async function saveArtist() {
         is_featured: document.getElementById('artistFeatured').checked
     };
     var editId = document.getElementById('editArtistId').value;
+    var isDemo = isDemoId(editId);
     try {
-        if (editId) {
+        if (editId && !isDemo) {
             var res = await sbClient.from('artists').update(payload).eq('id', editId);
             if (res.error) throw res.error;
         } else {
             var res2 = await sbClient.from('artists').insert(payload);
             if (res2.error) throw res2.error;
+            if (isDemo && typeof demoArtists !== 'undefined') {
+                demoArtists = demoArtists.filter(function (d) { return d.id !== editId; });
+            }
         }
         cancelEditArtist(); await loadAdminArtists(); refreshFrontendData();
         showToast('Saved! ✓', '"' + name + '" saved to Supabase.');
@@ -893,9 +905,14 @@ async function saveArtist() {
 
 async function deleteArtist(id) {
     if (!confirm('Delete this artist permanently?')) return;
+    var isDemo = isDemoId(id);
     try {
-        var res = await sbClient.from('artists').delete().eq('id', id);
-        if (res.error) throw res.error;
+        if (!isDemo) {
+            var res = await sbClient.from('artists').delete().eq('id', id);
+            if (res.error) throw res.error;
+        } else if (typeof demoArtists !== 'undefined') {
+            demoArtists = demoArtists.filter(function (d) { return d.id !== id; });
+        }
         adminArtists = adminArtists.filter(function (a) { return a.id !== id; });
         renderAdminArtistList(); refreshFrontendData();
         showToast('Deleted', 'Artist removed.');
@@ -1024,13 +1041,17 @@ async function saveArticle() {
         is_trending: document.getElementById('articleTrending').checked
     };
     var editId = document.getElementById('editArticleId').value;
+    var isDemo = isDemoId(editId);
     try {
-        if (editId) {
+        if (editId && !isDemo) {
             var res = await sbClient.from('articles').update(payload).eq('id', editId);
             if (res.error) throw res.error;
         } else {
             var res2 = await sbClient.from('articles').insert(payload);
             if (res2.error) throw res2.error;
+            if (isDemo && typeof demoArticles !== 'undefined') {
+                demoArticles = demoArticles.filter(function (d) { return d.id !== editId; });
+            }
         }
         cancelEditArticle(); await loadAdminArticles(); refreshFrontendData();
         showToast('Saved! ✓', '"' + title + '" saved.');
@@ -1039,9 +1060,14 @@ async function saveArticle() {
 
 async function deleteArticle(id) {
     if (!confirm('Delete this article permanently?')) return;
+    var isDemo = isDemoId(id);
     try {
-        var res = await sbClient.from('articles').delete().eq('id', id);
-        if (res.error) throw res.error;
+        if (!isDemo) {
+            var res = await sbClient.from('articles').delete().eq('id', id);
+            if (res.error) throw res.error;
+        } else if (typeof demoArticles !== 'undefined') {
+            demoArticles = demoArticles.filter(function (d) { return d.id !== id; });
+        }
         adminArticles = adminArticles.filter(function (a) { return a.id !== id; });
         renderAdminArticleList(); refreshFrontendData();
         showToast('Deleted', 'Article removed.');
@@ -1123,13 +1149,17 @@ async function saveThread() {
         is_pinned: document.getElementById('threadPinned').checked
     };
     var editId = document.getElementById('editThreadId').value;
+    var isDemo = isDemoId(editId);
     try {
-        if (editId) {
+        if (editId && !isDemo) {
             var res = await sbClient.from('threads').update(payload).eq('id', editId);
             if (res.error) throw res.error;
         } else {
             var res2 = await sbClient.from('threads').insert(payload);
             if (res2.error) throw res2.error;
+            if (isDemo && typeof demoThreads !== 'undefined') {
+                demoThreads = demoThreads.filter(function (d) { return d.id !== editId; });
+            }
         }
         cancelEditThread(); await loadAdminThreads(); refreshFrontendData();
         showToast('Saved! ✓', '"' + title + '" saved.');
@@ -1138,9 +1168,14 @@ async function saveThread() {
 
 async function deleteThread(id) {
     if (!confirm('Delete this thread permanently?')) return;
+    var isDemo = isDemoId(id);
     try {
-        var res = await sbClient.from('threads').delete().eq('id', id);
-        if (res.error) throw res.error;
+        if (!isDemo) {
+            var res = await sbClient.from('threads').delete().eq('id', id);
+            if (res.error) throw res.error;
+        } else if (typeof demoThreads !== 'undefined') {
+            demoThreads = demoThreads.filter(function (d) { return d.id !== id; });
+        }
         adminThreads = adminThreads.filter(function (t) { return t.id !== id; });
         renderAdminThreadList(); refreshFrontendData();
         showToast('Deleted', 'Thread removed.');
@@ -1226,13 +1261,17 @@ async function saveEvent() {
         status: document.getElementById('eventStatus').value
     };
     var editId = document.getElementById('editEventId').value;
+    var isDemo = isDemoId(editId);
     try {
-        if (editId) {
+        if (editId && !isDemo) {
             var res = await sbClient.from('events').update(payload).eq('id', editId);
             if (res.error) throw res.error;
         } else {
             var res2 = await sbClient.from('events').insert(payload);
             if (res2.error) throw res2.error;
+            if (isDemo && typeof demoEvents !== 'undefined') {
+                demoEvents = demoEvents.filter(function (d) { return d.id !== editId; });
+            }
         }
         cancelEditEvent(); await loadAdminEvents(); refreshFrontendData();
         showToast('Saved! ✓', '"' + title + '" saved.');
@@ -1241,9 +1280,14 @@ async function saveEvent() {
 
 async function deleteEvent(id) {
     if (!confirm('Delete this event permanently?')) return;
+    var isDemo = isDemoId(id);
     try {
-        var res = await sbClient.from('events').delete().eq('id', id);
-        if (res.error) throw res.error;
+        if (!isDemo) {
+            var res = await sbClient.from('events').delete().eq('id', id);
+            if (res.error) throw res.error;
+        } else if (typeof demoEvents !== 'undefined') {
+            demoEvents = demoEvents.filter(function (d) { return d.id !== id; });
+        }
         adminEvents = adminEvents.filter(function (e) { return e.id !== id; });
         renderAdminEventList(); refreshFrontendData();
         showToast('Deleted', 'Event removed.');
