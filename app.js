@@ -1434,37 +1434,45 @@ async function refreshFrontendData() {
     // Re-fetch and re-render all frontend sections from Supabase
     try {
         var aRes = await sbClient.from('artists').select('*').eq('status', 'Published').order('created_at', { ascending: false });
+        var displayArtists = typeof demoArtists !== 'undefined' ? demoArtists : [];
         if (!aRes.error && aRes.data && aRes.data.length) {
-            demoArtists = aRes.data;
+            var liveArtists = aRes.data;
+            displayArtists = liveArtists.concat(displayArtists.filter(d => !liveArtists.find(l => l.id === d.id)));
         }
-        renderArtists('featuredArtistsGrid', demoArtists.filter(function (a) { return a.is_featured; }));
-        renderArtists('allArtistsGrid', demoArtists);
+        renderArtists('featuredArtistsGrid', displayArtists.filter(function (a) { return a.is_featured; }));
+        renderArtists('allArtistsGrid', displayArtists);
     } catch (e) { /* keep demo data */ }
 
     try {
         var artRes = await sbClient.from('articles').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
+        var displayArticles = typeof demoArticles !== 'undefined' ? demoArticles : [];
         if (!artRes.error && artRes.data && artRes.data.length) {
-            demoArticles = artRes.data;
+            var liveArticles = artRes.data;
+            displayArticles = liveArticles.concat(displayArticles.filter(d => !liveArticles.find(l => l.id === d.id)));
         }
-        renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(function (a) { return a.is_featured; }));
-        renderArticles('allArticlesGrid', demoArticles);
+        renderFeaturedArticlesSplit('featuredArticlesGrid', displayArticles.filter(function (a) { return a.is_featured; }));
+        renderArticles('allArticlesGrid', displayArticles);
     } catch (e) { /* keep demo data */ }
 
     try {
         var tRes = await sbClient.from('threads').select('*').eq('status', 'Active').order('priority_order');
+        var displayThreads = typeof demoThreads !== 'undefined' ? demoThreads : [];
         if (!tRes.error && tRes.data && tRes.data.length) {
-            demoThreads = tRes.data;
+            var liveThreads = tRes.data;
+            displayThreads = liveThreads.concat(displayThreads.filter(d => !liveThreads.find(l => l.id === d.id)));
         }
-        renderThreads('allThreadsList', demoThreads);
+        renderThreads('allThreadsList', displayThreads);
     } catch (e) { /* keep demo data */ }
 
     try {
         var eRes = await sbClient.from('events').select('*').eq('status', 'Published').order('event_date');
+        var displayEvents = typeof demoEvents !== 'undefined' ? demoEvents : [];
         if (!eRes.error && eRes.data && eRes.data.length) {
-            demoEvents = eRes.data;
+            var liveEvents = eRes.data;
+            displayEvents = liveEvents.concat(displayEvents.filter(d => !liveEvents.find(l => l.id === d.id)));
         }
-        renderEvents('featuredEventsGrid', demoEvents.slice(0, 3));
-        renderEvents('allEventsGrid', demoEvents);
+        renderEvents('featuredEventsGrid', displayEvents.slice(0, 3));
+        renderEvents('allEventsGrid', displayEvents);
     } catch (e) { /* keep demo data */ }
 
     if (currentPage === 'home') loadHeroMedia();
