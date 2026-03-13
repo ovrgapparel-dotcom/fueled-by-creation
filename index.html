@@ -440,8 +440,8 @@
           <div class="payment-section">
             <div class="payment-header">Payment Method</div>
             <div class="payment-options">
-              <label class="payment-option selected" id="payOptPaypal"><input type="radio" name="payment" value="paypal"
-                  checked onchange="selectPayment('paypal')"><span class="pay-icon">💳</span><span
+              <label class="payment-option" id="payOptPaypal"><input type="radio" name="payment" value="paypal"
+                  onchange="selectPayment('paypal')"><span class="pay-icon">💳</span><span
                   class="pay-label">PayPal</span></label>
               <label class="payment-option" id="payOptOrange"><input type="radio" name="payment" value="orange"
                   onchange="selectPayment('orange')"><span class="pay-icon">🍊</span><span
@@ -500,6 +500,7 @@
         <div class="admin-tab" onclick="cancelEditProduct();showAdminTab('add', this)">+ Add Product</div>
         <div class="admin-tab" onclick="showAdminTab('artists-admin', this)">Artists</div>
         <div class="admin-tab" onclick="showAdminTab('articles-admin', this)">Articles</div>
+        <div class="admin-tab" onclick="showAdminTab('featured-articles-admin', this)">⭐ Featured</div>
         <div class="admin-tab" onclick="showAdminTab('threads-admin', this)">Threads</div>
         <div class="admin-tab" onclick="showAdminTab('events-admin', this)">Events</div>
         <div class="admin-tab" onclick="showAdminTab('notifications-admin', this)">Notifications</div>
@@ -681,7 +682,32 @@
                 placeholder="Brief 1-2 line summary..." style="min-height:50px"></textarea></div>
             <div><label>Body Content (HTML)</label><textarea id="articleBody"
                 placeholder="<p>Full article content...</p>" style="min-height:200px"></textarea></div>
+            <!-- removed duplicate admin-grid -->
             <div class="admin-grid">
+              <div class="field-with-upload">
+                <label>Promo Video URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="articlePromoVideo" placeholder="Upload or paste video URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('articlePromoVideoFile').click()">🎥</button>
+                  <input type="file" id="articlePromoVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'articlePromoVideo', 'articles')">
+                </div>
+              </div>
+              <div><label>External Link (Optional)</label><input type="text" id="articleExtLink" placeholder="https://..."></div>
+            </div>
+            <div class="admin-grid">
+              <div><label>Publish Date</label><input type="datetime-local" id="articlePublishDate"></div>
+              <div><label>Status</label><select id="articleStatus">
+                  <option value="Draft">Draft</option>
+                  <option value="Published">Published</option>
+                  <option value="Hidden">Hidden</option>
+                </select></div>
+            </div>
+            <div style="display:flex;gap:1.5rem;align-items:center;padding:.5rem 0">
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
+                  id="articleFeatured" style="accent-color:var(--primary);width:18px;height:18px"> ⭐ Featured</label>
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
+                  id="articleTrending" style="accent-color:#ef4444;width:18px;height:18px"> 🔥 Trending</label>
+            </div>
               <div><label>Publish Date</label><input type="datetime-local" id="articlePublishDate"></div>
               <div><label>Status</label><select id="articleStatus">
                   <option value="Draft">Draft</option>
@@ -699,6 +725,16 @@
               <button class="btn-save" onclick="saveArticle()">💾 Save Article</button>
               <button class="btn-cancel-admin" onclick="cancelEditArticle()">Cancel</button>
             </div>
+          </div>
+        </div>
+        
+        <!-- ===== FEATURED ARTICLES TAB ===== -->
+        <div id="adminTabFeaturedArticles" style="display:none">
+          <div id="featuredArticlesAdminList" class="admin-product-list" style="margin-bottom:2rem; display:flex; flex-direction:column;">
+            <p style="color:#666;text-align:center;padding:2rem">Loading featured articles...</p>
+          </div>
+          <div style="background:rgba(255,107,0,0.1); border:1px dashed var(--primary); padding:1rem; border-radius:8px; text-align:center">
+            <p style="font-size:0.9rem; color:var(--primary)">To feature an article, go to the <b>Articles</b> tab and check the "⭐ Featured" box. The top 3 featured articles will appear on the homepage.</p>
           </div>
         </div>
 
@@ -737,6 +773,16 @@
               </div>
               <div><label>External Link</label><input type="text" id="threadExtLink"
                   placeholder="Optional link to external content"></div>
+            </div>
+            <div class="admin-grid">
+              <div class="field-with-upload">
+                <label>Promo Video URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="threadPromoVideo" placeholder="Upload or paste video URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('threadPromoVideoFile').click()">🎥</button>
+                  <input type="file" id="threadPromoVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'threadPromoVideo', 'threads')">
+                </div>
+              </div>
             </div>
             <div class="admin-grid">
               <div><label>Status</label><select id="threadStatus">
@@ -792,6 +838,17 @@
               </div>
               <div><label>Ticketing URL</label><input type="text" id="eventTicketUrl"
                   placeholder="https://tickets.example.com/..."></div>
+            </div>
+            <div class="admin-grid">
+              <div class="field-with-upload">
+                <label>Promo Video URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="eventPromoVideo" placeholder="Upload or paste video URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('eventPromoVideoFile').click()">🎥</button>
+                  <input type="file" id="eventPromoVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'eventPromoVideo', 'events')">
+                </div>
+              </div>
+              <div><label>External Link (Optional)</label><input type="text" id="eventExtLink" placeholder="https://..."></div>
             </div>
             <div class="admin-grid">
               <div><label>Featured Artist ID</label><input type="text" id="eventArtistId"

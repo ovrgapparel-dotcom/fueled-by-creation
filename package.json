@@ -12,5 +12,11 @@
     "canvas": "^3.2.1",
     "vite": "^5.0.0",
     "vite-plugin-singlefile": "^2.3.0"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "playwright": "^1.58.2"
   }
 }

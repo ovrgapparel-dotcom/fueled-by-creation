@@ -261,17 +261,29 @@ function renderArticles(targetGridId, articleList) {
 function renderFeaturedArticlesSplit(targetContainerId, articleList) {
     var container = document.getElementById(targetContainerId); if (!container) return;
     if (!articleList.length) { container.innerHTML = '<div class="empty-state"><p>No featured articles yet.</p></div>'; return; }
-    // Only show top featured article in split mode
-    var a = articleList[0];
-    var bgImg = a.cover_image_url ? a.cover_image_url : 'https://images.unsplash.com/photo-1531123414780-f05244585149?auto=format&fit=crop&q=80';
-    container.innerHTML = '<div class="featured-split-block">' +
-        '<div class="featured-split-content">' +
-        '<h3>' + a.title + '</h3>' +
-        '<p>' + (a.excerpt || window.t('read_latest_feature')) + '</p>' +
-        '<button class="btn-primary" style="background:#3b82f6;color:white;padding:0.6rem 1.5rem" onclick="openArticleDetail(\'' + a.id + '\')">' + window.t('read_more') + '</button>' +
-        '</div>' +
-        '<div class="featured-split-img" style="background-image: url(\'' + bgImg + '\');"></div>' +
-        '</div>';
+    
+    // Show top 3 featured articles
+    var topArticles = articleList.slice(0, 3);
+    var html = '<div class="featured-articles-grid">';
+    
+    topArticles.forEach(function(a) {
+        var bgImg = a.cover_image_url ? a.cover_image_url : 'https://images.unsplash.com/photo-1531123414780-f05244585149?auto=format&fit=crop&q=80';
+        var excerpt = a.excerpt || window.t('read_latest_feature');
+        if (excerpt.length > 120) excerpt = excerpt.substring(0, 117) + '...';
+
+        html += 
+            '<div class="featured-article-card" onclick="openArticleDetail(\'' + a.id + '\')">' +
+                '<div class="card-img" style="background-image: url(\'' + bgImg + '\');"></div>' +
+                '<div class="card-body">' +
+                    '<h3>' + a.title + '</h3>' +
+                    '<p>' + excerpt + '</p>' +
+                    '<div class="btn-read">' + window.t('read_more') + '</div>' +
+                '</div>' +
+            '</div>';
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 function renderThreads(targetListId, threadList) {
@@ -552,7 +564,7 @@ function buyViaWhatsApp() {
 }
 
 // ===== ADMIN =====
-function handleAdminClick() { if (currentUser) openAdmin(); else openLogin(); }
+function handleAdminClick() { openAdmin(); }
 function openLogin() {
     document.getElementById('loginOverlay').classList.add('open');
     document.getElementById('loginEmail').focus();
@@ -702,6 +714,7 @@ function showAdminTab(tab, el) {
     var tabMap = {
         'products': 'adminTabProducts', 'add': 'adminTabAdd',
         'artists-admin': 'adminTabArtists', 'articles-admin': 'adminTabArticles',
+        'featured-articles-admin': 'adminTabFeaturedArticles',
         'threads-admin': 'adminTabThreads', 'events-admin': 'adminTabEvents',
         'notifications-admin': 'adminTabNotifications'
     };
@@ -715,6 +728,7 @@ function showAdminTab(tab, el) {
     // Lazy-load data when switching tabs
     if (tab === 'artists-admin') loadAdminArtists();
     else if (tab === 'articles-admin') loadAdminArticles();
+    else if (tab === 'featured-articles-admin') loadAdminFeaturedArticles();
     else if (tab === 'threads-admin') loadAdminThreads();
     else if (tab === 'events-admin') loadAdminEvents();
     else if (tab === 'notifications-admin') loadAdminNotifications();
@@ -790,13 +804,15 @@ async function loadAdminArtists() {
     try {
         var res = await sbClient.from('artists').select('*').order('created_at', { ascending: false });
         if (res.error) throw res.error;
-        adminArtists = res.data || [];
-    } catch (e) { adminArtists = demoArtists.slice(); }
+        adminArtists = (res.data && res.data.length > 0) ? res.data : (typeof demoArtists !== 'undefined' ? demoArtists.slice() : []);
+    } catch (e) { adminArtists = typeof demoArtists !== 'undefined' ? demoArtists.slice() : []; }
     renderAdminArtistList();
 }
 
 function renderAdminArtistList() {
     var list = document.getElementById('adminArtistList');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
     if (!adminArtists.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🎤</div><p>No artists yet. Add your first artist below.</p></div>'; return; }
     list.innerHTML = adminArtists.map(function (a) {
         var statusColor = a.status === 'Published' ? '#22c55e' : a.status === 'Hidden' ? '#ef4444' : '#f59e0b';
@@ -895,13 +911,55 @@ async function loadAdminArticles() {
     try {
         var res = await sbClient.from('articles').select('*').order('created_at', { ascending: false });
         if (res.error) throw res.error;
-        adminArticles = res.data || [];
-    } catch (e) { adminArticles = demoArticles.slice(); }
+        adminArticles = (res.data && res.data.length > 0) ? res.data : (typeof demoArticles !== 'undefined' ? demoArticles.slice() : []);
+    } catch (e) { 
+        console.error('ERROR IN loadAdminArticles:', e);
+        adminArticles = typeof demoArticles !== 'undefined' ? demoArticles.slice() : []; 
+    }
     renderAdminArticleList();
+    console.log("ARTICLES RENDERED HTML:", document.getElementById('adminArticleList').outerHTML);
+    console.log("DEMO ARTICLES:", demoArticles);
+}
+
+async function loadAdminFeaturedArticles() {
+    var list = document.getElementById('featuredArticlesAdminList'); if (!list) return;
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading featured articles...</p>';
+    // We already have adminArticles loaded or can load them
+    if (!adminArticles.length) {
+        await loadAdminArticles();
+    }
+    renderAdminFeaturedArticlesList();
+}
+
+function renderAdminFeaturedArticlesList() {
+    var list = document.getElementById('featuredArticlesAdminList');
+    var featured = adminArticles.filter(function(a) { return a.is_featured; });
+    
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
+    
+    if (!featured.length) { 
+        list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">⭐</div><p>No featured articles yet. Mark articles as "Featured" in the Articles tab.</p></div>'; 
+        return; 
+    }
+    
+    var catIcons = { article: '📰', vlog: '🎥', howto: '💡', hot: '🔥' };
+    list.innerHTML = '<h3 style="margin-bottom:1rem; color:var(--primary)">Featured Articles (Top 3 on Home)</h3>' + 
+    featured.map(function (a) {
+        var statusColor = a.status === 'Published' ? '#22c55e' : a.status === 'Hidden' ? '#ef4444' : '#f59e0b';
+        return '<div class="admin-product-item">' +
+            '<div class="admin-product-thumb">' + (a.cover_image_url ? '<img src="' + a.cover_image_url + '" alt="' + a.title + '">' : (catIcons[a.category] || '📄')) + '</div>' +
+            '<div class="admin-product-meta"><h4>' + a.title + '</h4>' +
+            '<p><span style="color:' + statusColor + '">' + a.status + '</span> · ' + (catIcons[a.category] || '') + ' ' + (a.category || '') + '</p></div>' +
+            '<div class="admin-product-actions">' +
+            '<button class="btn-edit" onclick="showAdminTab(\'articles-admin\', document.querySelector(\'[onclick*=\\\'articles-admin\\\']\')); editArticle(\'' + a.id + '\')">✏ Edit</button></div></div>';
+    }).join('');
 }
 
 function renderAdminArticleList() {
     var list = document.getElementById('adminArticleList');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
     if (!adminArticles.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">📰</div><p>No articles yet. Create your first article below.</p></div>'; return; }
     var catIcons = { article: '📰', vlog: '🎥', howto: '💡', hot: '🔥' };
     list.innerHTML = adminArticles.map(function (a) {
@@ -923,6 +981,8 @@ function editArticle(id) {
     document.getElementById('articleCategory').value = a.category || 'article';
     document.getElementById('articleAuthor').value = a.author || '';
     document.getElementById('articleCoverImg').value = a.cover_image_url || '';
+    document.getElementById('articlePromoVideo').value = a.promo_video_url || '';
+    document.getElementById('articleExtLink').value = a.external_link || '';
     document.getElementById('articleExcerpt').value = a.excerpt || '';
     document.getElementById('articleBody').value = a.body_content || '';
     document.getElementById('articlePublishDate').value = a.publish_date ? a.publish_date.slice(0, 16) : '';
@@ -934,7 +994,7 @@ function editArticle(id) {
 
 function cancelEditArticle() {
     document.getElementById('editArticleId').value = '';
-    ['articleTitle', 'articleAuthor', 'articleCoverImg', 'articleExcerpt', 'articleBody', 'articlePublishDate'].forEach(function (id) { document.getElementById(id).value = ''; });
+    ['articleTitle', 'articleAuthor', 'articleCoverImg', 'articlePromoVideo', 'articleExtLink', 'articleExcerpt', 'articleBody', 'articlePublishDate'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('articleCategory').value = 'article';
     document.getElementById('articleStatus').value = 'Draft';
     document.getElementById('articleFeatured').checked = false;
@@ -950,6 +1010,8 @@ async function saveArticle() {
         category: document.getElementById('articleCategory').value,
         author: document.getElementById('articleAuthor').value.trim() || 'FBC Editorial',
         cover_image_url: document.getElementById('articleCoverImg').value.trim() || null,
+        promo_video_url: document.getElementById('articlePromoVideo').value.trim() || null,
+        external_link: document.getElementById('articleExtLink').value.trim() || null,
         excerpt: document.getElementById('articleExcerpt').value.trim() || null,
         body_content: document.getElementById('articleBody').value || null,
         publish_date: document.getElementById('articlePublishDate').value || null,
@@ -993,13 +1055,15 @@ async function loadAdminThreads() {
     try {
         var res = await sbClient.from('threads').select('*').order('priority_order', { ascending: true });
         if (res.error) throw res.error;
-        adminThreads = res.data || [];
-    } catch (e) { adminThreads = demoThreads.slice(); }
+        adminThreads = (res.data && res.data.length > 0) ? res.data : (typeof demoThreads !== 'undefined' ? demoThreads.slice() : []);
+    } catch (e) { adminThreads = typeof demoThreads !== 'undefined' ? demoThreads.slice() : []; }
     renderAdminThreadList();
 }
 
 function renderAdminThreadList() {
     var list = document.getElementById('adminThreadList');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
     if (!adminThreads.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">💬</div><p>No threads yet. Start a conversation below.</p></div>'; return; }
     var tagIcons = { Hot: '🔥', Trend: '📈', News: '📰' };
     list.innerHTML = adminThreads.map(function (t) {
@@ -1021,6 +1085,7 @@ function editThread(id) {
     document.getElementById('threadTag').value = t.tag || 'Hot';
     document.getElementById('threadHook').value = t.hook_text || '';
     document.getElementById('threadCoverImg').value = t.cover_image_url || '';
+    document.getElementById('threadPromoVideo').value = t.promo_video_url || '';
     document.getElementById('threadExtLink').value = t.external_link || '';
     document.getElementById('threadStatus').value = t.status || 'Active';
     document.getElementById('threadPriority').value = t.priority_order || 0;
@@ -1030,7 +1095,7 @@ function editThread(id) {
 
 function cancelEditThread() {
     document.getElementById('editThreadId').value = '';
-    ['threadTitle', 'threadHook', 'threadCoverImg', 'threadExtLink'].forEach(function (id) { document.getElementById(id).value = ''; });
+    ['threadTitle', 'threadHook', 'threadCoverImg', 'threadPromoVideo', 'threadExtLink'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('threadTag').value = 'Hot';
     document.getElementById('threadStatus').value = 'Active';
     document.getElementById('threadPriority').value = '0';
@@ -1046,6 +1111,7 @@ async function saveThread() {
         tag: document.getElementById('threadTag').value,
         hook_text: document.getElementById('threadHook').value.trim() || null,
         cover_image_url: document.getElementById('threadCoverImg').value.trim() || null,
+        promo_video_url: document.getElementById('threadPromoVideo').value.trim() || null,
         external_link: document.getElementById('threadExtLink').value.trim() || null,
         status: document.getElementById('threadStatus').value,
         priority_order: parseInt(document.getElementById('threadPriority').value) || 0,
@@ -1087,13 +1153,15 @@ async function loadAdminEvents() {
     try {
         var res = await sbClient.from('events').select('*').order('event_date', { ascending: true });
         if (res.error) throw res.error;
-        adminEvents = res.data || [];
-    } catch (e) { adminEvents = demoEvents.slice(); }
+        adminEvents = (res.data && res.data.length > 0) ? res.data : (typeof demoEvents !== 'undefined' ? demoEvents.slice() : []);
+    } catch (e) { adminEvents = typeof demoEvents !== 'undefined' ? demoEvents.slice() : []; }
     renderAdminEventList();
 }
 
 function renderAdminEventList() {
     var list = document.getElementById('adminEventList');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
     if (!adminEvents.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🎫</div><p>No events yet. Create your first event below.</p></div>'; return; }
     list.innerHTML = adminEvents.map(function (e) {
         var statusColor = e.status === 'Published' ? '#22c55e' : e.status === 'Hidden' ? '#ef4444' : '#f59e0b';
@@ -1118,6 +1186,8 @@ function editEvent(id) {
     document.getElementById('eventVenue').value = e.location_name || '';
     document.getElementById('eventAddress').value = e.location_address || '';
     document.getElementById('eventCoverImg').value = e.cover_image_url || '';
+    document.getElementById('eventPromoVideo').value = e.promo_video_url || '';
+    document.getElementById('eventExtLink').value = e.external_link || '';
     document.getElementById('eventTicketUrl').value = e.ticketing_url || '';
     document.getElementById('eventArtistId').value = e.featured_artist_id || '';
     document.getElementById('eventStatus').value = e.status || 'Draft';
@@ -1126,7 +1196,7 @@ function editEvent(id) {
 
 function cancelEditEvent() {
     document.getElementById('editEventId').value = '';
-    ['eventTitle', 'eventDate', 'eventDescription', 'eventVenue', 'eventAddress', 'eventCoverImg', 'eventTicketUrl', 'eventArtistId'].forEach(function (id) { document.getElementById(id).value = ''; });
+    ['eventTitle', 'eventDate', 'eventDescription', 'eventVenue', 'eventAddress', 'eventCoverImg', 'eventPromoVideo', 'eventExtLink', 'eventTicketUrl', 'eventArtistId'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('eventStatus').value = 'Draft';
     document.getElementById('eventFormTitle').textContent = '+ New Event';
 }
@@ -1143,6 +1213,8 @@ async function saveEvent() {
         location_name: venue,
         location_address: document.getElementById('eventAddress').value.trim() || null,
         cover_image_url: document.getElementById('eventCoverImg').value.trim() || null,
+        promo_video_url: document.getElementById('eventPromoVideo').value.trim() || null,
+        external_link: document.getElementById('eventExtLink').value.trim() || null,
         ticketing_url: document.getElementById('eventTicketUrl').value.trim() || null,
         featured_artist_id: document.getElementById('eventArtistId').value.trim() || null,
         status: document.getElementById('eventStatus').value
@@ -1434,15 +1506,21 @@ async function openArticleDetail(id) {
     
     var mediaWrap = document.getElementById('articleMediaWrap');
     if (mediaWrap) {
-        var isVideo = a.cover_image_url && a.cover_image_url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        var videoUrl = a.promo_video_url || a.cover_image_url;
+        var isVideo = videoUrl && videoUrl.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
         if (isVideo) {
-            mediaWrap.innerHTML = '<video src="' + a.cover_image_url + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
+            mediaWrap.innerHTML = '<video src="' + videoUrl + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
         } else {
             mediaWrap.innerHTML = '<img id="articleCoverDetail" src="' + (a.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Cover" class="article-detail-cover" style="width:100%;display:block">';
         }
     }
 
-    document.getElementById('articleBodyDetail').innerHTML = a.body_content || '';
+    // Add External Link if exists
+    var bodyContent = a.body_content || '';
+    if (a.external_link) {
+        bodyContent += '<div style="margin-top:2rem;text-align:center"><a href="' + a.external_link + '" target="_blank" class="btn-primary" style="display:inline-block;width:auto;padding:0.8rem 2rem">Visit External Link &rarr;</a></div>';
+    }
+    document.getElementById('articleBodyDetail').innerHTML = bodyContent;
     document.getElementById('articleDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1464,13 +1542,21 @@ async function openEventDetail(id) {
     
     var mediaWrap = document.getElementById('eventMediaWrap');
     if (mediaWrap) {
-        var isVideo = e.cover_image_url && e.cover_image_url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        var videoUrl = e.promo_video_url || e.cover_image_url;
+        var isVideo = videoUrl && videoUrl.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
         if (isVideo) {
-            mediaWrap.innerHTML = '<video src="' + e.cover_image_url + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
+            mediaWrap.innerHTML = '<video src="' + videoUrl + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
         } else {
             mediaWrap.innerHTML = '<img id="eventCoverDetail" src="' + (e.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Event" class="event-detail-cover" style="width:100%;display:block">';
         }
     }
+
+    // Add External Link if exists
+    var eventDesc = e.description || '';
+    if (e.external_link) {
+        eventDesc += '\n\nMore info: ' + e.external_link;
+    }
+    document.getElementById('eventDescDetail').textContent = eventDesc;
 
     var ticketBtn = document.getElementById('eventTicketBtnDetail');
     if (ticketBtn) {
