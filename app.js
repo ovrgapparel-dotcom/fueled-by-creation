@@ -803,8 +803,10 @@ async function loadAdminArtists() {
     list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading artists...</p>';
     try {
         var res = await sbClient.from('artists').select('*').order('created_at', { ascending: false });
-        if (res.error) throw res.error;
-        adminArtists = (res.data && res.data.length > 0) ? res.data : (typeof demoArtists !== 'undefined' ? demoArtists.slice() : []);
+        var liveArtists = (res.data && res.data.length > 0) ? res.data : [];
+        // Merge with demo data, avoiding duplicates by ID
+        var demo = typeof demoArtists !== 'undefined' ? demoArtists : [];
+        adminArtists = liveArtists.concat(demo.filter(d => !liveArtists.find(l => l.id === d.id)));
     } catch (e) { adminArtists = typeof demoArtists !== 'undefined' ? demoArtists.slice() : []; }
     renderAdminArtistList();
 }
@@ -910,8 +912,9 @@ async function loadAdminArticles() {
     list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading articles...</p>';
     try {
         var res = await sbClient.from('articles').select('*').order('created_at', { ascending: false });
-        if (res.error) throw res.error;
-        adminArticles = (res.data && res.data.length > 0) ? res.data : (typeof demoArticles !== 'undefined' ? demoArticles.slice() : []);
+        var liveArticles = (res.data && res.data.length > 0) ? res.data : [];
+        var demo = typeof demoArticles !== 'undefined' ? demoArticles : [];
+        adminArticles = liveArticles.concat(demo.filter(d => !liveArticles.find(l => l.id === d.id)));
     } catch (e) { 
         console.error('ERROR IN loadAdminArticles:', e);
         adminArticles = typeof demoArticles !== 'undefined' ? demoArticles.slice() : []; 
@@ -1055,8 +1058,9 @@ async function loadAdminThreads() {
     list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading threads...</p>';
     try {
         var res = await sbClient.from('threads').select('*').order('priority_order', { ascending: true });
-        if (res.error) throw res.error;
-        adminThreads = (res.data && res.data.length > 0) ? res.data : (typeof demoThreads !== 'undefined' ? demoThreads.slice() : []);
+        var liveThreads = (res.data && res.data.length > 0) ? res.data : [];
+        var demo = typeof demoThreads !== 'undefined' ? demoThreads : [];
+        adminThreads = liveThreads.concat(demo.filter(d => !liveThreads.find(l => l.id === d.id)));
     } catch (e) { adminThreads = typeof demoThreads !== 'undefined' ? demoThreads.slice() : []; }
     renderAdminThreadList();
 }
@@ -1153,8 +1157,9 @@ async function loadAdminEvents() {
     list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading events...</p>';
     try {
         var res = await sbClient.from('events').select('*').order('event_date', { ascending: true });
-        if (res.error) throw res.error;
-        adminEvents = (res.data && res.data.length > 0) ? res.data : (typeof demoEvents !== 'undefined' ? demoEvents.slice() : []);
+        var liveEvents = (res.data && res.data.length > 0) ? res.data : [];
+        var demo = typeof demoEvents !== 'undefined' ? demoEvents : [];
+        adminEvents = liveEvents.concat(demo.filter(d => !liveEvents.find(l => l.id === d.id)));
     } catch (e) { adminEvents = typeof demoEvents !== 'undefined' ? demoEvents.slice() : []; }
     renderAdminEventList();
 }
