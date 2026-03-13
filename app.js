@@ -1,4 +1,5 @@
 /* ===== FUELED BY CREATION — Application Logic ===== */
+import './content_utils.js';
 
 var sbClient = null;
 var currentUser = null;
@@ -2001,7 +2002,7 @@ async function handleTopicLike(id) {
 }
 
 async function viewTopicDetail(id) {
-    window.incrementTopicViews(id);
+    await window.incrementTopicViews(id);
     // Actually opening the detail view
     const topics = await window.fetchCommunityTopics();
     const t = topics.find(x => x.id === id);
