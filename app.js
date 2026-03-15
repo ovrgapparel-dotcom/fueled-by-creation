@@ -2,7 +2,7 @@
 import './content_utils.js';
 import './translations.js';
 
-// ===== APP CONFIGURATION (v1.0.8) =====
+// ===== APP CONFIGURATION (v1.0.9) =====
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
 const CONFIG_TABLE = 'app_config';
@@ -888,9 +888,9 @@ function renderAdminImgSlots() {
     var labels = ['Main', 'Photo 2', 'Photo 3', 'Photo 4', 'Photo 5'];
     var slotsEl = document.getElementById('adminImgSlots'); if (!slotsEl) return;
     slotsEl.innerHTML = adminImgSlots.map(function (src, i) {
-        var isVideo = src && (src.match(/\.(mp4|webm|ogg|mov)$|^data:video/i));
+        var isVideo = src && (src.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i));
         var mediaHtml = src ? (isVideo ? 
-            '<video src="' + src + '" id="slotImg_' + i + '" style="width:100%;height:100%;object-fit:cover"></video>' : 
+            '<video src="' + src + '" id="slotImg_' + i + '" autoplay muted loop playsinline controls style="width:100%;height:100%;object-fit:cover"></video>' : 
             '<img src="' + src + '" alt="Slot ' + (i + 1) + '" id="slotImg_' + i + '">') : 
             '<div class="img-slot-icon">📷</div>';
 
@@ -1678,7 +1678,7 @@ async function openArtistDetail(id) {
     if (mediaContainer) {
         var isVideo = a.banner_image_url && (a.banner_image_url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i) || a.promo_video_url);
         if (isVideo) {
-            mediaContainer.innerHTML = '<video src="' + (a.promo_video_url || a.banner_image_url) + '" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1"></video>';
+            mediaContainer.innerHTML = '<video src="' + (a.promo_video_url || a.banner_image_url) + '" autoplay muted loop playsinline controls style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1"></video>';
             heroWrap.style.backgroundImage = 'none';
         } else {
             mediaContainer.innerHTML = '';
@@ -1723,9 +1723,9 @@ async function openArticleDetail(id) {
     var mediaWrap = document.getElementById('articleMediaWrap');
     if (mediaWrap) {
         var videoUrl = a.promo_video_url || a.cover_image_url;
-        var isVideo = videoUrl && videoUrl.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        var isVideo = videoUrl && videoUrl.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
         if (isVideo) {
-            mediaWrap.innerHTML = '<video src="' + videoUrl + '" autoplay muted loop playsinline style="width:100%;max-height:500px;object-fit:cover;display:block"></video>';
+            mediaWrap.innerHTML = `<video src="${videoUrl}" autoplay muted loop playsinline controls style="width:100%;max-height:500px;object-fit:cover;display:block"></video>`;
         } else {
             mediaWrap.innerHTML = '<img id="articleCoverDetail" src="' + (a.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Cover" class="article-detail-cover" style="width:100%;display:block;border-bottom:1px solid rgba(0,0,0,0.05)">';
         }
@@ -1768,9 +1768,9 @@ async function openEventDetail(id) {
     var mediaWrap = document.getElementById('eventMediaWrap');
     if (mediaWrap) {
         var videoUrl = e.promo_video_url || e.cover_image_url;
-        var isVideo = videoUrl && videoUrl.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        var isVideo = videoUrl && videoUrl.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
         if (isVideo) {
-            mediaWrap.innerHTML = '<video src="' + videoUrl + '" autoplay muted loop playsinline style="width:100%;max-height:400px;object-fit:cover;display:block"></video>';
+            mediaWrap.innerHTML = `<video src="${videoUrl}" autoplay muted loop playsinline controls style="width:100%;max-height:400px;object-fit:cover;display:block"></video>`;
         } else {
             mediaWrap.innerHTML = '<img id="eventCoverDetail" src="' + (e.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Event" class="event-detail-cover" style="width:100%;display:block">';
         }
@@ -1972,7 +1972,7 @@ async function handleContentFileSelect(event) {
         // Efficient preview (v1.0.4)
         const previewUrl = URL.createObjectURL(file);
         if (file.type.startsWith('video/')) {
-            preview.innerHTML = '<video src="' + previewUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px" controls autoplay muted loop></video>';
+            preview.innerHTML = '<video src="' + previewUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px" controls autoplay muted loop playsinline></video>';
             document.getElementById('contentMediaType').value = 'video';
         } else {
             preview.innerHTML = '<img src="' + previewUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px">';
@@ -2056,7 +2056,7 @@ async function loadHotTopics() {
                 var mediaHtml = '';
                 if (pinnedItem.media_url) {
                     if (pinnedItem.media_type === 'video') {
-                        mediaHtml = '<video src="' + pinnedItem.media_url + '" autoplay muted loop playsinline></video>';
+                        mediaHtml = '<video src="' + pinnedItem.media_url + '" autoplay muted loop playsinline controls style="width:100%; height:100%; object-fit:cover;"></video>';
                     } else {
                         mediaHtml = '<img src="' + pinnedItem.media_url + '" alt="Pinned">';
                     }
@@ -2084,8 +2084,8 @@ async function loadHotTopics() {
             
             var mediaHtml = '';
             if (t.media_url) {
-                if (t.media_type === 'video') {
-                    mediaHtml = '<div class="thread-media-preview video" style="height: 180px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1rem;"><video src="' + t.media_url + '" style="width:100%; height:100%; object-fit:cover;" controls></video></div>';
+                if (t.media_type === 'video' || t.media_url.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i)) {
+                    mediaHtml = '<div class="thread-media-preview video" style="height: 180px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1rem;"><video src="' + t.media_url + '" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;" controls></video></div>';
                 } else {
                     mediaHtml = '<div class="thread-media-preview" style="background-image:url(\'' + t.media_url + '\')"></div>';
                 }
