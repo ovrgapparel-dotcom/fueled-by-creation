@@ -2,7 +2,7 @@
 import './content_utils.js';
 import './translations.js';
 
-// ===== APP CONFIGURATION (v1.0.4) =====
+// ===== APP CONFIGURATION (v1.0.7) =====
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
 const CONFIG_TABLE = 'app_config';

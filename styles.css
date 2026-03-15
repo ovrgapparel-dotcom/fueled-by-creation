@@ -470,17 +470,7 @@ nav a.active {
   line-height: 1
 }
 
-.admin-tabs {
-  display: flex;
-  gap: 1.5rem;
-  padding: 0.5rem 2rem;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.admin-tabs::-webkit-scrollbar { display: none; }
+
 
 .supabase-status {
   margin: 0 2rem;
@@ -2314,9 +2304,27 @@ nav a.active {
 
 .admin-tabs {
   display: flex;
-  border-bottom: 1px solid #333;
+  gap: 1rem;
   padding: 0 2rem;
-  overflow-x: auto
+  border-bottom: 1px solid #333;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.admin-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-tabs::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
 }
 
 .admin-tab {
