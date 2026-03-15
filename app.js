@@ -2,6 +2,10 @@
 import './content_utils.js';
 import './translations.js';
 
+// ===== APP CONFIGURATION (v1.0.4) =====
+const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
+const STORAGE_BUCKET = 'product-images';
+
 var sbClient = null;
 var currentUser = null;
 var products = [];
@@ -1693,24 +1697,18 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
     const targetInput = document.getElementById(targetInputId);
     if (!targetInput) return;
 
-    // Direct preview before upload
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const previewUrl = e.target.result;
-        // Find if there's a corresponding preview element
-        const previewBtn = event.target.previousElementSibling;
-        if (previewBtn && previewBtn.classList.contains('btn-upload-trigger')) {
-            if (file.type.startsWith('video/')) {
-                previewBtn.innerHTML = '🎥';
-                previewBtn.style.color = 'var(--primary)';
-            } else {
-                previewBtn.innerHTML = '📷';
-                previewBtn.style.color = 'var(--primary)';
-            }
+    // Memory-efficient preview using Object URL (v1.0.4 fix for crashes)
+    const previewUrl = URL.createObjectURL(file);
+    const previewBtn = event.target.previousElementSibling;
+    if (previewBtn && previewBtn.classList.contains('btn-upload-trigger')) {
+        previewBtn.style.color = 'var(--primary)';
+        if (file.type.startsWith('video/')) {
+            previewBtn.innerHTML = '🎥';
+        } else {
+            previewBtn.innerHTML = '📷';
         }
-        targetInput.value = 'Uploading...';
-    };
-    reader.readAsDataURL(file);
+    }
+    targetInput.value = 'Uploading...';
 
     showToast('Uploading...', 'Please wait while we fuel the tribe media.', '#3b82f6');
 
@@ -1730,6 +1728,9 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
 
         const urlData = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
         targetInput.value = urlData.data.publicUrl;
+        
+        // Clean up object URL
+        URL.revokeObjectURL(previewUrl);
         
         showToast('Success!', 'Media uploaded successfully.', '#22c55e');
     } catch (e) {
@@ -1828,17 +1829,22 @@ async function handleContentFileSelect(event) {
     try {
         // Ensure user is logged in if RLS requires it, or handle as public if allowed
         // Note: content_utils.js uses window.sbClient
+        // Efficient preview (v1.0.4)
+        const previewUrl = URL.createObjectURL(file);
+        if (file.type.startsWith('video/')) {
+            preview.innerHTML = '<video src="' + previewUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px" controls autoplay muted loop></video>';
+            document.getElementById('contentMediaType').value = 'video';
+        } else {
+            preview.innerHTML = '<img src="' + previewUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px">';
+            document.getElementById('contentMediaType').value = 'image';
+        }
+
         contentUploadedUrl = await window.uploadContentFile(file);
         
-        if (file.type.startsWith('video/')) {
-            preview.innerHTML = '<video src="' + contentUploadedUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px" controls autoplay muted loop></video>';
-            document.getElementById('contentMediaType').value = 'video';
-            showToast('Media Ready ✓', 'Your video has been uploaded to the cloud.');
-        } else {
-            preview.innerHTML = '<img src="' + contentUploadedUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:12px">';
-            document.getElementById('contentMediaType').value = 'image';
-            showToast('Media Ready ✓', 'Your image has been uploaded to the cloud.');
-        }
+        // Clean up object URL after upload completes or updates
+        // URL.revokeObjectURL(previewUrl); // Keep it for the preview display though
+        
+        showToast('Media Ready ✓', 'Your media has been uploaded to the cloud.');
     } catch (e) {
         console.error('Content upload failed:', e);
         showToast('Upload Failed', e.message || 'Supabase Storage error.', '#ef4444');
@@ -1981,11 +1987,8 @@ async function loadHotTopics() {
 function loadHeroMedia() {
     var heroMedia = document.getElementById('heroMedia');
     if (!heroMedia) return;
-    
-    // We can use a video or high-quality image from our storage or a placeholder
-    // Let's use a premium video background if possible, or a nice culture image
-    var vUrl = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4'; // Placeholder culture video
-    heroMedia.innerHTML = '<video src="' + vUrl + '" autoplay muted loop playsinline></video>';
+    // Configurable hero video (v1.0.4)
+    heroMedia.innerHTML = '<video src="' + HERO_VIDEO_URL + '" autoplay muted loop playsinline></video>';
 }
 
 async function handleTopicLike(id) {

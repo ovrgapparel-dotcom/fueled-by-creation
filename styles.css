@@ -285,6 +285,11 @@ nav a.active {
   .featured-split-block {
     flex-direction: column;
   }
+  .featured-split-img {
+    width: 100%;
+    min-height: auto;
+    aspect-ratio: 4/5;
+  }
 }
 
 .featured-split-content {
@@ -462,6 +467,29 @@ nav a.active {
   letter-spacing: .04em;
   color: var(--dark);
   line-height: 1
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.admin-tabs::-webkit-scrollbar { display: none; }
+
+.supabase-status {
+  margin: 0 2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .filter-tabs {
