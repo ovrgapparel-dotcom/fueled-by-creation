@@ -494,6 +494,7 @@
         <div class="admin-tab" onclick="showAdminTab('featured-articles-admin', this)">⭐ Featured</div>
         <div class="admin-tab" onclick="showAdminTab('threads-admin', this)">Threads</div>
         <div class="admin-tab" onclick="showAdminTab('events-admin', this)">Events</div>
+        <div class="admin-tab" onclick="showAdminTab('hero-media', this)">🎬 Hero Media</div>
         <div class="admin-tab" onclick="showAdminTab('notifications-admin', this)">Notifications</div>
       </div>
       <div class="admin-content">
@@ -781,8 +782,29 @@
           </div>
         </div>
 
-        <!-- ===== EVENTS ADMIN TAB ===== -->
-        <div id="adminTabEvents" style="display:none">
+        <!-- Hero Media Management Tab -->
+        <div id="adminTabHeroMedia" style="display:none">
+          <div class="admin-form">
+            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+              Manage Hero Media</h3>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem">Update the video background for the home page hero section. Enter a direct video URL (MP4 recommended).</p>
+            
+            <div class="field-with-upload">
+              <label>Hero Video URL</label>
+              <div class="input-upload-group">
+                <input type="text" id="heroVideoInput" placeholder="https://example.com/video.mp4">
+                <button class="btn-upload-trigger" onclick="document.getElementById('heroVideoFile').click()">🎥</button>
+                <input type="file" id="heroVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'heroVideoInput', 'assets')">
+              </div>
+            </div>
+            
+            <div class="admin-form-actions" style="margin-top:2rem">
+              <button class="btn-save" onclick="saveHeroConfig()">💾 Save Hero Configuration</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- EVENTS ADMIN TAB -->
           <!-- Event List -->
           <div id="adminEventList" class="admin-product-list" style="margin-bottom:2rem">
             <p style="color:#666;text-align:center;padding:2rem">Loading events...</p>

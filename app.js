@@ -5,6 +5,7 @@ import './translations.js';
 // ===== APP CONFIGURATION (v1.0.4) =====
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
+const CONFIG_TABLE = 'app_config';
 
 var sbClient = null;
 var currentUser = null;
@@ -141,6 +142,43 @@ function handleRouting() {
 function toggleMobileMenu() {
     var nav = document.getElementById('mainNav');
     nav.classList.toggle('mobile-nav-active');
+}
+
+// ===== HERO MEDIA MANAGEMENT (v1.0.5) =====
+var currentHeroUrl = HERO_VIDEO_URL;
+
+async function loadHeroConfig() {
+    if (!sbClient) return;
+    try {
+        const { data, error } = await sbClient.from(CONFIG_TABLE).select('value').eq('key', 'hero_video_url').single();
+        if (error) {
+            if (error.code !== 'PGRST116') console.error('Error loading hero config:', error);
+            return;
+        }
+        if (data && data.value) {
+            currentHeroUrl = data.value;
+            var input = document.getElementById('heroVideoInput');
+            if (input) input.value = currentHeroUrl;
+        }
+    } catch (e) { console.error('Hero config load error:', e); }
+}
+
+async function saveHeroConfig() {
+    var url = document.getElementById('heroVideoInput').value.trim();
+    if (!url) { showToast('Error', 'Hero video URL cannot be empty.', '#ef4444'); return; }
+    if (!sbClient) { showToast('Demo Mode', 'Supabase not connected. URL saved locally.'); currentHeroUrl = url; loadHeroMedia(); return; }
+
+    try {
+        // Upsert logic
+        const { error } = await sbClient.from(CONFIG_TABLE).upsert({ key: 'hero_video_url', value: url }, { onConflict: 'key' });
+        if (error) throw error;
+        currentHeroUrl = url;
+        loadHeroMedia();
+        showToast('Saved! ✓', 'Hero video updated successfully.');
+    } catch (e) {
+        console.error('Save hero config error:', e);
+        showToast('Error', 'Could not save hero config: ' + e.message, '#ef4444');
+    }
 }
 
 // ===== PRODUCT LOADING =====
@@ -608,6 +646,7 @@ function openAdmin() {
     
     loadAdminThreads();
     loadAdminEvents();
+    loadHeroConfig(); // Load hero config when admin opens
     loadAdminNotifications();
 }
 
@@ -721,6 +760,7 @@ function showAdminTab(tab, el) {
         'artists-admin': 'adminTabArtists', 'articles-admin': 'adminTabArticles',
         'featured-articles-admin': 'adminTabFeaturedArticles',
         'threads-admin': 'adminTabThreads', 'events-admin': 'adminTabEvents',
+        'hero-media': 'adminTabHeroMedia',
         'notifications-admin': 'adminTabNotifications'
     };
     Object.values(tabMap).forEach(function (id) { var el2 = document.getElementById(id); if (el2) el2.style.display = 'none'; });
@@ -737,6 +777,7 @@ function showAdminTab(tab, el) {
     else if (tab === 'threads-admin') loadAdminThreads();
     else if (tab === 'events-admin') loadAdminEvents();
     else if (tab === 'notifications-admin') loadAdminNotifications();
+    else if (tab === 'hero-media') loadHeroConfig();
     else if (tab === 'products') loadAdminProducts();
 }
 function renderAdminImgSlots() {
@@ -1982,8 +2023,24 @@ async function loadHotTopics() {
 function loadHeroMedia() {
     var heroMedia = document.getElementById('heroMedia');
     if (!heroMedia) return;
-    // Configurable hero video (v1.0.4)
-    heroMedia.innerHTML = '<video src="' + HERO_VIDEO_URL + '" autoplay muted loop playsinline></video>';
+    var url = currentHeroUrl;
+    var isVideo = url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+    var isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+    var isVimeo = url.includes('vimeo.com');
+
+    if (isYouTube) {
+        var videoId = '';
+        if (url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
+        else if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
+        heroMedia.innerHTML = '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=1&loop=1&playlist=' + videoId + '&controls=0&showinfo=0&mute=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+    } else if (isVimeo) {
+        var vimeoId = url.split('vimeo.com/')[1].split('?')[0];
+        heroMedia.innerHTML = '<iframe src="https://player.vimeo.com/video/' + vimeoId + '?autoplay=1&muted=1&loop=1&background=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+    } else if (isVideo) {
+        heroMedia.innerHTML = '<video src="' + url + '" autoplay muted loop playsinline></video>';
+    } else {
+        heroMedia.innerHTML = '<img src="' + url + '" alt="Hero">';
+    }
 }
 
 async function handleTopicLike(id) {
