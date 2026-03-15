@@ -2,7 +2,7 @@
 import './content_utils.js';
 import './translations.js';
 
-// ===== APP CONFIGURATION (v1.1.1) =====
+// ===== APP CONFIGURATION (v1.1.2) =====
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
 const CONFIG_TABLE = 'app_config';
@@ -2385,8 +2385,9 @@ document.addEventListener('DOMContentLoaded', function () {
     loadHeroMedia();
     loadProducts();
     
-    // Initial Render (Demo data as fallback)
+    // Initial Render (Database first, then fallback to demo)
     refreshFrontendData();
+    loadHotTopics(); // Specifically for Trends page
 
     // Routing
     handleRouting();
