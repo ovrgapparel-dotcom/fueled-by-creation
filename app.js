@@ -2,7 +2,7 @@
 import './content_utils.js';
 import './translations.js';
 
-// ===== APP CONFIGURATION (v1.0.9) =====
+// ===== APP CONFIGURATION (v1.1.0) =====
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
 const CONFIG_TABLE = 'app_config';
@@ -164,12 +164,14 @@ async function loadHeroConfig() {
 }
 
 async function saveHeroConfig() {
+    var btn = event?.target || document.querySelector('button[onclick="saveHeroConfig()"]');
+    var originalText = btn ? btn.textContent : '💾 Save Hero Configuration';
     var url = document.getElementById('heroVideoInput').value.trim();
     if (!url) { showToast('Error', 'Hero video URL cannot be empty.', '#ef4444'); return; }
     if (!sbClient) { showToast('Demo Mode', 'Supabase not connected. URL saved locally.'); currentHeroUrl = url; loadHeroMedia(); return; }
 
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     try {
-        // Upsert logic
         const { error } = await sbClient.from(CONFIG_TABLE).upsert({ key: 'hero_video_url', value: url }, { onConflict: 'key' });
         if (error) throw error;
         currentHeroUrl = url;
@@ -178,6 +180,8 @@ async function saveHeroConfig() {
     } catch (e) {
         console.error('Save hero config error:', e);
         showToast('Error', 'Could not save hero config: ' + e.message, '#ef4444');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = originalText; }
     }
 }
 
@@ -208,6 +212,8 @@ async function loadFeaturedPromoConfig() {
 }
 
 async function saveFeaturedPromoConfig() {
+    var btn = event?.target || document.querySelector('button[onclick="saveFeaturedPromoConfig()"]');
+    var originalText = btn ? btn.textContent : '💾 Save Featured Configuration';
     const title = document.getElementById('featuredPromoTitleInput').value.trim();
     const desc = document.getElementById('featuredPromoDescInput').value.trim();
     const media = document.getElementById('featuredPromoMediaInput').value.trim();
@@ -219,21 +225,21 @@ async function saveFeaturedPromoConfig() {
         return;
     }
 
-    const configs = [
-        { key: 'featured_promo_title', value: title },
-        { key: 'featured_promo_desc', value: desc },
-        { key: 'featured_promo_media', value: media },
-        { key: 'featured_promo_btn_text', value: btnText },
-        { key: 'featured_promo_btn_link', value: btnLink }
-    ];
-
     if (!sbClient) {
         showToast('Demo Mode', 'Saved locally.');
         renderFeaturedPromo();
         return;
     }
 
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     try {
+        const configs = [
+            { key: 'featured_promo_title', value: title },
+            { key: 'featured_promo_desc', value: desc },
+            { key: 'featured_promo_media', value: media },
+            { key: 'featured_promo_btn_text', value: btnText },
+            { key: 'featured_promo_btn_link', value: btnLink }
+        ];
         const { error } = await sbClient.from(CONFIG_TABLE).upsert(configs, { onConflict: 'key' });
         if (error) throw error;
         renderFeaturedPromo();
@@ -241,6 +247,8 @@ async function saveFeaturedPromoConfig() {
     } catch (e) {
         console.error('Save featured promo config error:', e);
         showToast('Error', 'Could not save featured promo config: ' + e.message, '#ef4444');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = originalText; }
     }
 }
 
@@ -939,7 +947,13 @@ async function uploadImageToStorage(event, slotIndex) {
                 showToast('Photo loaded (local)', 'Note: Create the "product-images" bucket in Supabase.', '#f59e0b'); 
             };
             reader.readAsDataURL(file);
-        } else { showToast('Upload error', e.message || 'Check storage permissions.', '#ef4444'); }
+        } else {
+            var msg = e.message || 'Check storage permissions.';
+            if (msg.includes('payload too large') || msg.includes('oversized') || e.status === 413) {
+                msg = 'File too large (Max 50MB).';
+            }
+            showToast('Upload error', msg, '#ef4444');
+        }
     }
 }
 
@@ -1194,6 +1208,10 @@ async function saveArticle() {
     };
     var editId = document.getElementById('editArticleId').value;
     var isDemo = isDemoId(editId);
+    var btn = event?.target || document.querySelector('button[onclick="saveArticle()"]');
+    var originalText = btn ? btn.textContent : '💾 Save Article';
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from('articles').update(payload).eq('id', editId);
@@ -1207,7 +1225,12 @@ async function saveArticle() {
         }
         cancelEditArticle(); await loadAdminArticles(); refreshFrontendData();
         showToast('Saved! ✓', '"' + title + '" saved.');
-    } catch (e) { showToast('Error', e.message || 'Could not save article.', '#ef4444'); }
+    } catch (e) { 
+        console.error('saveArticle error:', e);
+        showToast('Error', e.message || 'Could not save article.', '#ef4444'); 
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = originalText; }
+    }
 }
 
 async function deleteArticle(id) {
@@ -1876,7 +1899,11 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
     } catch (e) {
         console.error('Admin upload error:', e);
         targetInput.value = '';
-        showToast('Upload Error', e.message || 'Check connection.', '#ef4444');
+        var msg = e.message || 'Check connection.';
+        if (msg.includes('payload too large') || msg.includes('oversized') || e.status === 413) {
+            msg = 'File too large (Max 50MB for video).';
+        }
+        showToast('Upload Error', msg, '#ef4444');
     }
 }
 
@@ -2031,7 +2058,8 @@ async function submitCommunityContent() {
         closeContentUpload();
         loadHotTopics(); // Refresh the feed
     } catch (e) {
-        showToast('Error', 'Could not save your submission.', '#ef4444');
+        console.error('submitCommunityContent error:', e);
+        showToast('Submission Failed', e.message || 'Check your connection.', '#ef4444');
     } finally {
         btn.disabled = false;
         btn.textContent = originalText;
@@ -2308,6 +2336,8 @@ window.updateAdminUI = updateAdminUI;
 window.openAdmin = openAdmin;
 window.closeAdmin = closeAdmin;
 window.showAdminTab = showAdminTab;
+window.saveHeroConfig = saveHeroConfig;
+window.saveFeaturedPromoConfig = saveFeaturedPromoConfig;
 window.saveProduct = saveProduct;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
