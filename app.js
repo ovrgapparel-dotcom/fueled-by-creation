@@ -181,6 +181,107 @@ async function saveHeroConfig() {
     }
 }
 
+// ===== FEATURED PROMO MANAGEMENT (v1.0.5) =====
+async function loadFeaturedPromoConfig() {
+    if (!sbClient) return;
+    try {
+        const { data, error } = await sbClient.from(CONFIG_TABLE).select('*').in('key', [
+            'featured_promo_title', 'featured_promo_desc', 'featured_promo_media', 'featured_promo_btn_text', 'featured_promo_btn_link'
+        ]);
+        if (error) { console.error('Error loading featured promo config:', error); return; }
+        
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const inputId = {
+                    'featured_promo_title': 'featuredPromoTitleInput',
+                    'featured_promo_desc': 'featuredPromoDescInput',
+                    'featured_promo_media': 'featuredPromoMediaInput',
+                    'featured_promo_btn_text': 'featuredPromoBtnTextInput',
+                    'featured_promo_btn_link': 'featuredPromoBtnLinkInput'
+                }[item.key];
+                const input = document.getElementById(inputId);
+                if (input) input.value = item.value;
+            });
+            renderFeaturedPromo();
+        }
+    } catch (e) { console.error('Featured promo config load error:', e); }
+}
+
+async function saveFeaturedPromoConfig() {
+    const title = document.getElementById('featuredPromoTitleInput').value.trim();
+    const desc = document.getElementById('featuredPromoDescInput').value.trim();
+    const media = document.getElementById('featuredPromoMediaInput').value.trim();
+    const btnText = document.getElementById('featuredPromoBtnTextInput').value.trim();
+    const btnLink = document.getElementById('featuredPromoBtnLinkInput').value.trim();
+
+    if (!title || !desc || !media) {
+        showToast('Error', 'Title, Description, and Media are required.', '#ef4444');
+        return;
+    }
+
+    const configs = [
+        { key: 'featured_promo_title', value: title },
+        { key: 'featured_promo_desc', value: desc },
+        { key: 'featured_promo_media', value: media },
+        { key: 'featured_promo_btn_text', value: btnText },
+        { key: 'featured_promo_btn_link', value: btnLink }
+    ];
+
+    if (!sbClient) {
+        showToast('Demo Mode', 'Saved locally.');
+        renderFeaturedPromo();
+        return;
+    }
+
+    try {
+        const { error } = await sbClient.from(CONFIG_TABLE).upsert(configs, { onConflict: 'key' });
+        if (error) throw error;
+        renderFeaturedPromo();
+        showToast('Saved! ✓', 'Featured promo updated successfully.');
+    } catch (e) {
+        console.error('Save featured promo config error:', e);
+        showToast('Error', 'Could not save featured promo config: ' + e.message, '#ef4444');
+    }
+}
+
+function renderFeaturedPromo() {
+    const title = document.getElementById('featuredPromoTitleInput')?.value || "THE CREW IN SESSION";
+    const desc = document.getElementById('featuredPromoDescInput')?.value || "Go behind the scenes with the FBC team...";
+    const media = document.getElementById('featuredPromoMediaInput')?.value || "assets/featured_video_thumbnail.png";
+    const btnText = document.getElementById('featuredPromoBtnTextInput')?.value || "Watch Documentary";
+    const btnLink = document.getElementById('featuredPromoBtnLinkInput')?.value || "trends";
+
+    const titleEl = document.getElementById('featuredPromoTitle');
+    const descEl = document.getElementById('featuredPromoDesc');
+    const mediaEl = document.getElementById('featuredPromoMedia');
+    const btnEl = document.getElementById('featuredPromoBtn');
+
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) descEl.textContent = desc;
+    if (btnEl) {
+        btnEl.textContent = btnText;
+        btnEl.onclick = (e) => {
+            e.preventDefault();
+            if (btnLink.startsWith('http')) window.open(btnLink, '_blank');
+            else switchPage(btnLink);
+        };
+    }
+    if (mediaEl) {
+        const isVideo = media.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+        if (isVideo) {
+            mediaEl.innerHTML = '<video src="' + media + '" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover"></video>';
+            mediaEl.style.backgroundImage = 'none';
+        } else {
+            mediaEl.style.backgroundImage = 'url(' + media + ')';
+            mediaEl.innerHTML = `
+                <div class="play-btn-glass"
+                    style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.4); cursor: pointer;">
+                    <span style="color: white; font-size: 2rem; margin-left: 5px;">▶</span>
+                </div>`;
+        }
+    }
+}
+
 // ===== PRODUCT LOADING =====
 function setSupabaseStatus(state, msg) {
     var el = document.getElementById('supabaseStatus');
@@ -647,6 +748,7 @@ function openAdmin() {
     loadAdminThreads();
     loadAdminEvents();
     loadHeroConfig(); // Load hero config when admin opens
+    loadFeaturedPromoConfig(); // Load featured promo config
     loadAdminNotifications();
 }
 
@@ -761,6 +863,7 @@ function showAdminTab(tab, el) {
         'featured-articles-admin': 'adminTabFeaturedArticles',
         'threads-admin': 'adminTabThreads', 'events-admin': 'adminTabEvents',
         'hero-media': 'adminTabHeroMedia',
+        'featured-promo': 'adminTabFeaturedPromo',
         'notifications-admin': 'adminTabNotifications'
     };
     Object.values(tabMap).forEach(function (id) { var el2 = document.getElementById(id); if (el2) el2.style.display = 'none'; });
@@ -778,6 +881,7 @@ function showAdminTab(tab, el) {
     else if (tab === 'events-admin') loadAdminEvents();
     else if (tab === 'notifications-admin') loadAdminNotifications();
     else if (tab === 'hero-media') loadHeroConfig();
+    else if (tab === 'featured-promo') loadFeaturedPromoConfig();
     else if (tab === 'products') loadAdminProducts();
 }
 function renderAdminImgSlots() {

@@ -156,7 +156,7 @@
     <!-- Featured Video Section -->
     <section class="video-section section-wrap" id="featuredVideoSection">
       <div class="featured-split-block">
-        <div class="featured-split-img"
+        <div class="featured-split-img" id="featuredPromoMedia"
           style="background-image: url('assets/featured_video_thumbnail.png'); display: flex; align-items: center; justify-content: center;">
           <div class="play-btn-glass"
             style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.4); cursor: pointer;">
@@ -164,13 +164,13 @@
           </div>
         </div>
         <div class="featured-split-content">
-          <h3 data-i18n="video_title"
+          <h3 id="featuredPromoTitle" data-i18n="video_title"
             style="font-family:'Bebas Neue',sans-serif;font-weight:700;font-size:3rem;margin-bottom:1rem;line-height:1; letter-spacing: 0.05em;">
             THE CREW IN SESSION</h3>
-          <p data-i18n="video_desc" style="font-size:1.1rem;color:var(--gray);margin-bottom:2rem">Go behind the scenes
+          <p id="featuredPromoDesc" data-i18n="video_desc" style="font-size:1.1rem;color:var(--gray);margin-bottom:2rem">Go behind the scenes
             with the FBC team as we
             scout the next generation of talent. Watch how culture is being redefined in the heart of the city.</p>
-          <button class="btn-primary" data-i18n="watch_doc"
+          <button id="featuredPromoBtn" class="btn-primary" data-i18n="watch_doc"
             style="background:var(--primary);color:white;width:auto;padding:0.9rem 2.5rem;border-radius:8px;font-weight:700"
             onclick="event.preventDefault();switchPage('trends')">Watch Documentary</button>
         </div>
@@ -495,6 +495,7 @@
         <div class="admin-tab" onclick="showAdminTab('threads-admin', this)">Threads</div>
         <div class="admin-tab" onclick="showAdminTab('events-admin', this)">Events</div>
         <div class="admin-tab" onclick="showAdminTab('hero-media', this)">🎬 Hero Media</div>
+        <div class="admin-tab" onclick="showAdminTab('featured-promo', this)">💎 Featured Promo</div>
         <div class="admin-tab" onclick="showAdminTab('notifications-admin', this)">Notifications</div>
       </div>
       <div class="admin-content">
@@ -800,6 +801,50 @@
             
             <div class="admin-form-actions" style="margin-top:2rem">
               <button class="btn-save" onclick="saveHeroConfig()">💾 Save Hero Configuration</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Featured Promo Management Tab (v1.0.5) -->
+        <div id="adminTabFeaturedPromo" style="display:none">
+          <div class="admin-form">
+            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+              Manage Featured Promo</h3>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem">Update the "THE CREW IN SESSION" section on the home page.</p>
+            
+            <div class="admin-grid">
+              <div>
+                <label>Section Title *</label>
+                <input type="text" id="featuredPromoTitleInput" placeholder="THE CREW IN SESSION">
+              </div>
+              <div class="field-with-upload">
+                <label>Media URL (Image or Video) *</label>
+                <div class="input-upload-group">
+                  <input type="text" id="featuredPromoMediaInput" placeholder="Upload or paste URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('featuredPromoMediaFile').click()">📷</button>
+                  <input type="file" id="featuredPromoMediaFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'featuredPromoMediaInput', 'assets')">
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label>Description *</label>
+              <textarea id="featuredPromoDescInput" placeholder="Go behind the scenes..." style="min-height:80px"></textarea>
+            </div>
+            
+            <div class="admin-grid">
+              <div>
+                <label>Button Text</label>
+                <input type="text" id="featuredPromoBtnTextInput" placeholder="Watch Documentary">
+              </div>
+              <div>
+                <label>Button Link (Page ID or URL)</label>
+                <input type="text" id="featuredPromoBtnLinkInput" placeholder="trends">
+              </div>
+            </div>
+            
+            <div class="admin-form-actions" style="margin-top:2rem">
+              <button class="btn-save" onclick="saveFeaturedPromoConfig()">💾 Save Featured Configuration</button>
             </div>
           </div>
         </div>
