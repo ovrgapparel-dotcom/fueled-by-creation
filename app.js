@@ -140,12 +140,7 @@ function handleRouting() {
 
 function toggleMobileMenu() {
     var nav = document.getElementById('mainNav');
-    nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-    if (nav.style.display === 'flex') {
-        nav.style.position = 'fixed'; nav.style.top = '68px'; nav.style.left = '0'; nav.style.right = '0';
-        nav.style.background = 'var(--dark)'; nav.style.flexDirection = 'column'; nav.style.padding = '1rem';
-        nav.style.zIndex = '99'; nav.style.borderBottom = '2px solid var(--primary)';
-    }
+    nav.classList.toggle('mobile-nav-active');
 }
 
 // ===== PRODUCT LOADING =====
