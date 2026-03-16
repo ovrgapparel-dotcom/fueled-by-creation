@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation — V1.1.8</title>
+  <title>Fueled By Creation — V1.1.9</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
@@ -88,17 +88,6 @@
       <a href="#" class="logo" onclick="event.preventDefault();switchPage('home')">
         <img src="app_icon.png" alt="FBC">
       </a>
-      <nav id="mainNav">
-        <a href="#" class="active" onclick="event.preventDefault();switchPage('home')" data-page="home"
-          data-i18n="home">Home</a>
-        <a href="#" onclick="event.preventDefault();switchPage('shop')" data-page="shop" data-i18n="shop">Shop</a>
-        <a href="#" onclick="event.preventDefault();switchPage('artists')" data-page="artists"
-          data-i18n="artists">Artists</a>
-        <a href="#" onclick="event.preventDefault();switchPage('trends')" data-page="trends"
-          data-i18n="trends">Trends</a>
-        <a href="#" onclick="event.preventDefault();switchPage('events')" data-page="events"
-          data-i18n="events">Events</a>
-      </nav>
       <div class="header-actions">
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
         <button class="cart-btn" onclick="toggleCart()">🛍 Cart <span class="cart-badge"
@@ -106,6 +95,19 @@
       </div>
     </div>
   </header>
+
+  <nav id="mainNav">
+    <a href="#" class="active" onclick="event.preventDefault();switchPage('home')" data-page="home"
+      data-i18n="home">Home</a>
+    <a href="#" onclick="event.preventDefault();switchPage('shop')" data-page="shop" data-i18n="shop">Shop</a>
+    <a href="#" onclick="event.preventDefault();switchPage('artists')" data-page="artists"
+      data-i18n="artists">Artists</a>
+    <a href="#" onclick="event.preventDefault();switchPage('trends')" data-page="trends"
+      data-i18n="trends">Trends</a>
+    <a href="#" onclick="event.preventDefault();switchPage('events')" data-page="events"
+      data-i18n="events">Events</a>
+  </nav>
+
 
   <!-- ===== HOME PAGE ===== -->
   <div class="page-section active" id="page-home">
