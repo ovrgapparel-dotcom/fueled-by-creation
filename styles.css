@@ -408,15 +408,18 @@ nav a.active {
 }
 
 .thread-card {
-  display: flex;
-  align-items: center;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex !important;
+  align-items: center !important;
+  background: white !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: 1.25rem !important;
+  margin-bottom: 1rem !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
+
 
 .thread-tag-wrap {
   width: 80px;
@@ -1017,16 +1020,19 @@ nav a.active {
 .pinned-media {
   flex: 1.2;
   height: 400px;
-  background: #eee;
+  background: #000;
   overflow: hidden;
+  position: relative;
 }
+
 
 .pinned-media img, .pinned-media video {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Changed from cover to prevent extreme zoom */
+  object-fit: cover; /* Back to cover for full banner look */
   background: #000;
 }
+
 
 
 .pinned-content {
@@ -1076,9 +1082,10 @@ nav a.active {
     flex-direction: column;
     margin-bottom: 2rem;
     border-radius: 12px;
+    width: 100%;
   }
   .pinned-media {
-    height: 300px;
+    height: 250px; /* Reduced height to prevent cropping heads */
     background: #000;
     width: 100%;
   }
@@ -1087,13 +1094,26 @@ nav a.active {
     width: 100%;
   }
   .pinned-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    line-height: 1.2;
   }
   .pinned-hook {
     font-size: 0.95rem;
     margin-bottom: 1.5rem;
   }
+  
+  .thread-card {
+    padding: 1rem !important;
+    gap: 0.75rem !important;
+  }
+  .thread-info {
+    padding: 0 0.5rem !important;
+  }
+  .thread-tag-wrap {
+    width: 60px !important;
+  }
 }
+
 
 
 /* Artist Detail Premium */
@@ -1269,17 +1289,8 @@ nav a.active {
   gap: 1rem
 }
 
-.thread-card {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1.2rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: all .2s
-}
+/* Consolidated with main thread-card style */
+
 
 .thread-card:hover {
   border-color: var(--primary);
@@ -3490,18 +3501,8 @@ footer {
 }
 
 /* Glassmorphism for Hot Topics */
-.thread-card {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  backdrop-filter: blur(5px);
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 107, 53, 0.1);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: 1.5rem;
-  border-radius: 16px;
-  margin-bottom: 1.5rem;
-}
+/* Consolidated with main thread-card style */
+
 
 .thread-media-preview {
   width: 120px;

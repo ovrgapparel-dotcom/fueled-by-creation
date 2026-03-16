@@ -755,7 +755,11 @@ function buyViaWhatsApp() {
 }
 
 // ===== ADMIN =====
-function handleAdminClick() { openAdmin(); }
+function handleAdminClick() { 
+    if (currentUser) openAdmin(); 
+    else openLogin(); 
+}
+
 function openLogin() {
     document.getElementById('loginOverlay').classList.add('open');
     document.getElementById('loginEmail').focus();
