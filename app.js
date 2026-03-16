@@ -2167,35 +2167,180 @@ function loadHeroMedia() {
 }
 
 async function handleTopicLike(id) {
-    // If not logged in, we allow "anon" likes if the RLS matches,
-    // otherwise we use a guest session or prompt for login.
-    // For now, let's assume public likes are allowed as per our SQL fix.
+    // Optimistic UI Update: Instantly change the heart to red
+    const btnArr = Array.from(document.querySelectorAll(`button[onclick="event.stopPropagation();handleTopicLike('${id}')"]`));
+    btnArr.forEach(btn => {
+        btn.classList.add('active');
+        const countSpan = btn.querySelector('.count');
+        if (countSpan && !btn.hasAttribute('data-liked')) {
+            countSpan.textContent = parseInt(countSpan.textContent || '0') + 1;
+            btn.setAttribute('data-liked', 'true');
+        } else if (countSpan && btn.hasAttribute('data-liked')) {
+            countSpan.textContent = parseInt(countSpan.textContent || '1') - 1;
+            btn.removeAttribute('data-liked');
+            btn.classList.remove('active');
+        }
+    });
+
     try {
         const userId = currentUser ? currentUser.id : null;
         await window.toggleTopicLike(id, userId);
-        loadHotTopics(); // Refresh to update count
-        showToast('Liked! ❤️', 'Engagement fuels the tribe.');
+        // We only reload if we actually need the real numbers synced, but optimistic is usually enough.
+        // loadHotTopics(); 
     } catch (e) {
         console.error('Like failed:', e);
+        showToast('Like failed', 'Server error.', '#ef4444');
     }
 }
 
+// Global state to track currently open topic
+let currentTopicId = null;
+
 async function viewTopicDetail(id) {
+    currentTopicId = id;
     await window.incrementTopicViews(id);
-    // Actually opening the detail view
+    
+    // Increment optimistic view count in feed
+    const topicsArr = document.querySelectorAll(`div[onclick="viewTopicDetail('${id}')"]`);
+    topicsArr.forEach(t => {
+        const viewSpan = t.querySelector('.thread-action-btn:last-child .count');
+        if(viewSpan) viewSpan.textContent = parseInt(viewSpan.textContent || '0') + 1;
+    });
+
     const topics = await window.fetchCommunityTopics();
     const t = topics.find(x => x.id === id);
     if (!t) return;
 
-    // Repurposing articleDetail or using a new logic 
-    // For now, let's just open the external link if it exists
-    if (t.external_link) {
-        window.open(t.external_link, '_blank');
-    } else {
-        showToast('Topic View', t.title);
+    // Build the topic main content
+    let mediaHtml = '';
+    if (t.media_url) {
+        if (t.media_type === 'video' || t.media_url.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i)) {
+            mediaHtml = `<div class="topic-main-media"><video src="${t.media_url}" autoplay muted loop playsinline controls></video></div>`;
+        } else {
+            mediaHtml = `<div class="topic-main-media"><img src="${t.media_url}" alt="Media"></div>`;
+        }
     }
-    loadHotTopics(); // Refresh views count
+
+    const tContent = `
+        ${mediaHtml}
+        <h2 class="topic-main-title">${t.title}</h2>
+        <div class="topic-main-body">${t.content}</div>
+        
+        ${t.external_link ? `<a href="${t.external_link}" target="_blank" class="btn-primary" style="display:inline-block; margin-top: 1rem;">View External Link ↗</a>` : ''}
+        
+        <div class="topic-main-stats">
+            <button class="topic-stat-btn" onclick="handleTopicLike('${id}')">
+                <span class="icon">❤️</span> <span class="count">${t.likes_count || 0}</span>
+            </button>
+            <div class="topic-stat-btn">
+                <span>💬</span> <span class="count">${t.comments_count || 0}</span>
+            </div>
+            <div class="topic-stat-btn">
+                <span>👀</span> <span class="count">${t.views_count || 0}</span>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('topicDetailContent').innerHTML = tContent;
+    document.getElementById('topicCommentsList').innerHTML = '<p style="color:#888; text-align:center; padding: 2rem;">Loading comments...</p>';
+    
+    const overlay = document.getElementById('topicDetailOverlay');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    await loadCommentsForTopic(id);
 }
+
+function closeTopicDetail() {
+    document.getElementById('topicDetailOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    currentTopicId = null;
+}
+
+async function loadCommentsForTopic(id) {
+    if (!sbClient) return;
+    try {
+        const { data: comments, error } = await sbClient
+            .from('comments')
+            .select('*')
+            .eq('topic_id', id)
+            .order('created_at', { ascending: true }); // Oldest first for a standard chat thread
+
+        if (error) throw error;
+        renderComments(comments);
+    } catch (e) {
+        console.error('Failed to load comments:', e);
+        document.getElementById('topicCommentsList').innerHTML = '<p class="empty-comments">Failed to load comments.</p>';
+    }
+}
+
+function renderComments(comments) {
+    const list = document.getElementById('topicCommentsList');
+    if (!comments || comments.length === 0) {
+        list.innerHTML = `
+            <div class="empty-comments">
+                <div style="font-size:2rem; margin-bottom: 0.5rem;">🤫</div>
+                <p>No comments yet. Be the first to start the conversation!</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = comments.map(c => {
+        // Since we don't have user profiles heavily fleshed out yet, we use generic avatars or anon names.
+        // We can extract initials if user_name was stored, but falling back to simple icons.
+        const fallbackName = c.user_id ? 'Tribe Member' : 'Anonymous';
+        return `
+            <div class="comment-item">
+                <div class="comment-avatar">👤</div>
+                <div class="comment-bubble">
+                    <div class="comment-meta">
+                        <span class="comment-author">${fallbackName}</span>
+                        <span>${new Date(c.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div class="comment-text">${c.content}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Auto-scroll to bottom of comments
+    const scrollBox = document.querySelector('.topic-body-scroll');
+    if(scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight;
+}
+
+window.submitNewComment = async function() {
+    if (!currentTopicId) return;
+    const input = document.getElementById('newCommentInput');
+    const content = input.value.trim();
+    if (!content) return;
+
+    // For now we allow anonymous commenting to lower friction, unless RLS blocks it inside sbClient
+    const userId = currentUser ? currentUser.id : null; 
+    
+    const originalText = input.value;
+    input.value = 'Sending...';
+    input.disabled = true;
+
+    try {
+        await window.submitTopicComment(currentTopicId, userId, content);
+        input.value = '';
+        await loadCommentsForTopic(currentTopicId);
+        showToast('Comment Posted', 'Your voice was added to the tribe.', '#22c55e');
+    } catch (e) {
+        input.value = originalText;
+        console.error('Failed to comment:', e);
+        showToast('Error', 'Failed to post comment. Ensure you are signed in.', '#ef4444');
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
+};
+
+// Expose close function securely
+window.closeTopicDetail = closeTopicDetail;
+window.handleTopicLike = handleTopicLike;
+window.viewTopicDetail = viewTopicDetail;
 
 // ===== EVENT PAYMENT GATE =====
 var currentEvent = null;
