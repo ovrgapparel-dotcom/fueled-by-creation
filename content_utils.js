@@ -45,7 +45,7 @@ async function saveCommunityTopic(topicData) {
 
     try {
         const { data, error } = await window.sbClient
-            .from('topics')
+            .from('threads')
             .insert([topicData])
             .select()
             .single();
@@ -67,7 +67,7 @@ async function fetchCommunityTopics() {
 
     try {
         const { data, error } = await window.sbClient
-            .from('topics')
+            .from('threads')
             .select('*')
             .order('created_at', { ascending: false });
 
@@ -111,9 +111,9 @@ async function toggleTopicLike(topicId, userId) {
 
         // Sync count to topics table (as a fallback for triggers)
         try {
-            const { data: topic } = await window.sbClient.from('topics').select('likes_count').eq('id', topicId).single();
+            const { data: topic } = await window.sbClient.from('threads').select('likes_count').eq('id', topicId).single();
             const newCount = (topic.likes_count || 0) + (isLiked ? 1 : -1);
-            await window.sbClient.from('topics').update({ likes_count: Math.max(0, newCount) }).eq('id', topicId);
+            await window.sbClient.from('threads').update({ likes_count: Math.max(0, newCount) }).eq('id', topicId);
         } catch (syncErr) {
             console.warn('Count sync error (non-critical):', syncErr);
         }
@@ -158,8 +158,8 @@ async function incrementTopicViews(topicId) {
         // Fallback if RPC isn't defined yet, or just ignore for now
         console.warn('View increment RPC failed, trying manual update');
         try {
-            const { data } = await window.sbClient.from('topics').select('views_count').eq('id', topicId).single();
-            await window.sbClient.from('topics').update({ views_count: (data.views_count || 0) + 1 }).eq('id', topicId);
+            const { data } = await window.sbClient.from('threads').select('views_count').eq('id', topicId).single();
+            await window.sbClient.from('threads').update({ views_count: (data.views_count || 0) + 1 }).eq('id', topicId);
         } catch (e) {
             console.error('Manual view increment failed:', e);
         }

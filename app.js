@@ -54,28 +54,32 @@ function localizeDemoData() {
 
 // ===== DEMO DATA (used until Supabase tables are populated) =====
 var demoArtists = [
-    { id: 'a1', name: 'Kwame Blaze', bio: 'Afrobeat sensation blending culture with rhythm.', profile_image_url: '', banner_image_url: '', promo_video_url: '', latest_release_title: 'Fire & Gold EP', latest_release_cover_url: '', latest_release_listen_url: '#', latest_release_date: '2026-02-15', merch_product_id: '', instagram_url: '#', youtube_url: '#', tiktok_spotify_url: '#', status: 'Published', is_featured: true },
-    { id: 'a2', name: 'Nia Vox', bio: 'R&B vocalist with soul-stirring melodies.', profile_image_url: '', banner_image_url: '', promo_video_url: '', latest_release_title: 'Midnight Session', latest_release_cover_url: '', latest_release_listen_url: '#', latest_release_date: '2026-01-20', merch_product_id: '', instagram_url: '#', youtube_url: '#', tiktok_spotify_url: '#', status: 'Published', is_featured: true },
-    { id: 'a3', name: 'DJ Phantom', bio: 'Electronic beats and culture-defining sounds.', profile_image_url: '', banner_image_url: '', promo_video_url: '', latest_release_title: 'Neon Pulse', latest_release_cover_url: '', latest_release_listen_url: '#', latest_release_date: '2026-03-01', merch_product_id: '', instagram_url: '#', youtube_url: '#', tiktok_spotify_url: '#', status: 'Published', is_featured: false },
+    { id: 'a1', name: 'Kwame Blaze', bio: 'Afrobeat sensation blending culture with rhythm.', profile_image_url: 'https://images.unsplash.com/photo-1557124816-e9b7d5440de2?auto=format&fit=crop&q=80&w=400', banner_image_url: '', promo_video_url: '', latest_release_title: 'Fire & Gold EP', latest_release_cover_url: '', latest_release_listen_url: '#', latest_release_date: '2026-02-15', merch_product_id: '', instagram_url: '#', youtube_url: '#', tiktok_spotify_url: '#', status: 'Published', is_featured: true },
+    { id: 'a2', name: 'Nia Vox', bio: 'R&B vocalist with soul-stirring melodies.', profile_image_url: 'https://images.unsplash.com/photo-1516575334481-f8528e9466b4?auto=format&fit=crop&q=80&w=400', banner_image_url: '', promo_video_url: '', latest_release_title: 'Midnight Session', latest_release_cover_url: '', latest_release_listen_url: '#', latest_release_date: '2026-01-20', merch_product_id: '', instagram_url: '#', youtube_url: '#', tiktok_spotify_url: '#', status: 'Published', is_featured: true },
+    { id: 'a3', name: 'DJ Phantom', bio: 'Electronic beats and culture-defining sounds.', profile_image_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=400', banner_image_url: '', promo_video_url: '', latest_release_title: 'Neon Pulse', latest_release_cover_url: '', latest_release_listen_url: '#', latest_release_date: '2026-03-01', merch_product_id: '', instagram_url: '#', youtube_url: '#', tiktok_spotify_url: '#', status: 'Published', is_featured: false },
 ];
+
 
 var demoArticles = [
-    { id: 'art1', title: 'The Rise of Afrobeat in Global Culture', category: 'article', cover_image_url: '', excerpt: 'How African rhythms are becoming the soundtrack of a generation.', body_content: '<p>Afrobeat has transcended borders. What started as a movement in West Africa is now a global phenomenon, influencing pop, hip-hop, and electronic music worldwide.</p><p>Artists like Kwame Blaze are at the forefront of this cultural revolution, blending traditional sounds with modern production techniques.</p>', author: 'FBC Editorial', publish_date: '2026-03-01', status: 'Published', is_featured: true, is_trending: true },
-    { id: 'art2', title: '5 Ways to Build Your Brand as an Independent Artist', category: 'howto', cover_image_url: '', excerpt: 'Practical tips for emerging artists to grow their audience.', body_content: '<p>Building a brand as an independent artist requires strategy, consistency, and authenticity. Here are five proven methods to accelerate your growth.</p>', author: 'FBC Editorial', publish_date: '2026-02-20', status: 'Published', is_featured: false, is_trending: false },
-    { id: 'art3', title: 'Behind the Scenes: FBC Studio Session', category: 'vlog', cover_image_url: '', excerpt: 'An exclusive look inside the creative process.', body_content: '<p>We took cameras inside the studio to capture the magic behind the latest FBC artist collaborations.</p>', author: 'FBC Media', publish_date: '2026-02-28', status: 'Published', is_featured: true, is_trending: true },
+    { id: 'art1', title: 'The Rise of Afrobeat in Global Culture', category: 'article', cover_image_url: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=800', excerpt: 'How African rhythms are becoming the soundtrack of a generation.', body_content: '<p>Afrobeat has transcended borders. What started as a movement in West Africa is now a global phenomenon, influencing pop, hip-hop, and electronic music worldwide.</p><p>Artists like Kwame Blaze are at the forefront of this cultural revolution, blending traditional sounds with modern production techniques.</p>', author: 'FBC Editorial', publish_date: '2026-03-01', status: 'Published', is_featured: true, is_trending: true },
+    { id: 'art2', title: '5 Ways to Build Your Brand as an Independent Artist', category: 'howto', cover_image_url: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800', excerpt: 'Practical tips for emerging artists to grow their audience.', body_content: '<p>Building a brand as an independent artist requires strategy, consistency, and authenticity. Here are five proven methods to accelerate your growth.</p>', author: 'FBC Editorial', publish_date: '2026-02-20', status: 'Published', is_featured: false, is_trending: false },
+    { id: 'art3', title: 'Behind the Scenes: FBC Studio Session', category: 'vlog', cover_image_url: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=800', excerpt: 'An exclusive look inside the creative process.', body_content: '<p>We took cameras inside the studio to capture the magic behind the latest FBC artist collaborations.</p>', author: 'FBC Media', publish_date: '2026-02-28', status: 'Published', is_featured: true, is_trending: true },
 ];
+
 
 var demoThreads = [
-    { id: 't1', title: 'Who is the most underrated artist right now?', tag: 'Hot', hook_text: 'Drop your picks — the culture needs to hear them.', cover_image_url: '', status: 'Active', priority_order: 1, is_pinned: true, likes: 124, comments: 45, views: 890 },
-    { id: 't2', title: 'Merch drop incoming 🔥', tag: 'Trend', hook_text: 'New FBC collection dropping this weekend. What pieces are you eyeing?', cover_image_url: '', status: 'Active', priority_order: 2, is_pinned: false, likes: 342, comments: 67, views: '1.2k' },
-    { id: 't3', title: 'Afrobeat vs Amapiano — which one defines 2026?', tag: 'News', hook_text: 'The debate that\'s been heating up all month.', cover_image_url: '', status: 'Active', priority_order: 3, is_pinned: false, likes: 89, comments: 23, views: 456 },
+    { id: 't1', title: 'Who is the most underrated artist right now?', tag: 'Hot', hook_text: 'Drop your picks — the culture needs to hear them.', cover_image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800', status: 'Active', priority_order: 1, is_pinned: true, likes: 124, comments: 45, views: 890 },
+    { id: 't2', title: 'Merch drop incoming 🔥', tag: 'Trend', hook_text: 'New FBC collection dropping this weekend. What pieces are you eyeing?', cover_image_url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', status: 'Active', priority_order: 2, is_pinned: false, likes: 342, comments: 67, views: '1.2k' },
+    { id: 't3', title: 'Afrobeat vs Amapiano — which one defines 2026?', tag: 'News', hook_text: 'The debate that\'s been heating up all month.', cover_image_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=800', status: 'Active', priority_order: 3, is_pinned: false, likes: 89, comments: 23, views: 456 },
 ];
 
+
 var demoEvents = [
-    { id: 'e1', title: 'FBC Live: Kwame Blaze in Concert', description: 'An electrifying night of Afrobeat, live performances, and exclusive merch drops.', event_date: '2026-04-15T20:00:00', location_name: 'Sofitel Abidjan', location_address: 'Abidjan, Côte d\'Ivoire', cover_image_url: '', ticketing_url: '#', featured_artist_id: 'a1', status: 'Published' },
-    { id: 'e2', title: 'Culture Night: Art × Music × Fashion', description: 'A multi-disciplinary evening celebrating the intersection of culture.', event_date: '2026-05-10T19:00:00', location_name: 'Ivoire Trade Center', location_address: 'Plateau, Abidjan', cover_image_url: '', ticketing_url: '#', featured_artist_id: null, status: 'Published' },
-    { id: 'e3', title: 'FBC Pop-Up Shop', description: 'Exclusive in-person merch experience. Limited drops only.', event_date: '2026-04-28T10:00:00', location_name: 'Zone 4, Marcory', location_address: 'Abidjan', cover_image_url: '', ticketing_url: '#', featured_artist_id: null, status: 'Published' },
+    { id: 'e1', title: 'FBC Live: Kwame Blaze in Concert', description: 'An electrifying night of Afrobeat, live performances, and exclusive merch drops.', event_date: '2026-04-15T20:00:00', location_name: 'Sofitel Abidjan', location_address: 'Abidjan, Côte d\'Ivoire', cover_image_url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800', ticketing_url: '#', featured_artist_id: 'a1', status: 'Published' },
+    { id: 'e2', title: 'Culture Night: Art × Music × Fashion', description: 'A multi-disciplinary evening celebrating the intersection of culture.', event_date: '2026-05-10T19:00:00', location_name: 'Ivoire Trade Center', location_address: 'Plateau, Abidjan', cover_image_url: 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&q=80&w=800', ticketing_url: '#', featured_artist_id: null, status: 'Published' },
+    { id: 'e3', title: 'FBC Pop-Up Shop', description: 'Exclusive in-person merch experience. Limited drops only.', event_date: '2026-04-28T10:00:00', location_name: 'Zone 4, Marcory', location_address: 'Abidjan', cover_image_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800', ticketing_url: '#', featured_artist_id: null, status: 'Published' },
 ];
+
 
 // ===== INIT =====
 function initSupabase() {
@@ -435,7 +439,8 @@ function renderArticles(targetGridId, articleList) {
     // Clean any prior classes
     grid.className = 'articles-grid';
     grid.innerHTML = articleList.map(function (a) {
-        var imgHtml = a.cover_image_url ? '<img src="' + a.cover_image_url + '" alt="' + a.title + '" loading="lazy">' : '';
+        var defaultImg = 'https://images.unsplash.com/photo-1514525253344-de81c97ef2c9?auto=format&fit=crop&q=80&w=800';
+        var imgHtml = '<img src="' + (a.cover_image_url || defaultImg) + '" alt="' + a.title + '" loading="lazy" style="width:100%; height:100%; object-fit:contain; background:#000;">';
         var catKey = a.category === 'howto' ? 'how_to' : (a.category === 'vlog' ? 'vlogs' : a.category);
         var catLabel = window.t(catKey) || a.category;
         return '<div class="article-card" onclick="openArticleDetail(\'' + a.id + '\')">' +
@@ -531,7 +536,10 @@ function renderEvents(targetGridId, eventList) {
         var enMonths = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
         var frMonths = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
         var months = window.getLang() === 'fr' ? frMonths : enMonths;
-        var imgHtml = e.cover_image_url ? '<img src="' + e.cover_image_url + '" alt="' + e.title + '" loading="lazy">' : '';
+        var defaultImg = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800';
+        var eventImg = e.cover_image_url || defaultImg;
+        var imgHtml = '<img src="' + eventImg + '" alt="' + e.title + '" loading="lazy" style="width:100%; height:100%; object-fit:contain; background:#000;">';
+
         return '<div class="event-card" onclick="openEventDetail(\'' + (e.id || '') + '\')">' +
             '<div class="event-card-img">' + imgHtml +
             '<div class="event-date-badge"><div class="edb-month">' + months[d.getMonth()] + '</div><div class="edb-day">' + d.getDate() + '</div></div>' +
