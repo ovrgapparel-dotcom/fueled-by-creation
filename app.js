@@ -2430,18 +2430,31 @@ window.viewTopicDetail = viewTopicDetail;
 var currentEvent = null;
 var unlockedEvents = []; // Track paid events in this session
 
-function openEventPaymentGate(id) {
-    currentEvent = demoEvents.find(function(e) { return e.id === id; });
-    if (!currentEvent && sbClient) {
-        // Try searching in products if it's a "ticket" product or similar, 
-        // but here we just use demoEvents for the gate.
+async function openEventPaymentGate(id) {
+    console.log('Opening Event Payment Gate for:', id);
+    // Find the event in demo or live data
+    var e = demoEvents.find(function(x) { return x.id === id; });
+    if (!e && window.sbClient) {
+        try {
+            var res = await window.sbClient.from('events').select('*').eq('id', id).single();
+            if (res.data) e = res.data;
+        } catch (err) { console.error('Gate fetch error:', err); }
     }
-    if (!currentEvent) return;
-
-    document.getElementById('eventPaymentOverlay').classList.add('open');
-    var titleEl = document.getElementById('gateEventTitle');
-    if (titleEl) titleEl.textContent = currentEvent.title;
+    
+    if (!e) {
+        console.warn('Event not found for gate:', id);
+    }
+    
+    var gateTitle = document.getElementById('gateEventTitle');
+    if (gateTitle) gateTitle.textContent = e ? e.title : 'Exclusive FBC Event';
+    
+    var overlay = document.getElementById('eventPaymentOverlay');
+    if (overlay) {
+        overlay.classList.add('open');
+        overlay.style.display = 'flex'; // Force visibility
+    }
 }
+
 
 function closeEventPaymentGate() {
     document.getElementById('eventPaymentOverlay').classList.remove('open');
