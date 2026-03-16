@@ -2114,7 +2114,7 @@ async function loadHotTopics() {
                 var mediaHtml = '';
                 if (pinnedItem.media_url) {
                     if (pinnedItem.media_type === 'video') {
-                        mediaHtml = '<video src="' + pinnedItem.media_url + '" autoplay muted loop playsinline controls style="width:100%; height:100%; object-fit:cover;"></video>';
+                        mediaHtml = '<video src="' + pinnedItem.media_url + '" autoplay muted loop playsinline controls style="width:100%; height:100%; object-fit:contain;"></video>';
                     } else {
                         mediaHtml = '<img src="' + pinnedItem.media_url + '" alt="Pinned">';
                     }

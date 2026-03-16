@@ -807,19 +807,20 @@ nav a.active {
 }
 
 /* ===== PREMIUM DETAIL OVERLAYS ===== */
-.overlay, .login-overlay, .admin-overlay {
+.overlay, .login-overlay, .admin-overlay, .checkout-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 2000;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 30000 !important; /* Extremely high to cover header */
   overflow-y: auto;
-  align-items: flex-start; /* Fix for content taller than viewport */
+  align-items: flex-start;
   justify-content: center;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   padding: 1rem;
 }
+
 
 .overlay.open, .login-overlay.open, .admin-overlay.open {
   display: flex !important;
@@ -1038,6 +1039,7 @@ nav a.active {
 
 
 
+
 .pinned-content {
   flex: 1;
   padding: 3rem;
@@ -1092,10 +1094,16 @@ nav a.active {
     height: auto !important;
     background: #000;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .pinned-media img {
     object-fit: contain !important;
+    width: 100%;
+    height: 100%;
   }
+
 
   .pinned-content {
     padding: 1.5rem;
@@ -3678,11 +3686,12 @@ footer {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    z-index: 9500 !important;
+    z-index: 30000 !important; /* Match parent overlay */
     padding-top: env(safe-area-inset-top, 24px) !important;
     display: flex;
     flex-direction: column;
   }
+
 
 
   .overlay-header-bar {
@@ -3840,8 +3849,8 @@ footer {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 2100;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 30000 !important;
   justify-content: center;
   align-items: flex-start;
   overflow-y: auto;
@@ -3849,6 +3858,7 @@ footer {
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
 }
+
 
 .topic-detail-overlay.open {
   display: flex !important;

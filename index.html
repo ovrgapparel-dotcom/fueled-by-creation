@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation — V1.2.1</title>
+  <title>Fueled By Creation — V1.2.2</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
@@ -380,19 +380,8 @@
     </div>
   </div>
 
-  <!-- ===== ARTICLE DETAIL OVERLAY ===== -->
-  <div class="article-detail-overlay" id="articleDetailOverlay" onclick="if(event.target===this)closeArticleDetail()">
-    <div class="article-detail-box">
-      <div class="modal-top">
-        <h3 id="articleDetailTitle">Article</h3>
-        <button class="btn-close" onclick="closeArticleDetail()">✕</button>
-      </div>
-      <div class="article-hero-img" id="articleHeroWrap"></div>
-      <div class="article-detail-body" id="articleDetailBody">
-        <!-- JS populated -->
-      </div>
-    </div>
-  </div>
+  <!-- Old overlay removed as it was redundant with articleDetail at line 1226 -->
+
 
   <!-- ===== CART PANEL ===== -->
   <div class="cart-panel" id="cartPanel">
@@ -1285,11 +1274,16 @@
         <p>This is an exclusive FBC showcase. Complete the secured payment to unlock your digital pass.</p>
         
         <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1.5rem; margin-bottom: 1.5rem;">
-          <button class="btn-paypal btn-full" onclick="payWithPayPal()">Pay with PayPal</button>
-          <button class="btn-yango btn-full" onclick="payWithOrange()" style="background:#f26829;color:white">Pay with Orange Money</button>
-          <button class="btn-yango btn-full" onclick="payWithDjamo()" style="background:#005e5e;color:white">Pay with Djamo</button>
-          <button class="btn-wave btn-full" onclick="payWithWave()" style="background:#1e90ff;color:white">Pay with Wave</button>
+          <button id="btnEventPay" class="btn-paypal btn-full" onclick="processEventPayment()">💰 Secure Entrance Pass</button>
+          <div style="font-size:0.8rem; text-align:center; opacity:0.6; margin-top:0.5rem">Select your preferred method above</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem">
+            <button class="btn-yango btn-full" onclick="processEventPayment()" style="background:#f26829;color:white;font-size:0.8rem">Orange Money</button>
+            <button class="btn-yango btn-full" onclick="processEventPayment()" style="background:#005e5e;color:white;font-size:0.8rem">Djamo</button>
+            <button class="btn-wave btn-full" onclick="processEventPayment()" style="background:#1e90ff;color:white;font-size:0.8rem">Wave</button>
+            <button class="btn-paypal btn-full" onclick="processEventPayment()" style="background:#003087;color:white;font-size:0.8rem">PayPal</button>
+          </div>
         </div>
+
         <p class="gate-footer">Secure SSL Encryption enabled. FBC Tribe verified.</p>
       </div>
     </div>
