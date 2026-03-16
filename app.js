@@ -111,15 +111,11 @@ function switchPage(page) {
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // When opening Trends page: ensure pinned item is rendered from demoThreads as fallback
+    // When opening Trends page: ensure pinned item is rendered
     if (page === 'trends') {
-        var pinnedWrap = document.getElementById('pinnedArticleWrap');
-        if (pinnedWrap && pinnedWrap.innerHTML.trim() === '') {
-            renderThreads('allThreadsList', demoThreads);
-        }
-        // Also attempt to load live data
         loadHotTopics();
     }
+
     // When opening Home: refresh hero media
     if (page === 'home') loadHeroMedia();
 }

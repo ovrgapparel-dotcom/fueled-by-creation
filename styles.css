@@ -35,7 +35,7 @@ header {
   background: var(--dark);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 9000;
   border-bottom: 2px solid var(--primary)
 }
 
@@ -3265,7 +3265,7 @@ footer {
   nav {
     display: none;
     position: fixed;
-    top: 80px; /* Below header */
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -3277,7 +3277,7 @@ footer {
     justify-content: center;
     padding: 2rem;
     gap: 2rem;
-    z-index: 1500;
+    z-index: 10000; transform: none !important;
   }
 
   nav.mobile-nav-active {
@@ -4095,5 +4095,18 @@ footer {
   background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(18,18,18,1) 100%);
   z-index: 2;
   pointer-events: none;
+}
+
+
+/* Trends Section Fixes (v1.1.8) */
+@media (max-width: 768px) {
+  .trends-section {
+    padding-top: 2rem !important; /* Prevent overlap with sticky header */
+  }
+  
+  .filter-tabs {
+    margin-bottom: 1.5rem !important;
+    padding: 0 1rem;
+  }
 }
 
