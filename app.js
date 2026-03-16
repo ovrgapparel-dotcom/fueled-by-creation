@@ -1863,7 +1863,12 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
         const userRes = await sbClient.auth.getUser();
         if (!userRes.data.user) throw new Error('Not authenticated');
 
-        const ext = file.name.split('.').pop();
+        let ext = file.name.split('.').pop().toLowerCase();
+        // Force video extensions for reliable detection on load
+        if (file.type.startsWith('video/') && !['mp4', 'webm', 'ogg', 'mov'].includes(ext)) {
+            ext = 'mp4';
+        }
+
         const path = `${bucket}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
         const upRes = await sbClient.storage.from(STORAGE_BUCKET).upload(path, file, { 
