@@ -2,7 +2,7 @@
 import './content_utils.js';
 import './translations.js';
 
-// ===== APP CONFIGURATION (v1.1.3) =====
+// ===== APP CONFIGURATION (v1.1.4) =====
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
 const CONFIG_TABLE = 'app_config';
@@ -163,6 +163,8 @@ async function loadHeroConfig() {
             currentHeroUrl = data.value;
             var input = document.getElementById('heroVideoInput');
             if (input) input.value = currentHeroUrl;
+            // Apply to hero immediately after loading
+            loadHeroMedia();
         }
     } catch (e) { console.error('Hero config load error:', e); }
 }
@@ -1611,58 +1613,36 @@ async function deleteNotification(id) {
 // ===================================================================
 async function refreshFrontendData() {
     // Re-fetch and re-render all frontend sections from Supabase
+    // Live data fully replaces demo data when available
     try {
         var aRes = await sbClient.from('artists').select('*').eq('status', 'Published').order('created_at', { ascending: false });
-        var displayArtists = typeof demoArtists !== 'undefined' ? demoArtists : [];
-        if (!aRes.error && aRes.data && aRes.data.length) {
-            var liveArtists = aRes.data;
-            displayArtists = liveArtists.concat(displayArtists.filter(d => !liveArtists.find(l => l.id === d.id)));
-        }
+        // Use live data exclusively if available; otherwise fall back to demo
+        var displayArtists = (!aRes.error && aRes.data && aRes.data.length > 0) ? aRes.data : (typeof demoArtists !== 'undefined' ? demoArtists : []);
         renderArtists('featuredArtistsGrid', displayArtists.filter(function (a) { return a.is_featured; }));
         renderArtists('allArtistsGrid', displayArtists);
-    } catch (e) { /* keep demo data */ }
+    } catch (e) { renderArtists('featuredArtistsGrid', demoArtists.filter(a => a.is_featured)); renderArtists('allArtistsGrid', demoArtists); }
 
     try {
         var artRes = await sbClient.from('articles').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
-        var displayArticles = typeof demoArticles !== 'undefined' ? demoArticles : [];
-        if (!artRes.error && artRes.data && artRes.data.length) {
-            var liveArticles = artRes.data;
-            displayArticles = liveArticles.concat(displayArticles.filter(d => !liveArticles.find(l => l.id === d.id)));
-        }
+        var displayArticles = (!artRes.error && artRes.data && artRes.data.length > 0) ? artRes.data : (typeof demoArticles !== 'undefined' ? demoArticles : []);
         renderFeaturedArticlesSplit('featuredArticlesGrid', displayArticles.filter(function (a) { return a.is_featured; }));
         renderArticles('allArticlesGrid', displayArticles);
-    } catch (e) { /* keep demo data */ }
+    } catch (e) { renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(a => a.is_featured)); renderArticles('allArticlesGrid', demoArticles); }
 
     try {
         var tRes = await sbClient.from('threads').select('*').eq('status', 'Active').order('priority_order');
-        var displayThreads = typeof demoThreads !== 'undefined' ? demoThreads : [];
-        if (!tRes.error && tRes.data && tRes.data.length) {
-            var liveThreads = tRes.data;
-            displayThreads = liveThreads.concat(displayThreads.filter(d => !liveThreads.find(l => l.id === d.id)));
-        }
+        var displayThreads = (!tRes.error && tRes.data && tRes.data.length > 0) ? tRes.data : (typeof demoThreads !== 'undefined' ? demoThreads : []);
         renderThreads('allThreadsList', displayThreads);
-    } catch (e) { /* keep demo data */ }
+    } catch (e) { renderThreads('allThreadsList', demoThreads); }
 
     try {
         var eRes = await sbClient.from('events').select('*').eq('status', 'Published').order('event_date');
-        var displayEvents = typeof demoEvents !== 'undefined' ? demoEvents : [];
-        if (!eRes.error && eRes.data && eRes.data.length) {
-            var liveEvents = eRes.data;
-            displayEvents = liveEvents.concat(displayEvents.filter(d => !liveEvents.find(l => l.id === d.id)));
-        }
+        var displayEvents = (!eRes.error && eRes.data && eRes.data.length > 0) ? eRes.data : (typeof demoEvents !== 'undefined' ? demoEvents : []);
         renderEvents('featuredEventsGrid', displayEvents.slice(0, 3));
         renderEvents('allEventsGrid', displayEvents);
-    } catch (e) { /* keep demo data */ }
+    } catch (e) { renderEvents('featuredEventsGrid', demoEvents.slice(0, 3)); renderEvents('allEventsGrid', demoEvents); }
 
     if (currentPage === 'home') loadHeroMedia();
-
-    // Verification check: ensure we show something if Supabase is empty after a delay
-    setTimeout(function() {
-        var threadContainer = document.getElementById('allThreadsList');
-        if (threadContainer && threadContainer.innerHTML === '') {
-            renderThreads('allThreadsList', demoThreads);
-        }
-    }, 2000);
 
     // Final translation pass
     setTimeout(applyTranslations, 100);
@@ -2160,7 +2140,9 @@ function loadHeroMedia() {
     var heroMedia = document.getElementById('heroMedia');
     if (!heroMedia) return;
     var url = currentHeroUrl;
-    var isVideo = url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+    // Strip query string for extension detection
+    var urlWithoutQuery = url.split('?')[0].toLowerCase();
+    var isVideo = urlWithoutQuery.match(/\.(mp4|webm|ogg|mov|m4v)$/) || url.includes('play_480p') || url.includes('play_720p') || url.includes('b-cdn.net');
     var isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
     var isVimeo = url.includes('vimeo.com');
 
@@ -2168,7 +2150,7 @@ function loadHeroMedia() {
         var videoId = '';
         if (url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
         else if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
-        heroMedia.innerHTML = '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=1&loop=1&playlist=' + videoId + '&controls=0&showinfo=0&mute=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+        heroMedia.innerHTML = '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=1&loop=1&playlist=' + videoId + '&controls=0&showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
     } else if (isVimeo) {
         var vimeoId = url.split('vimeo.com/')[1].split('?')[0];
         heroMedia.innerHTML = '<iframe src="https://player.vimeo.com/video/' + vimeoId + '?autoplay=1&muted=1&loop=1&background=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
