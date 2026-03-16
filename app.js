@@ -2,7 +2,7 @@
 import './content_utils.js';
 import './translations.js';
 
-// ===== APP CONFIGURATION (v1.1.2) =====
+// ===== APP CONFIGURATION (v1.1.3) =====
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
 const CONFIG_TABLE = 'app_config';
@@ -101,10 +101,14 @@ function switchPage(page) {
     document.querySelectorAll('#mainNav a').forEach(function (a) {
         a.classList.toggle('active', a.getAttribute('data-page') === page);
     });
-    // Hide details if we switch to a main page
-    document.getElementById('artistDetail').style.display = 'none';
-    document.getElementById('articleDetail').style.display = 'none';
-    document.getElementById('eventDetail').style.display = 'none';
+    // Close mobile nav on navigation
+    var nav = document.getElementById('mainNav');
+    if (nav) nav.classList.remove('mobile-nav-active');
+    // Hide overlays using the open class (not inline style — avoids CSS conflicts)
+    ['artistDetail', 'articleDetail', 'eventDetail'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.remove('open'); el.style.display = ''; }
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // When opening Trends page: ensure pinned item is rendered from demoThreads as fallback
