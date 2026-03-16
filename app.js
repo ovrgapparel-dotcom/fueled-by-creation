@@ -2110,12 +2110,12 @@ async function loadHotTopics() {
     if (!container) return;
 
     try {
-        var topics = await window.fetchCommunityTopics();
-        if (!topics || topics.length === 0) return;
+        var threads = await window.fetchCommunityTopics();
+        if (!threads || threads.length === 0) return;
 
         // Extract Pinned Item
-        var pinnedItem = topics.find(x => x.is_pinned);
-        var regularTopics = topics.filter(x => !x.is_pinned);
+        var pinnedItem = threads.find(x => x.is_pinned);
+        var regularTopics = threads.filter(x => !x.is_pinned);
 
         if (pinnedWrap) {
             if (pinnedItem) {
@@ -2291,8 +2291,8 @@ async function viewTopicDetail(id) {
         if(viewSpan) viewSpan.textContent = parseInt(viewSpan.textContent || '0') + 1;
     });
 
-    const topics = await window.fetchCommunityTopics();
-    const t = topics.find(x => x.id === id);
+    const threads = await window.fetchCommunityTopics();
+    const t = threads.find(x => x.id === id);
     if (!t) return;
 
     // Build the topic main content
@@ -2441,6 +2441,9 @@ async function openEventPaymentGate(id) {
         } catch (err) { console.error('Gate fetch error:', err); }
     }
     
+    // Crucial: Update global state
+    window.currentEvent = e;
+    
     if (!e) {
         console.warn('Event not found for gate:', id);
     }
@@ -2451,35 +2454,60 @@ async function openEventPaymentGate(id) {
     var overlay = document.getElementById('eventPaymentOverlay');
     if (overlay) {
         overlay.classList.add('open');
-        overlay.style.display = 'flex'; // Force visibility
     }
 }
+
 
 
 function closeEventPaymentGate() {
-    document.getElementById('eventPaymentOverlay').classList.remove('open');
+    var overlay = document.getElementById('eventPaymentOverlay');
+    if (overlay) {
+        overlay.classList.remove('open');
+        overlay.style.display = 'none'; // Explicitly hide
+    }
     document.body.style.overflow = '';
 }
 
+
 async function processEventPayment() {
-    const btn = document.getElementById('btnEventPay');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loader-dots">Processing</span>';
-
-    // Simulate payment sequence
-    await new Promise(r => setTimeout(r, 2000));
-
-    showToast('Success! 🎟️', 'Payment confirmed. Access granted.');
-    closeEventPaymentGate();
-
-    // Mark as unlocked
-    if (currentEvent && !unlockedEvents.includes(currentEvent.id)) {
-        unlockedEvents.push(currentEvent.id);
+    if (!window.currentEvent) {
+        console.error('No event selected for payment.');
+        showToast('Error', 'Please select an event first.');
+        return;
     }
 
-    // Grant access (transition to event detail)
-    openEventDetail(currentEvent.id);
+    const btn = document.getElementById('btnEventPay');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader-dots">Processing</span>';
+    }
+
+    // Simulate payment sequence for 1.5s
+    await new Promise(r => setTimeout(r, 1500));
+
+    // Check for real ticketing URL
+    if (window.currentEvent.ticketing_url && window.currentEvent.ticketing_url !== '#' && window.currentEvent.ticketing_url !== '') {
+        showToast('Redirecting... 🎟️', 'Taking you to the official ticket gate.');
+        setTimeout(function() {
+            window.location.href = window.currentEvent.ticketing_url;
+        }, 1000);
+    } else {
+        // Fallback: Just grant access if no link exists
+        showToast('Access Granted! 🔓', 'Confirmed. Enjoy the exclusive content.');
+        closeEventPaymentGate();
+        
+        if (!unlockedEvents.includes(window.currentEvent.id)) {
+            unlockedEvents.push(window.currentEvent.id);
+        }
+        openEventDetail(window.currentEvent.id);
+    }
+
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Secure Entrance Pass';
+    }
 }
+
 
 
 // Ensure Hot Topics load on trends page switch
