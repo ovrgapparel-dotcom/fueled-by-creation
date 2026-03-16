@@ -148,44 +148,85 @@ function toggleMobileMenu() {
     nav.classList.toggle('mobile-nav-active');
 }
 
-// ===== HERO MEDIA MANAGEMENT (v1.0.5) =====
+// ===== HERO MEDIA MANAGEMENT (v1.0.5 & v1.1.7) =====
 var currentHeroUrl = HERO_VIDEO_URL;
+var sectionHeroes = {
+    shop: '',
+    artists: '',
+    trends: '',
+    events: ''
+};
 
 async function loadHeroConfig() {
     if (!sbClient) return;
     try {
-        const { data, error } = await sbClient.from(CONFIG_TABLE).select('value').eq('key', 'hero_video_url').single();
+        const { data, error } = await sbClient.from(CONFIG_TABLE).select('*').in('key', [
+            'hero_video_url', 'shop_hero_url', 'artists_hero_url', 'trends_hero_url', 'events_hero_url'
+        ]);
         if (error) {
             if (error.code !== 'PGRST116') console.error('Error loading hero config:', error);
             return;
         }
-        if (data && data.value) {
-            currentHeroUrl = data.value;
-            var input = document.getElementById('heroVideoInput');
-            if (input) input.value = currentHeroUrl;
-            // Apply to hero immediately after loading
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                if (item.key === 'hero_video_url') {
+                    currentHeroUrl = item.value;
+                    const input = document.getElementById('heroVideoInput');
+                    if (input) input.value = currentHeroUrl;
+                } else {
+                    const sectionName = item.key.split('_')[0]; // e.g. 'shop'
+                    sectionHeroes[sectionName] = item.value;
+                    const input = document.getElementById(sectionName + 'HeroInput');
+                    if (input) input.value = item.value;
+                }
+            });
+            // Apply immediately
             loadHeroMedia();
+            loadSectionHeroMedia('shop', 'hero-shop');
+            loadSectionHeroMedia('artists', 'hero-artists');
+            loadSectionHeroMedia('trends', 'hero-trends');
+            loadSectionHeroMedia('events', 'hero-events');
         }
     } catch (e) { console.error('Hero config load error:', e); }
 }
 
 async function saveHeroConfig() {
     var btn = event?.target || document.querySelector('button[onclick="saveHeroConfig()"]');
-    var originalText = btn ? btn.textContent : '💾 Save Hero Configuration';
-    var url = document.getElementById('heroVideoInput').value.trim();
-    if (!url) { showToast('Error', 'Hero video URL cannot be empty.', '#ef4444'); return; }
-    if (!sbClient) { showToast('Demo Mode', 'Supabase not connected. URL saved locally.'); currentHeroUrl = url; loadHeroMedia(); return; }
+    var originalText = btn ? btn.textContent : '💾 Save All Hero Configurations';
+    
+    // Collect all URLs from DOM
+    const urls = {
+        hero_video_url: document.getElementById('heroVideoInput')?.value.trim() || '',
+        shop_hero_url: document.getElementById('shopHeroInput')?.value.trim() || '',
+        artists_hero_url: document.getElementById('artistsHeroInput')?.value.trim() || '',
+        trends_hero_url: document.getElementById('trendsHeroInput')?.value.trim() || '',
+        events_hero_url: document.getElementById('eventsHeroInput')?.value.trim() || ''
+    };
+
+    if (!urls.hero_video_url) { showToast('Error', 'Main hero video URL cannot be empty.', '#ef4444'); return; }
+    
+    if (!sbClient) { 
+        showToast('Demo Mode', 'URLs saved locally.'); 
+        currentHeroUrl = urls.hero_video_url; 
+        loadHeroMedia(); 
+        return; 
+    }
 
     if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     try {
-        const { error } = await sbClient.from(CONFIG_TABLE).upsert({ key: 'hero_video_url', value: url }, { onConflict: 'key' });
+        const configs = Object.keys(urls).filter(k => urls[k]).map(k => ({ key: k, value: urls[k] }));
+        if(configs.length === 0) return;
+
+        const { error } = await sbClient.from(CONFIG_TABLE).upsert(configs, { onConflict: 'key' });
         if (error) throw error;
-        currentHeroUrl = url;
-        loadHeroMedia();
-        showToast('Saved! ✓', 'Hero video updated successfully.');
+        
+        showToast('Saved! ✓', 'All Hero configurations updated.');
+        
+        // Reload to apply visual changes
+        loadHeroConfig();
     } catch (e) {
         console.error('Save hero config error:', e);
-        showToast('Error', 'Could not save hero config: ' + e.message, '#ef4444');
+        showToast('Error', 'Could not save configs: ' + e.message, '#ef4444');
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = originalText; }
     }
@@ -2164,6 +2205,41 @@ function loadHeroMedia() {
     } else {
         heroMedia.innerHTML = '<img src="' + url + '" alt="Hero">';
     }
+}
+
+function loadSectionHeroMedia(sectionName, containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+
+    var url = sectionHeroes[sectionName];
+    
+    // Clear the container (keep only the overlay)
+    Array.from(container.children).forEach(child => {
+        if (!child.classList.contains('section-hero-overlay')) {
+            child.remove();
+        }
+    });
+
+    if (!url) return;
+
+    var isVideo = url.split('?')[0].match(/\.(mp4|webm|ogg|mov)$/i) || url.match(/^data:video/i);
+    var isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
+    var isVimeo = url.includes('vimeo.com');
+
+    var mediaHtml = '';
+    if(isVideo) {
+        mediaHtml = '<video src="' + url + '" autoplay muted loop playsinline></video>';
+    } else if (isYoutube) {
+        var ytId = url.includes('v') ? url.split('v=')[1]?.split('&')[0] : url.split('youtu.be/')[1]?.split('?')[0];
+        mediaHtml = '<iframe src="https://www.youtube.com/embed/' + ytId + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + ytId + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+    } else if (isVimeo) {
+        var vimeoId = url.split('vimeo.com/')[1].split('?')[0];
+        mediaHtml = '<iframe src="https://player.vimeo.com/video/' + vimeoId + '?autoplay=1&muted=1&loop=1&background=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+    } else {
+        mediaHtml = '<img src="' + url + '" alt="' + sectionName + ' Hero">';
+    }
+    
+    container.insertAdjacentHTML('afterbegin', mediaHtml);
 }
 
 async function handleTopicLike(id) {

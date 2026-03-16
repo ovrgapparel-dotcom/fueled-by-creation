@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation — V1.1.6</title>
+  <title>Fueled By Creation — V1.1.7</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
@@ -191,6 +191,10 @@
 
   <!-- ===== SHOP PAGE ===== -->
   <div class="page-section" id="page-shop">
+    <div class="section-hero" id="hero-shop">
+      <!-- Media injected via JS -->
+      <div class="section-hero-overlay"></div>
+    </div>
     <section class="catalogue" id="catalogue">
       <div class="section-header">
         <div class="section-label" data-i18n="merch">Official Merch</div>
@@ -231,6 +235,10 @@
 
   <!-- ===== ARTISTS PAGE ===== -->
   <div class="page-section" id="page-artists">
+    <div class="section-hero" id="hero-artists">
+      <!-- Media injected via JS -->
+      <div class="section-hero-overlay"></div>
+    </div>
     <section class="artists-section">
       <div class="section-header">
         <div class="section-label" data-i18n="artist_showcase">Artist Showcase</div>
@@ -244,6 +252,10 @@
 
   <!-- ===== TRENDS PAGE ===== -->
   <div class="page-section" id="page-trends">
+    <div class="section-hero" id="hero-trends">
+      <!-- Media injected via JS -->
+      <div class="section-hero-overlay"></div>
+    </div>
     <section class="trends-section">
       <div id="pinnedArticleWrap"></div>
       <div class="section-header">
@@ -284,6 +296,10 @@
 
   <!-- ===== EVENTS PAGE ===== -->
   <div class="page-section" id="page-events">
+    <div class="section-hero" id="hero-events">
+      <!-- Media injected via JS -->
+      <div class="section-hero-overlay"></div>
+    </div>
     <section class="events-section">
       <div class="section-header">
         <div class="section-label" data-i18n="events_tickets">🎫 Events & Tickets</div>
@@ -787,19 +803,59 @@
           <div class="admin-form">
             <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
               Manage Hero Media</h3>
-            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem">Update the video background for the home page hero section. Enter a direct video URL (MP4 recommended).</p>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem">Update the backgrounds for the different sections of the app. Enter a direct media URL or upload one.</p>
             
-            <div class="field-with-upload">
-              <label>Hero Video URL</label>
+            <div class="field-with-upload" style="margin-bottom: 2rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: #fafafa;">
+              <label><strong>Main Home Hero</strong> (Video recommended)</label>
               <div class="input-upload-group">
-                <input type="text" id="heroVideoInput" placeholder="https://example.com/video.mp4">
+                <input type="text" id="heroVideoInput" placeholder="https://example.com/main_hero.mp4">
                 <button class="btn-upload-trigger" onclick="document.getElementById('heroVideoFile').click()">🎥</button>
                 <input type="file" id="heroVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'heroVideoInput', 'assets')">
               </div>
             </div>
+
+            <h4 style="font-family:'DM Sans',sans-serif; font-size:1.1rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border);">Section Banners (Image or Video)</h4>
+
+            <div class="admin-grid" style="margin-bottom: 1rem;">
+              <div class="field-with-upload">
+                <label>Shop Hero URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="shopHeroInput" placeholder="https://example.com/shop.jpg">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('shopHeroFile').click()">📷</button>
+                  <input type="file" id="shopHeroFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'shopHeroInput', 'assets')">
+                </div>
+              </div>
+              <div class="field-with-upload">
+                <label>Artists Hero URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="artistsHeroInput" placeholder="https://example.com/artists.jpg">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('artistsHeroFile').click()">📷</button>
+                  <input type="file" id="artistsHeroFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistsHeroInput', 'assets')">
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-grid">
+              <div class="field-with-upload">
+                <label>Trends Hero URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="trendsHeroInput" placeholder="https://example.com/trends.jpg">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('trendsHeroFile').click()">📷</button>
+                  <input type="file" id="trendsHeroFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'trendsHeroInput', 'assets')">
+                </div>
+              </div>
+              <div class="field-with-upload">
+                <label>Events Hero URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="eventsHeroInput" placeholder="https://example.com/events.jpg">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('eventsHeroFile').click()">📷</button>
+                  <input type="file" id="eventsHeroFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'eventsHeroInput', 'assets')">
+                </div>
+              </div>
+            </div>
             
             <div class="admin-form-actions" style="margin-top:2rem">
-              <button class="btn-save" onclick="saveHeroConfig()">💾 Save Hero Configuration</button>
+              <button class="btn-save" onclick="saveHeroConfig()">💾 Save All Hero Configurations</button>
             </div>
           </div>
         </div>
