@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation — V1.2.7</title>
+  <title>Fueled By Creation — V1.2.8</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
@@ -314,6 +314,23 @@
     </section>
   </div>
 
+  <!-- ===== INFLUENCERS PAGE ===== -->
+  <div class="page-section" id="page-influencers">
+    <div class="section-hero" id="hero-influencers">
+      <div class="section-hero-overlay"></div>
+    </div>
+    <section class="artists-section">
+      <div class="section-header">
+        <div class="section-label">🔥 Cultural Icons</div>
+        <h2 class="section-title">INFLUENCERS</h2>
+      </div>
+      <div class="artists-grid" id="allInfluencersGrid">
+        <!-- JS populated -->
+      </div>
+    </section>
+  </div>
+
+
 
   <!-- Footer merged to bottom -->
 
@@ -501,6 +518,7 @@
         <div class="admin-tab" onclick="showAdminTab('featured-articles-admin', this)">⭐ Featured</div>
         <div class="admin-tab" onclick="showAdminTab('threads-admin', this)">Threads</div>
         <div class="admin-tab" onclick="showAdminTab('events-admin', this)">Events</div>
+        <div class="admin-tab" onclick="showAdminTab('influencers-admin', this)">Influencers</div>
         <div class="admin-tab" onclick="showAdminTab('hero-media', this)">🎬 Hero Media</div>
         <div class="admin-tab" onclick="showAdminTab('featured-promo', this)">💎 Featured Promo</div>
         <div class="admin-tab" onclick="showAdminTab('notifications-admin', this)">Notifications</div>
@@ -600,23 +618,16 @@
               <label style="color:var(--primary);margin-bottom:.75rem;display:block;font-size:.9rem">🎵 Latest
                 Release</label>
               <div class="admin-grid">
-                <div><label>Release Title</label><input type="text" id="artistReleaseTitle"
-                    placeholder="Fire & Gold EP"></div>
-                <div><label>Release Date</label><input type="date" id="artistReleaseDate"></div>
+                <div><label>Release Title</label><input type="text" id="artistReleaseTitle" placeholder="Song/Album Title"></div>
+                <div><label>Release Media Link</label><input type="text" id="artistReleaseLink" placeholder="Spotify/Apple Music Link"></div>
               </div>
-      </div>
-
-              <div class="admin-grid">
-                <div class="field-with-upload">
-                  <label>Cover Art URL</label>
-                  <div class="input-upload-group">
-                    <input type="text" id="artistReleaseCover" placeholder="Cover image URL">
-                    <button class="btn-upload-trigger" onclick="document.getElementById('artistReleaseCoverFile').click()">📷</button>
-                    <input type="file" id="artistReleaseCoverFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistReleaseCover', 'artists')">
-                  </div>
+              <div class="field-with-upload" style="margin-top:0.5rem">
+                <label>Release Cover URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="artistReleaseCover" placeholder="Upload or paste URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('artistReleaseCoverFile').click()">📷</button>
+                  <input type="file" id="artistReleaseCoverFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'artistReleaseCover', 'artists')">
                 </div>
-                <div><label>Listen URL (Spotify/Apple)</label><input type="text" id="artistReleaseListen"
-                    placeholder="https://open.spotify.com/..."></div>
               </div>
             </div>
             <div style="background:#111;border-radius:10px;padding:1.2rem;margin:.5rem 0">
@@ -643,6 +654,49 @@
             <div class="admin-form-actions">
               <button class="btn-save" onclick="saveArtist()">💾 Save Artist</button>
               <button class="btn-cancel-admin" onclick="cancelEditArtist()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== INFLUENCERS ADMIN TAB ===== -->
+        <div id="adminTabInfluencers" style="display:none">
+          <div id="adminInfluencerList" class="admin-product-list" style="margin-bottom:2rem; display:flex; flex-direction:column;">
+            <p style="color:#666;text-align:center;padding:2rem">Loading influencers...</p>
+          </div>
+          <div class="admin-form">
+            <h3 id="influencerFormTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--primary);margin-bottom:0.5rem">
+              + New Influencer</h3>
+            <input type="hidden" id="editInfluencerId" value="">
+            <div class="admin-grid">
+              <div><label>Influencer Name *</label><input type="text" id="influencerName" placeholder="Name"></div>
+              <div><label>Category</label><input type="text" id="influencerCategory" placeholder="e.g. Fashion Blogger"></div>
+            </div>
+            <div><label>Bio</label><textarea id="influencerBio" placeholder="Bio..."></textarea></div>
+            <div class="admin-grid">
+              <div class="field-with-upload">
+                <label>Profile Image URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="influencerProfileImg" placeholder="URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('influencerProfileImgFile').click()">📷</button>
+                  <input type="file" id="influencerProfileImgFile" style="display:none" onchange="handleAdminMediaUpload(event, 'influencerProfileImg', 'influencers')">
+                </div>
+              </div>
+              <div class="field-with-upload">
+                <label>Banner Image URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="influencerBannerImg" placeholder="URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('influencerBannerImgFile').click()">📷</button>
+                  <input type="file" id="influencerBannerImgFile" style="display:none" onchange="handleAdminMediaUpload(event, 'influencerBannerImg', 'influencers')">
+                </div>
+              </div>
+            </div>
+            <div class="admin-grid">
+              <div><label>Instagram URL</label><input type="url" id="influencerInstagram" placeholder="URL"></div>
+              <div><label>YouTube URL</label><input type="url" id="influencerYoutube" placeholder="URL"></div>
+            </div>
+            <div class="admin-form-actions" style="margin-top:1.5rem">
+              <button class="btn-save" onclick="saveInfluencer()">💾 Save Influencer</button>
+              <button class="btn-cancel-admin" onclick="cancelEditInfluencer()">Cancel</button>
             </div>
           </div>
         </div>
@@ -1135,6 +1189,7 @@
           <ul>
             <li><a href="#" onclick="event.preventDefault();switchPage('shop')" data-i18n="shop">Shop</a></li>
             <li><a href="#" onclick="event.preventDefault();switchPage('artists')" data-i18n="artists">Artists</a></li>
+            <li><a href="#" onclick="event.preventDefault();switchPage('influencers')" data-i18n="influencers">Influencers</a></li>
             <li><a href="#" onclick="event.preventDefault();switchPage('trends')" data-i18n="trends">Trends</a></li>
             <li><a href="#" onclick="event.preventDefault();switchPage('events')" data-i18n="events">Events</a></li>
           </ul>
@@ -1261,33 +1316,37 @@
     </div>
   </div>
 
-  <!-- Event Payment Gate Overlay -->
-  <div id="eventPaymentOverlay" class="overlay">
-    <div class="modal-box premium-gate">
-      <div class="modal-top">
-        <h3>Secure Access</h3>
-        <button class="btn-close" onclick="closeEventPaymentGate()">✕</button>
+  <div id="influencerDetail" class="overlay">
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="influencer">INFLUENCER</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn"
+          onclick="shareContent(document.getElementById('influencerNameDetail').textContent, window.location.href)">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
       </div>
-      <div class="gate-content">
-        <div class="gate-icon">🔐</div>
-        <h2 id="gateEventTitle">Event Name</h2>
-        <p>This is an exclusive FBC showcase. Complete the secured payment to unlock your digital pass.</p>
-        
-        <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1.5rem; margin-bottom: 1.5rem;">
-          <button id="btnEventPay" class="btn-paypal btn-full" onclick="processEventPayment()">💰 Secure Entrance Pass</button>
-          <div style="font-size:0.8rem; text-align:center; opacity:0.6; margin-top:0.5rem">Select your preferred method above</div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem">
-            <button class="btn-yango btn-full" onclick="processEventPayment()" style="background:#f26829;color:white;font-size:0.8rem">Orange Money</button>
-            <button class="btn-yango btn-full" onclick="processEventPayment()" style="background:#005e5e;color:white;font-size:0.8rem">Djamo</button>
-            <button class="btn-wave btn-full" onclick="processEventPayment()" style="background:#1e90ff;color:white;font-size:0.8rem">Wave</button>
-            <button class="btn-paypal btn-full" onclick="processEventPayment()" style="background:#003087;color:white;font-size:0.8rem">PayPal</button>
+      <div id="influencerHero" class="artist-hero-detail">
+        <div id="influencerHeroMedia"></div>
+        <div class="influencer-hero-inner">
+          <img id="influencerProfileImgDetail" src="" alt="" class="artist-profile-img-large">
+          <h2 id="influencerNameDetail" class="premium-title"></h2>
+          <p id="influencerBioDetail" class="artist-bio-large"></p>
+        </div>
+      </div>
+      <div class="detail-container">
+        <div class="detail-section">
+          <h3>📱 Connect</h3>
+          <div class="social-links-detail">
+            <a id="influencerInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
+            <a id="influencerYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
           </div>
         </div>
-
-        <p class="gate-footer">Secure SSL Encryption enabled. FBC Tribe verified.</p>
       </div>
     </div>
   </div>
+
 
 
 

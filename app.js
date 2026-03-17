@@ -66,6 +66,11 @@ var demoArticles = [
     { id: 'art3', title: 'Behind the Scenes: FBC Studio Session', category: 'vlog', cover_image_url: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=800', excerpt: 'An exclusive look inside the creative process.', body_content: '<p>We took cameras inside the studio to capture the magic behind the latest FBC artist collaborations.</p>', author: 'FBC Media', publish_date: '2026-02-28', status: 'Published', is_featured: true, is_trending: true },
 ];
 
+var influencers = [];
+var demoInfluencers = [
+    { id: 'i1', name: 'DJ Zadig', category: 'Music Icon', bio: 'The pioneer of Afro-Electric sounds.', profile_image_url: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80', banner_image_url: '', ig_url: '#', yt_url: '#' },
+    { id: 'i2', name: 'Aicha Culture', category: 'Cultural Activist', bio: 'Promoting Ivorian heritage through modern art.', profile_image_url: 'https://images.unsplash.com/photo-1531123414780-f05244585149?auto=format&fit=crop&q=80', banner_image_url: '', ig_url: '#', yt_url: '#' }
+];
 
 var demoThreads = [
     { id: 't1', title: 'Who is the most underrated artist right now?', tag: 'Hot', hook_text: 'Drop your picks — the culture needs to hear them.', cover_image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800', status: 'Active', priority_order: 1, is_pinned: true, likes: 124, comments: 45, views: 890 },
@@ -109,7 +114,7 @@ function switchPage(page) {
     var nav = document.getElementById('mainNav');
     if (nav) nav.classList.remove('mobile-nav-active');
     // Hide overlays using the open class (not inline style — avoids CSS conflicts)
-    ['artistDetail', 'articleDetail', 'eventDetail'].forEach(function(id) {
+    ['artistDetail', 'articleDetail', 'eventDetail', 'influencerDetail'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) { el.classList.remove('open'); el.style.display = ''; }
     });
@@ -136,6 +141,9 @@ function handleRouting() {
     } else if (hash.startsWith('#event/')) {
         const id = hash.replace('#event/', '');
         openEventDetail(id);
+    } else if (hash.startsWith('#influencer/')) {
+        const id = hash.replace('#influencer/', '');
+        openInfluencerDetail(id);
     } else if (hash === '#shop') {
         document.getElementById('shop').scrollIntoView();
     } else if (hash === '#artists') {
@@ -645,6 +653,7 @@ function handleOverlayClick(e, id) {
         else if (id === 'checkoutOverlay') closeCheckout();
         else if (id === 'adminOverlay') closeAdmin();
         else if (id === 'contentUploadOverlay') closeContentUpload();
+        else if (id === 'influencerDetail') closeDetail();
     }
 }
 
@@ -944,7 +953,8 @@ function showAdminTab(tab, el) {
         'threads-admin': 'adminTabThreads', 'events-admin': 'adminTabEvents',
         'hero-media': 'adminTabHeroMedia',
         'featured-promo': 'adminTabFeaturedPromo',
-        'notifications-admin': 'adminTabNotifications'
+        'notifications-admin': 'adminTabNotifications',
+        'influencers-admin': 'adminTabInfluencers'
     };
     Object.values(tabMap).forEach(function (id) { var el2 = document.getElementById(id); if (el2) el2.style.display = 'none'; });
     var target = document.getElementById(tabMap[tab]);
@@ -963,6 +973,7 @@ function showAdminTab(tab, el) {
     else if (tab === 'hero-media') loadHeroConfig();
     else if (tab === 'featured-promo') loadFeaturedPromoConfig();
     else if (tab === 'products') loadAdminProducts();
+    else if (tab === 'influencers-admin') loadAdminInfluencers();
 }
 function renderAdminImgSlots() {
     var labels = ['Main', 'Photo 2', 'Photo 3', 'Photo 4', 'Photo 5'];
@@ -1033,7 +1044,7 @@ async function uploadImageToStorage(event, slotIndex) {
 // ===== ADMIN CRUD: ARTISTS ========================================
 // ===================================================================
 function isDemoId(id) {
-    return typeof id === 'string' && /^(a|art|t|e|p)\d+$/.test(id);
+    return typeof id === 'string' && /^(a|art|t|e|p|i)\d+$/.test(id);
 }
 
 var adminArtists = [];
@@ -1542,6 +1553,107 @@ async function deleteEvent(id) {
 }
 
 // ===================================================================
+// ===== ADMIN CRUD: INFLUENCERS ====================================
+// ===================================================================
+var adminInfluencers = [];
+
+async function loadAdminInfluencers() {
+    var list = document.getElementById('adminInfluencerList'); if (!list) return;
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading influencers...</p>';
+    try {
+        var res = await sbClient.from(INFLUENCERS_TABLE).select('*').order('created_at', { ascending: false });
+        var liveInfluencers = (res.data && res.data.length > 0) ? res.data : [];
+        var demo = typeof demoInfluencers !== 'undefined' ? demoInfluencers : [];
+        adminInfluencers = liveInfluencers.concat(demo.filter(d => !liveInfluencers.find(l => l.id === d.id)));
+    } catch (e) {
+        console.error('ERROR IN loadAdminInfluencers:', e);
+        adminInfluencers = typeof demoInfluencers !== 'undefined' ? demoInfluencers.slice() : [];
+    }
+    renderAdminInfluencerList();
+}
+
+function renderAdminInfluencerList() {
+    var list = document.getElementById('adminInfluencerList');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
+    if (!adminInfluencers.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🌟</div><p>No influencers yet. Add your first influencer below.</p></div>'; return; }
+    list.innerHTML = adminInfluencers.map(function (i) {
+        return '<div class="admin-product-item">' +
+            '<div class="admin-product-thumb">' + (i.profile_image_url ? '<img src="' + i.profile_image_url + '" alt="' + i.name + '">' : '🌟') + '</div>' +
+            '<div class="admin-product-meta"><h4>' + i.name + '</h4>' +
+            '<p>' + (i.category || 'Influencer') + '</p></div>' +
+            '<div class="admin-product-actions">' +
+            '<button class="btn-edit" onclick="editInfluencer(\'' + i.id + '\')">✏ Edit</button>' +
+            '<button class="btn-delete" onclick="deleteInfluencer(\'' + i.id + '\')">🗑 Delete</button></div></div>';
+    }).join('');
+}
+
+function editInfluencer(id) {
+    var i = adminInfluencers.find(function (x) { return x.id === id; }); if (!i) return;
+    document.getElementById('editInfluencerId').value = id;
+    document.getElementById('influencerName').value = i.name || '';
+    document.getElementById('influencerCategory').value = i.category || '';
+    document.getElementById('influencerBio').value = i.bio || '';
+    document.getElementById('influencerProfileImg').value = i.profile_image_url || '';
+    document.getElementById('influencerBannerImg').value = i.banner_image_url || '';
+    document.getElementById('influencerInstagram').value = i.ig_url || '';
+    document.getElementById('influencerYoutube').value = i.yt_url || '';
+    document.getElementById('influencerFormTitle').textContent = '✏ Edit — ' + i.name;
+}
+
+function cancelEditInfluencer() {
+    document.getElementById('editInfluencerId').value = '';
+    ['influencerName', 'influencerCategory', 'influencerBio', 'influencerProfileImg', 'influencerBannerImg', 'influencerInstagram', 'influencerYoutube'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('influencerFormTitle').textContent = '+ New Influencer';
+}
+
+async function saveInfluencer() {
+    var name = document.getElementById('influencerName').value.trim();
+    if (!name) { showToast('Required', 'Influencer name is required.', '#f59e0b'); return; }
+    var payload = {
+        name: name,
+        category: document.getElementById('influencerCategory').value.trim() || null,
+        bio: document.getElementById('influencerBio').value.trim() || null,
+        profile_image_url: document.getElementById('influencerProfileImg').value.trim() || null,
+        banner_image_url: document.getElementById('influencerBannerImg').value.trim() || null,
+        ig_url: document.getElementById('influencerInstagram').value.trim() || null,
+        yt_url: document.getElementById('influencerYoutube').value.trim() || null
+    };
+    var editId = document.getElementById('editInfluencerId').value;
+    var isDemo = isDemoId(editId);
+    try {
+        if (editId && !isDemo) {
+            var res = await sbClient.from(INFLUENCERS_TABLE).update(payload).eq('id', editId);
+            if (res.error) throw res.error;
+        } else {
+            var res2 = await sbClient.from(INFLUENCERS_TABLE).insert(payload);
+            if (res2.error) throw res2.error;
+            if (isDemo && typeof demoInfluencers !== 'undefined') {
+                demoInfluencers = demoInfluencers.filter(function (d) { return d.id !== editId; });
+            }
+        }
+        cancelEditInfluencer(); await loadAdminInfluencers(); refreshFrontendData();
+        showToast('Saved! ✓', '"' + name + '" saved to Supabase.');
+    } catch (e) { showToast('Error', e.message || 'Could not save influencer.', '#ef4444'); }
+}
+
+async function deleteInfluencer(id) {
+    if (!confirm('Delete this influencer permanently?')) return;
+    var isDemo = isDemoId(id);
+    try {
+        if (!isDemo) {
+            var res = await sbClient.from(INFLUENCERS_TABLE).delete().eq('id', id);
+            if (res.error) throw res.error;
+        } else if (typeof demoInfluencers !== 'undefined') {
+            demoInfluencers = demoInfluencers.filter(function (d) { return d.id !== id; });
+        }
+        adminInfluencers = adminInfluencers.filter(function (i) { return i.id !== id; });
+        renderAdminInfluencerList(); refreshFrontendData();
+        showToast('Deleted', 'Influencer removed.');
+    } catch (e) { showToast('Error', 'Could not delete influencer.', '#ef4444'); }
+}
+
+// ===================================================================
 // ===== ADMIN: NOTIFICATIONS =======================================
 // ===================================================================
 var adminNotifications = [];
@@ -1707,6 +1819,12 @@ async function refreshFrontendData() {
         renderEvents('featuredEventsGrid', displayEvents.slice(0, 3));
         renderEvents('allEventsGrid', displayEvents);
     } catch (e) { renderEvents('featuredEventsGrid', demoEvents.slice(0, 3)); renderEvents('allEventsGrid', demoEvents); }
+
+    try {
+        var iRes = await sbClient.from(INFLUENCERS_TABLE).select('*').order('name');
+        var displayInfluencers = (!iRes.error && iRes.data && iRes.data.length > 0) ? iRes.data : (typeof demoInfluencers !== 'undefined' ? demoInfluencers : []);
+        renderInfluencers('allInfluencersGrid', displayInfluencers);
+    } catch (e) { renderInfluencers('allInfluencersGrid', demoInfluencers); }
 
     if (currentPage === 'home') loadHeroMedia();
 
@@ -1877,7 +1995,10 @@ async function openEventDetail(id) {
             joinBtn.textContent = 'Join Exclusive Event';
             joinBtn.disabled = false;
             joinBtn.classList.remove('btn-success');
-            joinBtn.onclick = function() { openEventPaymentGate(e.id); };
+            joinBtn.onclick = function() { 
+                window.currentEvent = e; // Set current event for processEventPayment
+                processEventPayment(); 
+            };
         }
     }
 
@@ -1885,10 +2006,57 @@ async function openEventDetail(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ===== INFLUENCERS IMPLEMENTATION =====
+function renderInfluencers(targetGridId, list) {
+    var grid = document.getElementById(targetGridId); if (!grid) return;
+    if (!list.length) { grid.innerHTML = '<div class="empty-state"><p>No influencers yet.</p></div>'; return; }
+    grid.innerHTML = list.map(function (a) {
+        var imgHtml = a.profile_image_url ? '<img src="' + a.profile_image_url + '" alt="' + a.name + '" loading="lazy">' : '';
+        return '<div class="artist-card" onclick="openInfluencerDetail(\'' + a.id + '\')">' +
+            '<div class="artist-card-img">' + imgHtml + '</div>' +
+            '<div class="artist-card-body">' +
+            '<h3 class="artist-card-name">' + a.name + '</h3>' +
+            '<p class="artist-card-release">🌟 ' + (a.category || 'Cultural Icon') + '</p>' +
+            '<div class="artist-card-actions">' +
+            '<button class="btn-sm btn-view-profile" onclick="event.stopPropagation();openInfluencerDetail(\'' + a.id + '\')">View Profile</button>' +
+            '</div></div></div>';
+    }).join('');
+}
+
+async function loadInfluencers() {
+    if (!sbClient) { influencers = demoInfluencers; renderInfluencers('allInfluencersGrid', influencers); return; }
+    try {
+        var res = await sbClient.from(INFLUENCERS_TABLE).select('*').order('name');
+        influencers = res.data || demoInfluencers;
+        renderInfluencers('allInfluencersGrid', influencers);
+    } catch (e) { influencers = demoInfluencers; renderInfluencers('allInfluencersGrid', influencers); }
+}
+
+function openInfluencerDetail(id) {
+    // Hide any other details first
+    document.querySelectorAll('.overlay').forEach(ov => ov.classList.remove('open'));
+    var a = influencers.find(function (x) { return x.id == id; });
+    if (!a) return;
+    var overlay = document.getElementById('influencerDetail');
+    if (overlay) {
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('influencerNameDetail').textContent = a.name;
+        document.getElementById('influencerBioDetail').textContent = a.bio || '';
+        document.getElementById('influencerProfileImgDetail').src = a.profile_image_url || '';
+        
+        var ig = document.getElementById('influencerInstaDetail');
+        if (ig) { ig.href = a.ig_url || '#'; ig.style.display = a.ig_url ? 'inline-flex' : 'none'; }
+        var yt = document.getElementById('influencerYoutubeDetail');
+        if (yt) { yt.href = a.yt_url || '#'; yt.style.display = a.yt_url ? 'inline-flex' : 'none'; }
+    }
+}
+
 function closeDetail() {
     document.getElementById('artistDetail').classList.remove('open');
     document.getElementById('articleDetail').classList.remove('open');
     document.getElementById('eventDetail').classList.remove('open');
+    document.getElementById('influencerDetail').classList.remove('open');
     window.location.hash = currentPage;
 }
 

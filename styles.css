@@ -2667,6 +2667,55 @@ nav a.active {
   cursor: pointer
 }
 
+.filter-tab {
+  padding: 0.8rem 2rem;
+  background: var(--dark);
+  color: white;
+  border: none;
+  border-radius: 8px; /* Rounded rectangle */
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.filter-tab:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+}
+
+.filter-tab.active {
+  background: var(--primary);
+  box-shadow: 0 8px 15px rgba(255, 107, 53, 0.3);
+}
+
+.btn-premium-rect {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px; /* Standardized rounded rectangle */
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-premium-rect:hover {
+  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
 .supabase-status {
   display: flex;
   align-items: center;
