@@ -68,8 +68,8 @@ var demoArticles = [
 
 var influencers = [];
 var demoInfluencers = [
-    { id: 'i1', name: 'DJ Zadig', category: 'Music Icon', bio: 'The pioneer of Afro-Electric sounds.', profile_image_url: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80', banner_image_url: '', ig_url: '#', yt_url: '#' },
-    { id: 'i2', name: 'Aicha Culture', category: 'Cultural Activist', bio: 'Promoting Ivorian heritage through modern art.', profile_image_url: 'https://images.unsplash.com/photo-1531123414780-f05244585149?auto=format&fit=crop&q=80', banner_image_url: '', ig_url: '#', yt_url: '#' }
+    { id: 'i1', name: 'DJ Zadig', category: 'Music Icon', bio: 'The pioneer of Afro-Electric sounds.', profile_image_url: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80', banner_image_url: '', ig_url: '#', yt_url: '#', tiktok_spotify_url: '#' },
+    { id: 'i2', name: 'Aicha Culture', category: 'Cultural Activist', bio: 'Promoting Ivorian heritage through modern art.', profile_image_url: 'https://images.unsplash.com/photo-1531123414780-f05244585149?auto=format&fit=crop&q=80', banner_image_url: '', ig_url: '#', yt_url: '#', tiktok_spotify_url: '#' }
 ];
 
 var demoThreads = [
@@ -1617,7 +1617,8 @@ async function saveInfluencer() {
         profile_image_url: document.getElementById('influencerProfileImg').value.trim() || null,
         banner_image_url: document.getElementById('influencerBannerImg').value.trim() || null,
         ig_url: document.getElementById('influencerInstagram').value.trim() || null,
-        yt_url: document.getElementById('influencerYoutube').value.trim() || null
+        yt_url: document.getElementById('influencerYoutube').value.trim() || null,
+        tiktok_spotify_url: document.getElementById('influencerTikTok').value.trim() || null
     };
     var editId = document.getElementById('editInfluencerId').value;
     var isDemo = isDemoId(editId);
@@ -1887,6 +1888,12 @@ async function openArtistDetail(id) {
     // Social
     document.getElementById('artistInstaDetail').href = a.instagram_url || '#';
     document.getElementById('artistYoutubeDetail').href = a.youtube_url || '#';
+    
+    var tiktok = document.getElementById('artistTikTokDetail');
+    if (tiktok) { 
+        tiktok.href = a.tiktok_spotify_url || '#'; 
+        tiktok.style.display = a.tiktok_spotify_url ? 'inline-flex' : 'none'; 
+    }
 
     document.getElementById('artistDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2049,6 +2056,8 @@ function openInfluencerDetail(id) {
         if (ig) { ig.href = a.ig_url || '#'; ig.style.display = a.ig_url ? 'inline-flex' : 'none'; }
         var yt = document.getElementById('influencerYoutubeDetail');
         if (yt) { yt.href = a.yt_url || '#'; yt.style.display = a.yt_url ? 'inline-flex' : 'none'; }
+        var tiktok = document.getElementById('influencerTikTokDetail');
+        if (tiktok) { tiktok.href = a.tiktok_spotify_url || '#'; tiktok.style.display = a.tiktok_spotify_url ? 'inline-flex' : 'none'; }
     }
 }
 

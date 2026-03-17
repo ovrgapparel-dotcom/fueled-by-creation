@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation — V1.2.8</title>
+  <title>Fueled By Creation — V1.2.9</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
@@ -107,6 +107,8 @@
       data-i18n="trends">Trends</a>
     <a href="#" onclick="event.preventDefault();switchPage('events')" data-page="events"
       data-i18n="events">Events</a>
+    <a href="#" onclick="event.preventDefault();switchPage('influencers')" data-page="influencers"
+      data-i18n="influencers">Influencers</a>
   </nav>
 
 
@@ -132,6 +134,23 @@
       </div>
       <div class="artists-grid" id="featuredArtistsGrid">
         <!-- JS populated -->
+      </div>
+      <div style="text-align:center; margin-top:2rem">
+        <button class="btn-premium-rect" onclick="switchPage('artists')" data-i18n="view_profile">View All Artists</button>
+      </div>
+    </section>
+
+    <!-- Cultural Influencers Preview -->
+    <section class="artists-section" id="featuredInfluencersPreview">
+      <div class="section-header">
+        <div class="section-label">🔥 Cultural Icons</div>
+        <h2 class="section-title">THE INFLUENCERS</h2>
+      </div>
+      <div class="artists-grid" id="featuredInfluencersGrid">
+        <!-- JS populated -->
+      </div>
+      <div style="text-align:center; margin-top:2rem">
+        <button class="btn-premium-rect" onclick="switchPage('influencers')">View All Influencers</button>
       </div>
     </section>
 
@@ -188,6 +207,9 @@
       </div>
       <div class="events-grid" id="featuredEventsGrid">
         <!-- JS populated -->
+      </div>
+      <div style="text-align:center; margin-top:2rem">
+        <button class="btn-premium-rect" onclick="switchPage('events')" data-i18n="view_details">View All Events</button>
       </div>
     </section>
   </div>
@@ -634,12 +656,12 @@
               <label style="color:var(--primary);margin-bottom:.75rem;display:block;font-size:.9rem">📱 Social
                 Links</label>
               <div class="admin-grid">
-                <div><label>Instagram</label><input type="text" id="artistInstagram"
+                <div><label>Instagram URL</label><input type="text" id="artistInstagram"
                     placeholder="https://instagram.com/..."></div>
-                <div><label>YouTube</label><input type="text" id="artistYoutube" placeholder="https://youtube.com/...">
+                <div><label>YouTube URL</label><input type="text" id="artistYoutube" placeholder="https://youtube.com/...">
                 </div>
               </div>
-              <div><label>TikTok / Spotify</label><input type="text" id="artistTiktok"
+              <div><label>TikTok URL</label><input type="text" id="artistTiktok"
                   placeholder="https://tiktok.com/..."></div>
             </div>
             <div class="admin-grid">
@@ -694,6 +716,8 @@
               <div><label>Instagram URL</label><input type="url" id="influencerInstagram" placeholder="URL"></div>
               <div><label>YouTube URL</label><input type="url" id="influencerYoutube" placeholder="URL"></div>
             </div>
+            <div><label>TikTok URL</label><input type="url" id="influencerTikTok" placeholder="TikTok URL"></div>
+            <div><label>TikTok URL</label><input type="url" id="influencerTikTok" placeholder="TikTok URL"></div>
             <div class="admin-form-actions" style="margin-top:1.5rem">
               <button class="btn-save" onclick="saveInfluencer()">💾 Save Influencer</button>
               <button class="btn-cancel-admin" onclick="cancelEditInfluencer()">Cancel</button>
@@ -1214,7 +1238,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; 2026 Fueled By Creation. All rights reserved.</p>
+        <p>&copy; 2026 Fueled By Creation. v1.2.9 All rights reserved.</p>
         <p class="made-with">
           <button id="adminToggleBtn" onclick="handleAdminClick()" title=""
             style="background:none;border:none;cursor:pointer;color:#1a1a1a;font-size:0.6rem;margin-right:0.5rem;opacity:0.15;transition:opacity 0.3s;padding:2px 4px;border-radius:3px;"
@@ -1261,6 +1285,7 @@
           <div class="social-links-detail">
             <a id="artistInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
             <a id="artistYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
+            <a id="artistTikTokDetail" href="#" target="_blank" class="social-icon">TIKTOK</a>
           </div>
         </div>
       </div>
@@ -1341,6 +1366,7 @@
           <div class="social-links-detail">
             <a id="influencerInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
             <a id="influencerYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
+            <a id="influencerTikTokDetail" href="#" target="_blank" class="social-icon">TIKTOK</a>
           </div>
         </div>
       </div>
