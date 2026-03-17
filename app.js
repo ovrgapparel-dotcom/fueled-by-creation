@@ -737,7 +737,24 @@ function redirectPayPal(total) {
     });
     pf.submit(); finishOrder('');
 }
-function finishOrder(name) { closeCheckout(); cart = []; renderCart(); showToast('Order confirmed! 🎉', 'Thanks ' + name + '! We\'ll contact you within 24h.'); }
+function finishOrder(name) { 
+    // Check if an event was in the cart to unlock it
+    cart.forEach(function(item) {
+        if (item.key.startsWith('event-')) {
+            var eventId = item.id;
+            if (eventId && !unlockedEvents.includes(eventId)) {
+                unlockedEvents.push(eventId);
+                console.log('Event unlocked via checkout:', eventId);
+            }
+        }
+    });
+
+    closeCheckout(); 
+    cart = []; 
+    renderCart(); 
+    showToast('Order confirmed! 🎉', 'Thanks ' + name + '! We\'ll contact you within 24h.'); 
+}
+
 
 function payWithPayPal() {
     if (!currentProduct) return;
@@ -1972,25 +1989,42 @@ function applyTranslations() {
 
 
 
-window.shareContent = function (title, link) {
+window.shareContent = async function (title, link) {
     var shareText = "Download the app and join the community: ";
-    var shareData = {
-        title: title,
-        text: shareText,
-        url: link
-    };
+    
+    // Attempt native share if available (Capacitor)
+    try {
+        const Share = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+        if (Share) {
+            await Share.share({
+                title: title,
+                text: shareText,
+                url: link,
+                dialogTitle: 'Share with the Tribe'
+            });
+            return;
+        }
+    } catch (err) {
+        console.warn('Native share failed, falling back:', err);
+    }
 
+    // Web Share API fallback
     if (navigator.share) {
-        navigator.share(shareData).catch(function (err) {
-            console.error('Error sharing', err);
+        navigator.share({
+            title: title,
+            text: shareText,
+            url: link
+        }).catch(function (err) {
+            console.error('Web share error:', err);
         });
     } else {
-        // Fallback or copy to clipboard
+        // Clipboard fallback
         navigator.clipboard.writeText(shareText + "\n" + link).then(function () {
             showToast('Link Copied', 'Share link copied to clipboard.', '#3b82f6');
         });
     }
 };
+
 
 // ===================================================================
 // ===== COMMUNITY CONTENT: UPLOADS & HOT TOPICS ====================
@@ -2475,38 +2509,26 @@ async function processEventPayment() {
         showToast('Error', 'Please select an event first.');
         return;
     }
-
-    const btn = document.getElementById('btnEventPay');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="loader-dots">Processing</span>';
-    }
-
-    // Simulate payment sequence for 1.5s
-    await new Promise(r => setTimeout(r, 1500));
-
-    // Check for real ticketing URL
-    if (window.currentEvent.ticketing_url && window.currentEvent.ticketing_url !== '#' && window.currentEvent.ticketing_url !== '') {
-        showToast('Redirecting... 🎟️', 'Taking you to the official ticket gate.');
-        setTimeout(function() {
-            window.location.href = window.currentEvent.ticketing_url;
-        }, 1000);
-    } else {
-        // Fallback: Just grant access if no link exists
-        showToast('Access Granted! 🔓', 'Confirmed. Enjoy the exclusive content.');
-        closeEventPaymentGate();
-        
-        if (!unlockedEvents.includes(window.currentEvent.id)) {
-            unlockedEvents.push(window.currentEvent.id);
-        }
-        openEventDetail(window.currentEvent.id);
-    }
-
-    if (btn) {
-        btn.disabled = false;
-        btn.textContent = 'Secure Entrance Pass';
-    }
+    
+    // Close the gate and open the real checkout
+    closeEventPaymentGate();
+    
+    // Add the event to the cart as a special checkout item
+    // This allows us to use the professional checkout flow
+    var eventItem = {
+        id: window.currentEvent.id,
+        name: '🎟️ ' + window.currentEvent.title,
+        price: 0, // Events are often free or handle payment at redirect, but we want the form
+        qty: 1,
+        img: window.currentEvent.cover_image_url || ''
+    };
+    
+    // For events, we clear the cart to focus on the ticket
+    cart = [{ key: 'event-' + eventItem.id, ...eventItem }];
+    renderCart();
+    openCheckout();
 }
+
 
 
 

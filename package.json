@@ -17,6 +17,7 @@
     "@capacitor/android": "^8.2.0",
     "@capacitor/cli": "^8.2.0",
     "@capacitor/core": "^8.2.0",
+    "@capacitor/share": "^8.0.1",
     "playwright": "^1.58.2"
   }
 }
