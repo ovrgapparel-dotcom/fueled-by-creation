@@ -1555,6 +1555,7 @@ async function deleteEvent(id) {
 // ===================================================================
 // ===== ADMIN CRUD: INFLUENCERS ====================================
 // ===================================================================
+const INFLUENCERS_TABLE = 'influencers';
 var adminInfluencers = [];
 
 async function loadAdminInfluencers() {
@@ -1598,12 +1599,13 @@ function editInfluencer(id) {
     document.getElementById('influencerBannerImg').value = i.banner_image_url || '';
     document.getElementById('influencerInstagram').value = i.ig_url || '';
     document.getElementById('influencerYoutube').value = i.yt_url || '';
+    document.getElementById('influencerTikTok').value = i.tiktok_spotify_url || '';
     document.getElementById('influencerFormTitle').textContent = '✏ Edit — ' + i.name;
 }
 
 function cancelEditInfluencer() {
     document.getElementById('editInfluencerId').value = '';
-    ['influencerName', 'influencerCategory', 'influencerBio', 'influencerProfileImg', 'influencerBannerImg', 'influencerInstagram', 'influencerYoutube'].forEach(function (id) { document.getElementById(id).value = ''; });
+    ['influencerName', 'influencerCategory', 'influencerBio', 'influencerProfileImg', 'influencerBannerImg', 'influencerInstagram', 'influencerYoutube', 'influencerTikTok'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('influencerFormTitle').textContent = '+ New Influencer';
 }
 
@@ -1622,6 +1624,10 @@ async function saveInfluencer() {
     };
     var editId = document.getElementById('editInfluencerId').value;
     var isDemo = isDemoId(editId);
+    var btn = event?.target || document.querySelector('button[onclick="saveInfluencer()"]');
+    var originalText = btn ? btn.textContent : '💾 Save Influencer';
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from(INFLUENCERS_TABLE).update(payload).eq('id', editId);
@@ -1636,6 +1642,9 @@ async function saveInfluencer() {
         cancelEditInfluencer(); await loadAdminInfluencers(); refreshFrontendData();
         showToast('Saved! ✓', '"' + name + '" saved to Supabase.');
     } catch (e) { showToast('Error', e.message || 'Could not save influencer.', '#ef4444'); }
+    finally {
+        if (btn) { btn.disabled = false; btn.textContent = originalText; }
+    }
 }
 
 async function deleteInfluencer(id) {
