@@ -133,6 +133,20 @@
       </div>
     </section>
 
+    <!-- Featured Radio Preview -->
+    <section class="artists-section" id="featuredRadioPreview">
+      <div class="section-header">
+        <div class="section-label">📻 Featured Mixes</div>
+        <h2 class="section-title">THE RADIO</h2>
+      </div>
+      <div class="playlist-grid" id="featuredRadioGrid">
+        <!-- JS populated -->
+      </div>
+      <div style="text-align:center; margin-top:2rem">
+        <button class="btn-premium-rect" onclick="switchPage('radio')">Hear All Mixes</button>
+      </div>
+    </section>
+
     <!-- Cultural Influencers Preview -->
     <section class="artists-section" id="featuredInfluencersPreview">
       <div class="section-header">
@@ -718,6 +732,12 @@
               <div><label>YouTube URL</label><input type="url" id="influencerYoutube" placeholder="URL"></div>
             </div>
             <div><label>TikTok URL</label><input type="url" id="influencerTikTok" placeholder="TikTok URL"></div>
+            <div style="display:flex;gap:1.5rem;align-items:center;padding:.5rem 0">
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
+                  id="influencerFeatured" style="accent-color:var(--primary);width:18px;height:18px"> ⭐ Featured</label>
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
+                  id="influencerTrending" style="accent-color:#ef4444;width:18px;height:18px"> 🔥 Trending</label>
+            </div>
             <div class="admin-form-actions" style="margin-top:1.5rem">
               <button class="btn-save" onclick="saveInfluencer(event)">💾 Save Influencer</button>
               <button class="btn-cancel-admin" onclick="cancelEditInfluencer()">Cancel</button>
@@ -1139,6 +1159,12 @@
               <button class="btn-sm" onclick="addTrackRow()" style="margin-top:1rem; background:#333; color:white; border:1px solid #444">+ Add Track</button>
             </div>
 
+            <div style="display:flex;gap:1.5rem;align-items:center;padding:.5rem 0">
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
+                  id="playlistFeatured" style="accent-color:var(--primary);width:18px;height:18px"> ⭐ Featured</label>
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
+                  id="playlistTrending" style="accent-color:#ef4444;width:18px;height:18px"> 🔥 Trending</label>
+            </div>
             <div class="admin-form-actions" style="margin-top:2rem">
               <button class="btn-save" onclick="savePlaylist(event)">💾 Save Playlist</button>
               <button class="btn-cancel-admin" onclick="cancelEditPlaylist()">Cancel</button>

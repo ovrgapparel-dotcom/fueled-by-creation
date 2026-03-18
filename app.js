@@ -1636,12 +1636,16 @@ function editInfluencer(id) {
     document.getElementById('influencerInstagram').value = i.ig_url || '';
     document.getElementById('influencerYoutube').value = i.yt_url || '';
     document.getElementById('influencerTikTok').value = i.tiktok_spotify_url || '';
+    document.getElementById('influencerFeatured').checked = i.is_featured || false;
+    document.getElementById('influencerTrending').checked = i.is_trending || false;
     document.getElementById('influencerFormTitle').textContent = '✏ Edit — ' + i.name;
 }
 
 function cancelEditInfluencer() {
     document.getElementById('editInfluencerId').value = '';
     ['influencerName', 'influencerCategory', 'influencerBio', 'influencerProfileImg', 'influencerBannerImg', 'influencerInstagram', 'influencerYoutube', 'influencerTikTok'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('influencerFeatured').checked = false;
+    document.getElementById('influencerTrending').checked = false;
     document.getElementById('influencerFormTitle').textContent = '+ New Influencer';
 }
 
@@ -1657,7 +1661,9 @@ async function saveInfluencer(event) {
         banner_image_url: document.getElementById('influencerBannerImg').value.trim() || null,
         ig_url: document.getElementById('influencerInstagram').value.trim() || null,
         yt_url: document.getElementById('influencerYoutube').value.trim() || null,
-        tiktok_spotify_url: document.getElementById('influencerTikTok').value.trim() || null
+        tiktok_spotify_url: document.getElementById('influencerTikTok').value.trim() || null,
+        is_featured: document.getElementById('influencerFeatured').checked,
+        is_trending: document.getElementById('influencerTrending').checked
     };
     var editId = document.getElementById('editInfluencerId').value;
     var isDemo = isDemoId(editId);
@@ -1877,9 +1883,19 @@ async function refreshFrontendData() {
         var liveInfluencers = (!iRes.error && iRes.data && iRes.data.length > 0) ? iRes.data : [];
         var demo = typeof demoInfluencers !== 'undefined' ? demoInfluencers : [];
         var displayInfluencers = liveInfluencers.concat(demo.filter(function(d) { return !liveInfluencers.find(function(l) { return l.id === d.id; }); }));
-        influencers = displayInfluencers; // Sync global influencers
-        renderInfluencers('allInfluencersGrid', displayInfluencers);
-    } catch (e) { influencers = demoInfluencers; renderInfluencers('allInfluencersGrid', demoInfluencers); }
+        influencers = displayInfluencers;
+        renderInfluencers('featuredInfluencersGrid', displayInfluencers.filter(function(i) { return i.is_featured; }));
+        renderInfluencers('allInfluencersGrid', influencers);
+    } catch (e) {
+        influencers = typeof demoInfluencers !== 'undefined' ? demoInfluencers : [];
+        renderInfluencers('featuredInfluencersGrid', influencers.filter(function(i) { return i.is_featured; }));
+        renderInfluencers('allInfluencersGrid', influencers);
+    }
+
+    try {
+        await renderRadio('featuredRadioGrid', function(p) { return p.is_featured; });
+        await renderRadio('playlistGrid');
+    } catch (e) { console.error('Error refreshing radio:', e); }
 
     if (currentPage === 'home') loadHeroMedia();
 
@@ -3002,6 +3018,8 @@ async function editPlaylist(id) {
     document.getElementById('playlistDesc').value = p.description || '';
     document.getElementById('playlistCoverImg').value = p.cover_image_url || '';
     document.getElementById('playlistStatus').value = p.status;
+    document.getElementById('playlistFeatured').checked = p.is_featured || false;
+    document.getElementById('playlistTrending').checked = p.is_trending || false;
     document.getElementById('radioFormTitle').textContent = 'Edit Playlist: ' + p.title;
 
     // Load Tracks
@@ -3052,7 +3070,9 @@ async function savePlaylist(e) {
         artist_name: document.getElementById('playlistArtist').value,
         description: document.getElementById('playlistDesc').value,
         cover_image_url: document.getElementById('playlistCoverImg').value,
-        status: document.getElementById('playlistStatus').value
+        status: document.getElementById('playlistStatus').value,
+        is_featured: document.getElementById('playlistFeatured').checked,
+        is_trending: document.getElementById('playlistTrending').checked
     };
 
     if (!playlistData.title) return alert('Title is required');
@@ -3097,7 +3117,8 @@ async function savePlaylist(e) {
 
         alert('Playlist saved successfully!');
         cancelEditPlaylist();
-        loadAdminRadio();
+        await loadAdminRadio();
+        await refreshFrontendData();
     } catch (err) {
         console.error('Save Playlist Error:', err);
         alert('Error saving playlist: ' + (err.message || 'Unknown error'));
@@ -3118,13 +3139,15 @@ function cancelEditPlaylist() {
     document.getElementById('playlistArtist').value = '';
     document.getElementById('playlistDesc').value = '';
     document.getElementById('playlistCoverImg').value = '';
+    document.getElementById('playlistFeatured').checked = false;
+    document.getElementById('playlistTrending').checked = false;
     document.getElementById('adminTracksList').innerHTML = '';
     document.getElementById('radioFormTitle').textContent = '+ New Playlist';
 }
 
 // FRONTEND
-async function renderRadio() {
-    const grid = document.getElementById('playlistGrid');
+async function renderRadio(targetGridId = 'playlistGrid', filterFn = null) {
+    const grid = document.getElementById(targetGridId);
     if (!grid) return;
     grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading Radio...</p>';
 
@@ -3132,12 +3155,15 @@ async function renderRadio() {
         const { data, error } = await sbClient.from(PLAYLISTS_TABLE).select('*').eq('status', 'Published').order('priority_order', { ascending: false });
         if (error) throw error;
         
-        if (!data || data.length === 0) {
-            grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">No playlists available yet. Check back soon!</p>';
+        let displayData = data;
+        if (filterFn) displayData = data.filter(filterFn);
+        
+        if (!displayData || displayData.length === 0) {
+            grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">No playlists available yet.</p>';
             return;
         }
 
-        grid.innerHTML = data.map(p => `
+        grid.innerHTML = displayData.map(p => `
             <div class="playlist-card" onclick="openPlaylistDetail('${p.id}')">
                 <div class="playlist-card-img">
                     <img src="${p.cover_image_url || 'placeholder.jpg'}" alt="${p.title}">
