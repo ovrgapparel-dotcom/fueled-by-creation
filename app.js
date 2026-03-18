@@ -132,7 +132,7 @@ function switchPage(page) {
     // When opening Radio page: render playlists and hero
     if (page === 'radio') {
         renderRadio();
-        loadSectionHeroMedia('radio', 'radioHeroMedia');
+        loadSectionHeroMedia('radio', 'hero-radio');
     }
 
     // When opening Home: refresh hero media
@@ -205,7 +205,7 @@ async function loadHeroConfig() {
             loadSectionHeroMedia('artists', 'hero-artists');
             loadSectionHeroMedia('trends', 'hero-trends');
             loadSectionHeroMedia('events', 'hero-events');
-            loadSectionHeroMedia('radio', 'radioHeroMedia');
+            loadSectionHeroMedia('radio', 'hero-radio');
         }
     } catch (e) { console.error('Hero config load error:', e); }
 }
@@ -2512,9 +2512,9 @@ function loadSectionHeroMedia(sectionName, containerId) {
 
     var url = sectionHeroes[sectionName];
     
-    // Clear the container (keep only the overlay)
+    // Clear the container (keep only the overlay and content)
     Array.from(container.children).forEach(child => {
-        if (!child.classList.contains('section-hero-overlay')) {
+        if (!child.classList.contains('section-hero-overlay') && !child.classList.contains('hero-content')) {
             child.remove();
         }
     });
