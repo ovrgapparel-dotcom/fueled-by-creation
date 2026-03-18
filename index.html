@@ -64,7 +64,7 @@
 
     const STORAGE_BUCKET = 'product-images';
     const PRODUCTS_TABLE = 'products';
-
+  </script>
   <script type="module" src="./app.js"></script>
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -96,8 +96,12 @@
       data-i18n="trends">Trends</a>
     <a href="#" onclick="event.preventDefault();switchPage('events')" data-page="events"
       data-i18n="events">Events</a>
+    <a href="#" onclick="event.preventDefault();switchPage('radio')" data-page="radio"
+      data-i18n="radio">Radio</a>
     <a href="#" onclick="event.preventDefault();switchPage('influencers')" data-page="influencers"
       data-i18n="influencers">Influencers</a>
+    <a href="#" onclick="event.preventDefault();switchPage('radio')" data-page="radio"
+      data-i18n="radio">Radio</a>
   </nav>
 
 
@@ -397,6 +401,23 @@
   <!-- Old overlay removed as it was redundant with articleDetail at line 1255 -->
 
 
+  <!-- ===== RADIO PAGE ===== -->
+  <div class="page-section" id="page-radio">
+    <section class="hero-small">
+      <div id="radioHeroMedia" class="hero-media-bg"></div>
+      <div class="hero-content">
+        <h1 data-i18n="radio">FBC RADIO</h1>
+        <p>Exclusive mixes and artist playlists.</p>
+      </div>
+    </section>
+
+    <div class="section-wrap">
+      <div class="artists-grid" id="playlistGrid">
+        <!-- JS populated -->
+      </div>
+    </div>
+  </div>
+
   <!-- ===== CART PANEL ===== -->
   <div class="cart-panel" id="cartPanel">
     <div class="cart-header">
@@ -519,6 +540,7 @@
         <div class="admin-tab" onclick="showAdminTab('threads-admin', this)">Threads</div>
         <div class="admin-tab" onclick="showAdminTab('events-admin', this)">Events</div>
         <div class="admin-tab" onclick="showAdminTab('influencers-admin', this)">Influencers</div>
+        <div class="admin-tab" onclick="showAdminTab('radio-admin', this)">📻 Radio</div>
         <div class="admin-tab" onclick="showAdminTab('hero-media', this)">🎬 Hero Media</div>
         <div class="admin-tab" onclick="showAdminTab('featured-promo', this)">💎 Featured Promo</div>
         <div class="admin-tab" onclick="showAdminTab('notifications-admin', this)">Notifications</div>
@@ -882,7 +904,7 @@
               </div>
             </div>
 
-            <div class="admin-grid">
+            <div class="admin-grid" style="margin-bottom: 1rem;">
               <div class="field-with-upload">
                 <label>Trends Hero URL</label>
                 <div class="input-upload-group">
@@ -897,6 +919,17 @@
                   <input type="text" id="eventsHeroInput" placeholder="https://example.com/events.jpg">
                   <button class="btn-upload-trigger" onclick="document.getElementById('eventsHeroFile').click()">📷</button>
                   <input type="file" id="eventsHeroFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'eventsHeroInput', 'assets')">
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-grid">
+              <div class="field-with-upload">
+                <label>Radio Hero URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="radioHeroInput" placeholder="https://example.com/radio.jpg">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('radioHeroFile').click()">📷</button>
+                  <input type="file" id="radioHeroFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'radioHeroInput', 'assets')">
                 </div>
               </div>
             </div>
@@ -1058,6 +1091,55 @@
               Analytics</h4>
             <div id="notifAnalytics" style="color:#888;font-size:.85rem">Analytics data will appear here once
               notifications are sent.</div>
+          </div>
+        <!-- ===== RADIO ADMIN TAB ===== -->
+        <div id="adminTabRadio" style="display:none">
+          <div id="adminPlaylistList" class="admin-product-list" style="margin-bottom:2rem">
+            <p style="color:#666;text-align:center;padding:2rem">Loading playlists...</p>
+          </div>
+
+          <div class="admin-form" id="radioFormSection">
+            <h3 id="radioFormTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--primary);margin-bottom:0.5rem">+ New Playlist</h3>
+            <input type="hidden" id="editPlaylistId" value="">
+            
+            <div class="admin-grid">
+              <div><label>Playlist Title *</label><input type="text" id="playlistTitle" placeholder="Summer Vibes 2026"></div>
+              <div><label>Artist / DJ Name *</label><input type="text" id="playlistArtist" placeholder="DJ Phantom"></div>
+            </div>
+
+            <div><label>Description</label><textarea id="playlistDesc" placeholder="The ultimate Afrobeat mix..." style="min-height:60px"></textarea></div>
+
+            <div class="admin-grid">
+              <div class="field-with-upload">
+                <label>Cover Image URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="playlistCoverImg" placeholder="Upload or paste URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('playlistCoverImgFile').click()">📷</button>
+                  <input type="file" id="playlistCoverImgFile" accept="image/*" style="display:none" onchange="handleAdminMediaUpload(event, 'playlistCoverImg', 'playlists')">
+                </div>
+              </div>
+              <div><label>Status</label>
+                <select id="playlistStatus">
+                  <option value="Draft">Draft</option>
+                  <option value="Published">Published</option>
+                  <option value="Hidden">Hidden</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tracks Section -->
+            <div style="margin-top:2rem; background:#111; padding:1.5rem; border-radius:12px; border:1px solid #333">
+              <h4 style="color:var(--primary); margin-bottom:1rem">🎵 Tracks (Max 15)</h4>
+              <div id="adminTracksList" style="display:flex; flex-direction:column; gap:0.75rem">
+                <!-- Track rows injected via JS -->
+              </div>
+              <button class="btn-sm" onclick="addTrackRow()" style="margin-top:1rem; background:#333; color:white; border:1px solid #444">+ Add Track</button>
+            </div>
+
+            <div class="admin-form-actions" style="margin-top:2rem">
+              <button class="btn-save" onclick="savePlaylist(event)">💾 Save Playlist</button>
+              <button class="btn-cancel-admin" onclick="cancelEditPlaylist()">Cancel</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1346,6 +1428,48 @@
         <p id="eventDescDetail" class="event-desc"></p>
         <a id="eventTicketBtnDetail" href="#" target="_blank" class="btn-secondary btn-full" style="text-decoration:none;display:block;text-align:center;margin-bottom:1rem">🎫 Get Tickets</a>
         <button id="eventJoinBtn" class="btn-primary btn-full">Join Exclusive Event</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="playlistDetail" class="overlay">
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="radio">RADIO</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn" onclick="sharePlaylist()">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closePlaylistDetail()">✕</button>
+      </div>
+
+      <div class="playlist-header-hero">
+        <img id="playlistCoverDetail" src="" alt="Cover" class="playlist-cover-large">
+        <div class="playlist-info-hero">
+          <h2 id="playlistTitleDetail" class="premium-title"></h2>
+          <p id="playlistArtistDetail" class="playlist-artist-sub"></p>
+          <p id="playlistDescDetail" class="playlist-desc-sub"></p>
+        </div>
+      </div>
+
+      <div class="player-controls">
+        <div class="player-main-row">
+            <button id="playerPrev" class="player-btn">⏮</button>
+            <button id="playerPlay" class="player-btn play-main">▶</button>
+            <button id="playerNext" class="player-btn">⏭</button>
+        </div>
+        <div class="player-progress-container">
+            <span id="playerCurrentTime">0:00</span>
+            <div class="player-progress-bar"><div id="playerProgressFill"></div></div>
+            <span id="playerDuration">0:00</span>
+        </div>
+        <div id="playerNowPlaying" class="now-playing-txt">Select a track to play</div>
+      </div>
+
+      <div class="detail-container">
+        <div class="tracklist-container" id="tracklistItems">
+          <!-- Tracks injected via JS -->
+        </div>
       </div>
     </div>
   </div>

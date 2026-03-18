@@ -4376,3 +4376,249 @@ footer {
   }
 }
 
+/* ===== RADIO & PLAYLIST STYLES ===== */
+.playlist-card { 
+  background: var(--dark2); 
+  border: 1px solid #333; 
+  border-radius: 16px; 
+  overflow: hidden; 
+  transition: all 0.3s; 
+  cursor: pointer; 
+  position: relative; 
+}
+
+.playlist-card:hover { 
+  transform: translateY(-8px); 
+  border-color: var(--primary); 
+  box-shadow: 0 12px 30px rgba(255,107,53,0.15); 
+}
+
+.playlist-card-img { 
+  height: 260px; 
+  position: relative; 
+  overflow: hidden; 
+}
+
+.playlist-card-img img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+  transition: transform 0.5s; 
+}
+
+.playlist-card:hover .playlist-card-img img { 
+  transform: scale(1.1); 
+}
+
+.playlist-card-info { 
+  padding: 1.5rem; 
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); 
+  position: absolute; 
+  bottom: 0; 
+  width: 100%; 
+}
+
+.playlist-card-title { 
+  font-family: "Bebas Neue", sans-serif; 
+  font-size: 1.8rem; 
+  color: white; 
+  line-height: 1; 
+  margin-bottom: 0.3rem; 
+}
+
+.playlist-card-artist { 
+  font-size: 0.85rem; 
+  color: var(--primary); 
+  font-weight: 700; 
+  text-transform: uppercase; 
+  letter-spacing: 0.05em; 
+}
+
+/* Playlist Detail Overlay */
+.playlist-header-hero { 
+  display: flex; 
+  gap: 2rem; 
+  align-items: flex-end; 
+  padding: 2rem; 
+  background: #000; 
+  border-radius: 20px; 
+  margin-bottom: 2rem; 
+}
+
+.playlist-cover-large { 
+  width: 220px; 
+  height: 220px; 
+  border-radius: 12px; 
+  object-fit: cover; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+}
+
+.playlist-info-hero { 
+  flex: 1; 
+}
+
+.playlist-artist-sub { 
+  color: var(--primary); 
+  font-weight: 800; 
+  font-size: 1.2rem; 
+  text-transform: uppercase; 
+  margin-bottom: 0.5rem; 
+}
+
+.playlist-desc-sub { 
+  color: #888; 
+  font-size: 1rem; 
+  max-width: 600px; 
+}
+
+/* Audio Player */
+.player-controls { 
+  background: #111; 
+  padding: 1.5rem; 
+  border-radius: 16px; 
+  border: 1px solid #222; 
+  margin-bottom: 2rem; 
+  position: sticky; 
+  top: 0; 
+  z-index: 10; 
+}
+
+.player-main-row { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 2rem; 
+  margin-bottom: 1rem; 
+}
+
+.player-btn { 
+  background: none; 
+  border: none; 
+  color: white; 
+  font-size: 1.5rem; 
+  cursor: pointer; 
+  transition: color 0.2s; 
+}
+
+.player-btn:hover { 
+  color: var(--primary); 
+}
+
+.player-btn.play-main { 
+  font-size: 2.5rem; 
+  width: 60px; 
+  height: 60px; 
+  background: var(--primary); 
+  border-radius: 50%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding-left: 4px; 
+}
+
+.player-btn.play-main:hover { 
+  transform: scale(1.05); 
+  background: var(--primary-dark); 
+}
+
+.player-progress-container { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  color: #666; 
+  font-size: 0.8rem; 
+  font-family: monospace; 
+}
+
+.player-progress-bar { 
+  flex: 1; 
+  height: 4px; 
+  background: #333; 
+  border-radius: 2px; 
+  cursor: pointer; 
+  position: relative; 
+}
+
+#playerProgressFill { 
+  position: absolute; 
+  height: 100%; 
+  background: var(--primary); 
+  border-radius: 2px; 
+  width: 0%; 
+}
+
+.now-playing-txt { 
+  text-align: center; 
+  color: var(--primary); 
+  font-size: 0.9rem; 
+  font-weight: 600; 
+  margin-top: 1rem; 
+  height: 1.2rem; 
+}
+
+/* Track List */
+.track-item { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  padding: 1rem; 
+  border-radius: 10px; 
+  border: 1px solid transparent; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+}
+
+.track-item:hover { 
+  background: #111; 
+  border-color: #222; 
+}
+
+.track-item.active { 
+  background: rgba(255,107,53,0.1); 
+  border-color: var(--primary); 
+}
+
+.track-num { 
+  width: 30px; 
+  color: #555; 
+  font-size: 0.9rem; 
+  font-weight: 700; 
+}
+
+.track-info { 
+  flex: 1; 
+}
+
+.track-title { 
+  color: white; 
+  font-weight: 600; 
+  font-size: 1rem; 
+}
+
+.track-item.active .track-title { 
+  color: var(--primary); 
+}
+
+.track-play-icon { 
+  color: var(--gray); 
+  font-size: 1rem; 
+}
+
+@media (max-width: 768px) {
+  .playlist-header-hero { 
+    flex-direction: column; 
+    align-items: center; 
+    text-align: center; 
+  }
+  .playlist-cover-large { 
+    width: 100%; 
+    max-width: 300px; 
+    height: auto; 
+    aspect-ratio: 1/1; 
+  }
+  .player-main-row { 
+    gap: 1rem; 
+  }
+}
+
+

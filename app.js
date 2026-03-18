@@ -6,16 +6,26 @@ import './translations.js';
 const HERO_VIDEO_URL = 'https://vz-746a5c10-8cd.b-cdn.net/513e9a7e-1a5c-4d3e-9e33-7a918e9a/play_480p.mp4';
 const STORAGE_BUCKET = 'product-images';
 const CONFIG_TABLE = 'app_config';
+const PLAYLISTS_TABLE = 'playlists';
+const TRACKS_TABLE = 'playlist_tracks';
 
 var sbClient = null;
 var currentUser = null;
 var products = [];
+var influencers = [];
+var playlists = [];
 var activeFilter = 'all';
 var adminImgSlots = ['', '', '', '', ''];
 var selectedPayment = 'paypal';
 var currentProduct = null;
 var cart = [];
 var currentPage = 'home';
+
+// Audio Player Global State
+var currentAudio = null;
+var currentPlaylistTracks = [];
+var currentTrackIndex = -1;
+var isPlaying = false;
 
 function localizeDemoData() {
     if (window.getLang() === 'fr') {
@@ -114,15 +124,19 @@ function switchPage(page) {
     var nav = document.getElementById('mainNav');
     if (nav) nav.classList.remove('mobile-nav-active');
     // Hide overlays using the open class (not inline style — avoids CSS conflicts)
-    ['artistDetail', 'articleDetail', 'eventDetail', 'influencerDetail'].forEach(function(id) {
+    ['artistDetail', 'articleDetail', 'eventDetail', 'influencerDetail', 'playlistDetail'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) { el.classList.remove('open'); el.style.display = ''; }
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // When opening Trends page: ensure pinned item is rendered
-    if (page === 'trends') {
-        loadHotTopics();
+    if (page === 'trends') loadHotTopics();
+    
+    // When opening Radio page: render playlists and hero
+    if (page === 'radio') {
+        renderRadio();
+        loadSectionHeroMedia('radio', 'radioHeroMedia');
     }
 
     // When opening Home: refresh hero media
@@ -162,14 +176,15 @@ var sectionHeroes = {
     shop: '',
     artists: '',
     trends: '',
-    events: ''
+    events: '',
+    radio: ''
 };
 
 async function loadHeroConfig() {
     if (!sbClient) return;
     try {
         const { data, error } = await sbClient.from(CONFIG_TABLE).select('*').in('key', [
-            'hero_video_url', 'shop_hero_url', 'artists_hero_url', 'trends_hero_url', 'events_hero_url'
+            'hero_video_url', 'shop_hero_url', 'artists_hero_url', 'trends_hero_url', 'events_hero_url', 'radio_hero_url'
         ]);
         if (error) {
             if (error.code !== 'PGRST116') console.error('Error loading hero config:', error);
@@ -194,6 +209,7 @@ async function loadHeroConfig() {
             loadSectionHeroMedia('artists', 'hero-artists');
             loadSectionHeroMedia('trends', 'hero-trends');
             loadSectionHeroMedia('events', 'hero-events');
+            loadSectionHeroMedia('radio', 'radioHeroMedia');
         }
     } catch (e) { console.error('Hero config load error:', e); }
 }
@@ -208,7 +224,8 @@ async function saveHeroConfig() {
         shop_hero_url: document.getElementById('shopHeroInput')?.value.trim() || '',
         artists_hero_url: document.getElementById('artistsHeroInput')?.value.trim() || '',
         trends_hero_url: document.getElementById('trendsHeroInput')?.value.trim() || '',
-        events_hero_url: document.getElementById('eventsHeroInput')?.value.trim() || ''
+        events_hero_url: document.getElementById('eventsHeroInput')?.value.trim() || '',
+        radio_hero_url: document.getElementById('radioHeroInput')?.value.trim() || ''
     };
 
     if (!urls.hero_video_url) { showToast('Error', 'Main hero video URL cannot be empty.', '#ef4444'); return; }
@@ -954,11 +971,13 @@ function showAdminTab(tab, el) {
         'products': 'adminTabProducts', 'add': 'adminTabAdd',
         'artists-admin': 'adminTabArtists', 'articles-admin': 'adminTabArticles',
         'featured-articles-admin': 'adminTabFeaturedArticles',
-        'threads-admin': 'adminTabThreads', 'events-admin': 'adminTabEvents',
+        'threads-admin': 'adminTabThreads', 
+        'events-admin': 'adminTabEvents',
+        'influencers-admin': 'adminTabInfluencers',
+        'radio-admin': 'adminTabRadio',
         'hero-media': 'adminTabHeroMedia',
         'featured-promo': 'adminTabFeaturedPromo',
-        'notifications-admin': 'adminTabNotifications',
-        'influencers-admin': 'adminTabInfluencers'
+        'notifications-admin': 'adminTabNotifications'
     };
     Object.values(tabMap).forEach(function (id) { var el2 = document.getElementById(id); if (el2) el2.style.display = 'none'; });
     var target = document.getElementById(tabMap[tab]);
@@ -978,6 +997,7 @@ function showAdminTab(tab, el) {
     else if (tab === 'featured-promo') loadFeaturedPromoConfig();
     else if (tab === 'products') loadAdminProducts();
     else if (tab === 'influencers-admin') loadAdminInfluencers();
+    else if (tab === 'radio-admin') loadAdminRadio();
 }
 function renderAdminImgSlots() {
     var labels = ['Main', 'Photo 2', 'Photo 3', 'Photo 4', 'Photo 5'];
@@ -2155,6 +2175,8 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
         previewBtn.style.color = 'var(--primary)';
         if (file.type.startsWith('video/')) {
             previewBtn.innerHTML = '🎥';
+        } else if (file.type.startsWith('audio/')) {
+            previewBtn.innerHTML = '🎵';
         } else {
             previewBtn.innerHTML = '📷';
         }
@@ -2926,3 +2948,322 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (currentPage === 'trends') loadHotTopics();
 });
+
+// ===== RADIO FEATURE =====
+let allPlaylists = [];
+let currentPlaylist = null;
+let currentTracks = [];
+let currentTrackIndex = -1;
+let audioPlayer = new Audio();
+
+async function loadAdminRadio() {
+    const listDiv = document.getElementById('adminPlaylistList');
+    if (!listDiv) return;
+    listDiv.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading playlists...</p>';
+
+    try {
+        const { data, error } = await sbClient.from(PLAYLISTS_TABLE).select('*').order('priority_order', { ascending: false });
+        if (error) throw error;
+        allPlaylists = data || [];
+        renderAdminPlaylistList(allPlaylists);
+    } catch (e) {
+        console.error('Error loading playlists:', e);
+        listDiv.innerHTML = '<p style="color:#ef4444;text-align:center;padding:2rem">Error loading playlists.</p>';
+    }
+}
+
+function renderAdminPlaylistList(playlists) {
+    const listDiv = document.getElementById('adminPlaylistList');
+    if (playlists.length === 0) {
+        listDiv.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">No playlists found. Create one below.</p>';
+        return;
+    }
+
+    let html = '<table class="admin-table"><thead><tr><th>Cover</th><th>Title</th><th>Artist</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+    playlists.forEach(p => {
+        html += `<tr>
+            <td><img src="${p.cover_image_url || 'placeholder.jpg'}" style="width:40px;height:40px;object-fit:cover;border-radius:4px"></td>
+            <td>${p.title}</td>
+            <td>${p.artist_name || ''}</td>
+            <td><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
+            <td>
+                <button class="btn-sm" onclick="editPlaylist('${p.id}')">Edit</button>
+                <button class="btn-sm btn-danger" onclick="deletePlaylist('${p.id}')">Delete</button>
+            </td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    listDiv.innerHTML = html;
+}
+
+async function editPlaylist(id) {
+    const p = allPlaylists.find(x => x.id === id);
+    if (!p) return;
+
+    document.getElementById('editPlaylistId').value = p.id;
+    document.getElementById('playlistTitle').value = p.title;
+    document.getElementById('playlistArtist').value = p.artist_name || '';
+    document.getElementById('playlistDesc').value = p.description || '';
+    document.getElementById('playlistCoverImg').value = p.cover_image_url || '';
+    document.getElementById('playlistStatus').value = p.status;
+    document.getElementById('radioFormTitle').textContent = 'Edit Playlist: ' + p.title;
+
+    // Load Tracks
+    document.getElementById('adminTracksList').innerHTML = '<p style="color:#666">Loading tracks...</p>';
+    const { data: tracks, error } = await sbClient.from(TRACKS_TABLE).select('*').eq('playlist_id', p.id).order('track_order', { ascending: true });
+    
+    document.getElementById('adminTracksList').innerHTML = '';
+    if (tracks && tracks.length > 0) {
+        tracks.forEach(t => addTrackRow(t));
+    } else {
+        addTrackRow(); // Add one empty row
+    }
+
+    document.getElementById('radioFormSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function addTrackRow(data = null) {
+    const container = document.getElementById('adminTracksList');
+    const rowCount = container.querySelectorAll('.track-row').length;
+    if (rowCount >= 15) return;
+
+    const row = document.createElement('div');
+    row.className = 'track-row admin-grid';
+    row.style = 'grid-template-columns: 2fr 3fr 40px; gap:0.5rem; margin-bottom:0.5rem; align-items:center';
+    
+    const id = data ? data.id : '';
+    const title = data ? data.track_title : '';
+    const url = data ? data.track_url : '';
+
+    row.innerHTML = `
+        <input type="hidden" class="track-id" value="${id}">
+        <input type="text" class="track-title" placeholder="Track Title" value="${title}">
+        <div class="input-upload-group">
+            <input type="text" class="track-url" placeholder="Audio URL" value="${url}">
+            <button class="btn-upload-trigger" onclick="this.nextElementSibling.click()">🎵</button>
+            <input type="file" accept="audio/*" style="display:none" onchange="handleAdminMediaUpload(event, this.previousElementSibling.previousElementSibling, 'radio-media')">
+        </div>
+        <button class="btn-sm btn-danger" onclick="this.parentElement.remove()" style="padding:0.4rem">✕</button>
+    `;
+    container.appendChild(row);
+}
+
+async function savePlaylist(e) {
+    e.preventDefault();
+    const id = document.getElementById('editPlaylistId').value;
+    const playlistData = {
+        title: document.getElementById('playlistTitle').value,
+        artist_name: document.getElementById('playlistArtist').value,
+        description: document.getElementById('playlistDesc').value,
+        cover_image_url: document.getElementById('playlistCoverImg').value,
+        status: document.getElementById('playlistStatus').value
+    };
+
+    if (!playlistData.title) return alert('Title is required');
+
+    try {
+        let pId = id;
+        if (id) {
+            await sbClient.from(PLAYLISTS_TABLE).update(playlistData).eq('id', id);
+        } else {
+            const { data, error } = await sbClient.from(PLAYLISTS_TABLE).insert(playlistData).select();
+            if (error) throw error;
+            pId = data[0].id;
+        }
+
+        // Save Tracks
+        const trackRows = document.querySelectorAll('.track-row');
+        const tracksToUpsert = [];
+        trackRows.forEach((row, index) => {
+            const tId = row.querySelector('.track-id').value;
+            const tTitle = row.querySelector('.track-title').value;
+            const tUrl = row.querySelector('.track-url').value;
+            if (tTitle && tUrl) {
+                const tData = { playlist_id: pId, track_title: tTitle, track_url: tUrl, track_order: index };
+                if (tId) tData.id = tId;
+                tracksToUpsert.push(tData);
+            }
+        });
+
+        // Simplified: Delete all old tracks and insert new ones to avoid complex diffing
+        if (id) await sbClient.from(TRACKS_TABLE).delete().eq('playlist_id', id);
+        if (tracksToUpsert.length > 0) {
+            // Remove IDs for the re-insertion
+            const cleanTracks = tracksToUpsert.map(({id, ...rest}) => rest);
+            await sbClient.from(TRACKS_TABLE).insert(cleanTracks);
+        }
+
+        alert('Playlist saved successfully!');
+        cancelEditPlaylist();
+        loadAdminRadio();
+    } catch (e) {
+        console.error(e);
+        alert('Error saving playlist.');
+    }
+}
+
+async function deletePlaylist(id) {
+    if (!confirm('Are you sure you want to delete this playlist?')) return;
+    try {
+        await sbClient.from(PLAYLISTS_TABLE).delete().eq('id', id);
+        loadAdminRadio();
+    } catch (e) { console.error(e); }
+}
+
+function cancelEditPlaylist() {
+    document.getElementById('editPlaylistId').value = '';
+    document.getElementById('playlistTitle').value = '';
+    document.getElementById('playlistArtist').value = '';
+    document.getElementById('playlistDesc').value = '';
+    document.getElementById('playlistCoverImg').value = '';
+    document.getElementById('adminTracksList').innerHTML = '';
+    document.getElementById('radioFormTitle').textContent = '+ New Playlist';
+}
+
+// FRONTEND
+async function renderRadio() {
+    const grid = document.getElementById('playlistGrid');
+    if (!grid) return;
+    grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading Radio...</p>';
+
+    try {
+        const { data, error } = await sbClient.from(PLAYLISTS_TABLE).select('*').eq('status', 'Published').order('priority_order', { ascending: false });
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">No playlists available yet. Check back soon!</p>';
+            return;
+        }
+
+        grid.innerHTML = data.map(p => `
+            <div class="playlist-card" onclick="openPlaylistDetail('${p.id}')">
+                <div class="playlist-card-img">
+                    <img src="${p.cover_image_url || 'placeholder.jpg'}" alt="${p.title}">
+                    <div class="play-overlay">▶</div>
+                </div>
+                <div class="playlist-card-info">
+                    <h4>${p.title}</h4>
+                    <p>${p.artist_name || 'Various Artists'}</p>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        grid.innerHTML = '<p style="color:#ef4444;text-align:center;padding:2rem">Error loading Radio content.</p>';
+    }
+}
+
+async function openPlaylistDetail(id) {
+    const overlay = document.getElementById('playlistDetail');
+    overlay.classList.add('open');
+    
+    try {
+        const { data: p, error: pErr } = await sbClient.from(PLAYLISTS_TABLE).select('*').eq('id', id).single();
+        if (pErr) throw pErr;
+        
+        currentPlaylist = p;
+        document.getElementById('playlistTitleDetail').textContent = p.title;
+        document.getElementById('playlistArtistDetail').textContent = p.artist_name || '';
+        document.getElementById('playlistDescDetail').textContent = p.description || '';
+        document.getElementById('playlistCoverDetail').src = p.cover_image_url || 'placeholder.jpg';
+
+        const { data: tracks, error: tErr } = await sbClient.from(TRACKS_TABLE).select('*').eq('playlist_id', id).order('track_order', { ascending: true });
+        if (tErr) throw tErr;
+        
+        currentTracks = tracks || [];
+        const trackList = document.getElementById('playlistTrackList');
+        trackList.innerHTML = currentTracks.map((t, idx) => `
+            <div class="track-item" id="track-${idx}" onclick="playTrack(${idx})">
+                <span class="track-num">${idx + 1}</span>
+                <span class="track-name">${t.track_title}</span>
+                <span class="track-play-icon">▶</span>
+            </div>
+        `).join('');
+
+        // Reset player if new playlist
+        if (currentTrackIndex === -1) {
+            // playerPlay(); // Play first track by default? Or wait for user. Let's wait.
+        }
+
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function closePlaylistDetail() {
+    document.getElementById('playlistDetail').classList.remove('open');
+}
+
+function playTrack(index) {
+    if (index < 0 || index >= currentTracks.length) return;
+    currentTrackIndex = index;
+    const track = currentTracks[index];
+    
+    audioPlayer.src = track.track_url;
+    audioPlayer.play();
+    
+    // Update UI
+    document.querySelectorAll('.track-item').forEach(el => el.classList.remove('active'));
+    const trackEl = document.getElementById(`track-${index}`);
+    if (trackEl) trackEl.classList.add('active');
+    document.getElementById('playerPlay').textContent = '⏸';
+}
+
+function playerPlay() {
+    if (currentTrackIndex === -1 && currentTracks.length > 0) {
+        playTrack(0);
+        return;
+    }
+    if (audioPlayer.paused) {
+        audioPlayer.play();
+        document.getElementById('playerPlay').textContent = '⏸';
+    } else {
+        audioPlayer.pause();
+        document.getElementById('playerPlay').textContent = '▶';
+    }
+}
+
+function playerNext() {
+    if (currentTrackIndex < currentTracks.length - 1) {
+        playTrack(currentTrackIndex + 1);
+    }
+}
+
+function playerPrev() {
+    if (currentTrackIndex > 0) {
+        playTrack(currentTrackIndex - 1);
+    }
+}
+
+audioPlayer.addEventListener('timeupdate', () => {
+    const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    const fill = document.getElementById('playerProgressFill');
+    if (fill) fill.style.width = progress + '%';
+    
+    // Format time
+    const mins = Math.floor(audioPlayer.currentTime / 60);
+    const secs = Math.floor(audioPlayer.currentTime % 60);
+    const timeDisplay = document.getElementById('playerCurrentTime');
+    if (timeDisplay) timeDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+});
+
+audioPlayer.addEventListener('ended', () => {
+    playerNext();
+});
+
+// EXPORTS
+window.loadAdminRadio = loadAdminRadio;
+window.editPlaylist = editPlaylist;
+window.savePlaylist = savePlaylist;
+window.deletePlaylist = deletePlaylist;
+window.cancelEditPlaylist = cancelEditPlaylist;
+window.addTrackRow = addTrackRow;
+window.renderRadio = renderRadio;
+window.openPlaylistDetail = openPlaylistDetail;
+window.closePlaylistDetail = closePlaylistDetail;
+window.playTrack = playTrack;
+window.playerPlay = playerPlay;
+window.playerNext = playerNext;
+window.playerPrev = playerPrev;
+window.sharePlaylist = () => {
+    if (currentPlaylist) shareContent(currentPlaylist.title, window.location.href);
+};
