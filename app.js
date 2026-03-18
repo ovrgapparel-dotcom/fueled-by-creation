@@ -22,10 +22,6 @@ var cart = [];
 var currentPage = 'home';
 
 // Audio Player Global State
-var currentAudio = null;
-var currentPlaylistTracks = [];
-var currentTrackIndex = -1;
-var isPlaying = false;
 
 function localizeDemoData() {
     if (window.getLang() === 'fr') {
