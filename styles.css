@@ -704,6 +704,29 @@ nav a.active {
   background: var(--primary)
 }
 
+.btn-premium-rect {
+  display: inline-block;
+  background: var(--dark);
+  color: white;
+  padding: 0.9rem 2.5rem;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-premium-rect:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+}
+
 /* ===== ARTIST SHOWCASE ===== */
 .artists-section {
   background: var(--light);
@@ -857,18 +880,29 @@ nav a.active {
 }
 
 /* ===== PREMIUM DETAIL OVERLAYS ===== */
-.overlay, .login-overlay, .admin-overlay, .checkout-overlay {
+.overlay, .login-overlay, .admin-overlay {
   display: none;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.95);
-  z-index: 30000 !important; /* Extremely high to cover header */
+  z-index: 30000; /* Base detail level */
   overflow-y: auto;
   align-items: flex-start;
   justify-content: center;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   padding: 1rem;
+}
+
+.checkout-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.98);
+  z-index: 40000 !important; /* Higher than detail overlays */
+  overflow-y: auto;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 
@@ -1927,6 +1961,40 @@ nav a.active {
 }
 
 .btn-paypal:hover {
+  opacity: .9
+}
+
+.btn-orange {
+  background: #ff7900;
+  color: white;
+  border: none;
+  padding: .85rem;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .2s
+}
+
+.btn-orange:hover {
+  opacity: .9
+}
+
+.btn-djamo {
+  background: #003666;
+  color: white;
+  border: none;
+  padding: .85rem;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .2s
+}
+
+.btn-djamo:hover {
   opacity: .9
 }
 

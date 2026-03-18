@@ -917,6 +917,11 @@ async function saveProduct() {
     var isDemo = isDemoId(editId);
     if (!name || !price) { showToast('Required fields', 'Name and price are required.', '#f59e0b'); return; }
     var payload = { name: name, category: cat, price: price, old_price: old_price, description: description, badge: badge, sizes: sizes, imgs: imgs };
+    
+    var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveProduct"]');
+    var originalText = btn ? btn.textContent : '💾 Save to Supabase';
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from(PRODUCTS_TABLE).update(payload).eq('id', parseInt(editId));
@@ -925,10 +930,9 @@ async function saveProduct() {
             var res2 = await sbClient.from(PRODUCTS_TABLE).insert(payload);
             if (res2.error) throw res2.error;
         }
-        await loadAdminProducts(); cancelEditProduct();
-        showAdminTab('products', document.querySelectorAll('.admin-tab')[0]);
         showToast('Saved! ✓', '"' + name + '" updated in Supabase.');
     } catch (e) { showToast('Supabase Error', e.message || 'Check configuration.', '#ef4444'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = originalText; } }
 }
 function cancelEditProduct() {
     document.getElementById('editProductId').value = '';
@@ -1114,7 +1118,8 @@ function cancelEditArtist() {
     document.getElementById('artistFormTitle').textContent = '+ New Artist';
 }
 
-async function saveArtist() {
+async function saveArtist(event) {
+    if (event) event.preventDefault();
     var name = document.getElementById('artistName').value.trim();
     if (!name) { showToast('Required', 'Artist name is required.', '#f59e0b'); return; }
     var payload = {
@@ -1136,6 +1141,11 @@ async function saveArtist() {
     };
     var editId = document.getElementById('editArtistId').value;
     var isDemo = isDemoId(editId);
+    
+    var btn = (event && event.target) || (window.event && window.event.target) || document.querySelector('button[onclick*="saveArtist"]');
+    var originalText = btn ? btn.textContent : '💾 Save Artist';
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from('artists').update(payload).eq('id', editId);
@@ -1147,9 +1157,9 @@ async function saveArtist() {
                 demoArtists = demoArtists.filter(function (d) { return d.id !== editId; });
             }
         }
-        cancelEditArtist(); await loadAdminArtists(); refreshFrontendData();
         showToast('Saved! ✓', '"' + name + '" saved to Supabase.');
     } catch (e) { showToast('Error', e.message || 'Could not save artist.', '#ef4444'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = originalText; } }
 }
 
 async function deleteArtist(id) {
@@ -1291,7 +1301,7 @@ async function saveArticle() {
     };
     var editId = document.getElementById('editArticleId').value;
     var isDemo = isDemoId(editId);
-    var btn = event?.target || document.querySelector('button[onclick="saveArticle()"]');
+    var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveArticle"]');
     var originalText = btn ? btn.textContent : '💾 Save Article';
 
     if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
@@ -1408,6 +1418,11 @@ async function saveThread() {
     };
     var editId = document.getElementById('editThreadId').value;
     var isDemo = isDemoId(editId);
+    
+    var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveThread"]');
+    var originalText = btn ? btn.textContent : '💾 Save Thread';
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from('threads').update(payload).eq('id', editId);
@@ -1520,6 +1535,11 @@ async function saveEvent() {
     };
     var editId = document.getElementById('editEventId').value;
     var isDemo = isDemoId(editId);
+    
+    var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveEvent"]');
+    var originalText = btn ? btn.textContent : '💾 Save Event';
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from('events').update(payload).eq('id', editId);
@@ -1562,10 +1582,10 @@ async function loadAdminInfluencers() {
     var list = document.getElementById('adminInfluencerList'); if (!list) return;
     list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading influencers...</p>';
     try {
-        var res = await sbClient.from(INFLUENCERS_TABLE).select('*').order('created_at', { ascending: false });
+        var res = await sbClient.from(INFLUENCERS_TABLE).select('*').order('name');
         var liveInfluencers = (res.data && res.data.length > 0) ? res.data : [];
         var demo = typeof demoInfluencers !== 'undefined' ? demoInfluencers : [];
-        adminInfluencers = liveInfluencers.concat(demo.filter(d => !liveInfluencers.find(l => l.id === d.id)));
+        adminInfluencers = liveInfluencers.concat(demo.filter(function(d) { return !liveInfluencers.find(function(l) { return l.id === d.id; }); }));
     } catch (e) {
         console.error('ERROR IN loadAdminInfluencers:', e);
         adminInfluencers = typeof demoInfluencers !== 'undefined' ? demoInfluencers.slice() : [];
@@ -1609,7 +1629,8 @@ function cancelEditInfluencer() {
     document.getElementById('influencerFormTitle').textContent = '+ New Influencer';
 }
 
-async function saveInfluencer() {
+async function saveInfluencer(event) {
+    if (event) event.preventDefault();
     var name = document.getElementById('influencerName').value.trim();
     if (!name) { showToast('Required', 'Influencer name is required.', '#f59e0b'); return; }
     var payload = {
@@ -1624,7 +1645,9 @@ async function saveInfluencer() {
     };
     var editId = document.getElementById('editInfluencerId').value;
     var isDemo = isDemoId(editId);
-    var btn = event?.target || document.querySelector('button[onclick="saveInfluencer()"]');
+    
+    // Attempt to get button from event or DOM
+    var btn = (event && event.target) || (window.event && window.event.target) || document.querySelector('button[onclick*="saveInfluencer"]');
     var originalText = btn ? btn.textContent : '💾 Save Influencer';
 
     if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
@@ -1740,6 +1763,9 @@ async function saveNotification() {
         status: 'draft'
     };
     var editId = document.getElementById('editNotificationId').value;
+    var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveNotification"]');
+    var originalText = btn ? btn.textContent : '💾 Save Draft';
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     try {
         if (editId) {
             var res = await sbClient.from('notifications').update(payload).eq('id', editId);
@@ -1748,9 +1774,9 @@ async function saveNotification() {
             var res2 = await sbClient.from('notifications').insert(payload);
             if (res2.error) throw res2.error;
         }
-        cancelEditNotification(); await loadAdminNotifications();
         showToast('Saved! ✓', 'Notification draft saved.');
     } catch (e) { showToast('Error', e.message || 'Could not save notification.', '#ef4444'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = originalText; } }
 }
 
 async function sendNotification(idOverride) {
@@ -1832,9 +1858,12 @@ async function refreshFrontendData() {
 
     try {
         var iRes = await sbClient.from(INFLUENCERS_TABLE).select('*').order('name');
-        var displayInfluencers = (!iRes.error && iRes.data && iRes.data.length > 0) ? iRes.data : (typeof demoInfluencers !== 'undefined' ? demoInfluencers : []);
+        var liveInfluencers = (!iRes.error && iRes.data && iRes.data.length > 0) ? iRes.data : [];
+        var demo = typeof demoInfluencers !== 'undefined' ? demoInfluencers : [];
+        var displayInfluencers = liveInfluencers.concat(demo.filter(function(d) { return !liveInfluencers.find(function(l) { return l.id === d.id; }); }));
+        influencers = displayInfluencers; // Sync global influencers
         renderInfluencers('allInfluencersGrid', displayInfluencers);
-    } catch (e) { renderInfluencers('allInfluencersGrid', demoInfluencers); }
+    } catch (e) { influencers = demoInfluencers; renderInfluencers('allInfluencersGrid', demoInfluencers); }
 
     if (currentPage === 'home') loadHeroMedia();
 
@@ -2032,9 +2061,9 @@ function renderInfluencers(targetGridId, list) {
             '<div class="artist-card-img">' + imgHtml + '</div>' +
             '<div class="artist-card-body">' +
             '<h3 class="artist-card-name">' + a.name + '</h3>' +
-            '<p class="artist-card-release">🌟 ' + (a.category || 'Cultural Icon') + '</p>' +
+            '<p class="artist-card-release">🌟 ' + (a.category || window.t('cultural_icon') || 'Cultural Icon') + '</p>' +
             '<div class="artist-card-actions">' +
-            '<button class="btn-sm btn-view-profile" onclick="event.stopPropagation();openInfluencerDetail(\'' + a.id + '\')">View Profile</button>' +
+            '<button class="btn-sm btn-view-profile" onclick="event.stopPropagation();openInfluencerDetail(\'' + a.id + '\')">' + window.t('view_profile') + '</button>' +
             '</div></div></div>';
     }).join('');
 }
@@ -2048,26 +2077,49 @@ async function loadInfluencers() {
     } catch (e) { influencers = demoInfluencers; renderInfluencers('allInfluencersGrid', influencers); }
 }
 
-function openInfluencerDetail(id) {
+async function openInfluencerDetail(id) {
     // Hide any other details first
     document.querySelectorAll('.overlay').forEach(ov => ov.classList.remove('open'));
-    var a = influencers.find(function (x) { return x.id == id; });
-    if (!a) return;
-    var overlay = document.getElementById('influencerDetail');
-    if (overlay) {
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        document.getElementById('influencerNameDetail').textContent = a.name;
-        document.getElementById('influencerBioDetail').textContent = a.bio || '';
-        document.getElementById('influencerProfileImgDetail').src = a.profile_image_url || '';
-        
-        var ig = document.getElementById('influencerInstaDetail');
-        if (ig) { ig.href = a.ig_url || '#'; ig.style.display = a.ig_url ? 'inline-flex' : 'none'; }
-        var yt = document.getElementById('influencerYoutubeDetail');
-        if (yt) { yt.href = a.yt_url || '#'; yt.style.display = a.yt_url ? 'inline-flex' : 'none'; }
-        var tiktok = document.getElementById('influencerTikTokDetail');
-        if (tiktok) { tiktok.href = a.tiktok_spotify_url || '#'; tiktok.style.display = a.tiktok_spotify_url ? 'inline-flex' : 'none'; }
+    
+    // Check locally sync'd influencers first
+    var infs = typeof influencers !== 'undefined' ? influencers : [];
+    var a = infs.find(function (x) { return x.id == id; });
+    
+    // Fallback to demo if not found
+    if (!a && typeof demoInfluencers !== 'undefined') {
+        a = demoInfluencers.find(x => x.id === id);
     }
+
+    // Direct DB lookup if still not found
+    if (!a && sbClient) {
+        try {
+            var res = await sbClient.from(INFLUENCERS_TABLE).select('*').eq('id', id).single();
+            if (!res.error) {
+                a = res.data;
+            }
+        } catch (e) {
+            console.error('Influencer lookup failed:', e);
+        }
+    }
+
+    if (!a) return;
+
+    var overlay = document.getElementById('influencerDetail');
+    if (!overlay) return;
+
+    overlay.classList.add('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    document.getElementById('influencerNameDetail').textContent = a.name;
+    document.getElementById('influencerBioDetail').textContent = a.bio || '';
+    document.getElementById('influencerProfileImgDetail').src = a.profile_image_url || '';
+    
+    var ig = document.getElementById('influencerInstaDetail');
+    if (ig) { ig.href = a.ig_url || '#'; ig.style.display = a.ig_url ? 'inline-flex' : 'none'; }
+    var yt = document.getElementById('influencerYoutubeDetail');
+    if (yt) { yt.href = a.yt_url || '#'; yt.style.display = a.yt_url ? 'inline-flex' : 'none'; }
+    var tiktok = document.getElementById('influencerTikTokDetail');
+    if (tiktok) { tiktok.href = a.tiktok_spotify_url || '#'; tiktok.style.display = a.tiktok_spotify_url ? 'inline-flex' : 'none'; }
 }
 
 function closeDetail() {
@@ -2152,6 +2204,7 @@ function showToast(title, body, borderColor) {
     borderColor = borderColor || '#22c55e';
     var t = document.getElementById('toast');
     t.style.borderLeftColor = borderColor;
+    t.style.zIndex = '99999'; // Ensure toast is always on top
     document.getElementById('toastTitle').textContent = title;
     document.getElementById('toastBody').textContent = body;
     t.classList.add('show');
@@ -2777,6 +2830,8 @@ window.closeArtistDetail = closeArtistDetail;
 window.openArticleDetail = openArticleDetail;
 window.closeArticleDetail = closeArticleDetail;
 window.openEventDetail = openEventDetail;
+window.openInfluencerDetail = openInfluencerDetail;
+console.log('--- GLOBAL EXPORT: openInfluencerDetail assigned:', typeof window.openInfluencerDetail);
 window.closeDetail = closeDetail;
 window.openEventPaymentGate = openEventPaymentGate;
 window.closeEventPaymentGate = closeEventPaymentGate;
@@ -2835,6 +2890,13 @@ window.deleteNotification = deleteNotification;
 window.cancelEditNotification = cancelEditNotification;
 window.handleAdminMediaUpload = handleAdminMediaUpload;
 window.updateAdminImgSlotFromInput = updateAdminImgSlotFromInput;
+
+// Influencers
+window.loadAdminInfluencers = loadAdminInfluencers;
+window.saveInfluencer = saveInfluencer;
+window.editInfluencer = editInfluencer;
+window.deleteInfluencer = deleteInfluencer;
+window.cancelEditInfluencer = cancelEditInfluencer;
 
 // ===== BOOTSTRAP =====
 document.addEventListener('DOMContentLoaded', function () {

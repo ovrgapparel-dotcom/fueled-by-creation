@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation — V1.2.9</title>
+  <title>Fueled By Creation — V1.3.0</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
@@ -65,17 +65,6 @@
     const STORAGE_BUCKET = 'product-images';
     const PRODUCTS_TABLE = 'products';
 
-    // DIAGNOSTIC HOOK
-    window.addEventListener('load', () => {
-      console.log('--- FBC DIAGNOSTICS ---');
-      console.log('switchPage defined:', typeof window.switchPage);
-      console.log('handleAdminClick defined:', typeof window.handleAdminClick);
-      console.log('openEventDetail defined:', typeof window.openEventDetail);
-      console.log('adminOverlay:', document.getElementById('adminOverlay'));
-      console.log('loginOverlay:', document.getElementById('loginOverlay'));
-      console.log('eventDetail:', document.getElementById('eventDetail'));
-    });
-  </script>
   <script type="module" src="./app.js"></script>
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -405,21 +394,7 @@
     </div>
   </div>
 
-  <!-- ===== ARTIST DETAIL OVERLAY ===== -->
-  <div class="artist-detail-overlay" id="artistDetailOverlay" onclick="if(event.target===this)closeArtistDetail()">
-    <div class="artist-detail-box">
-      <div class="modal-top">
-        <h3 id="artistDetailName">Artist</h3>
-        <button class="btn-close" onclick="closeArtistDetail()">✕</button>
-      </div>
-      <div class="artist-hero-banner" id="artistBannerWrap"></div>
-      <div class="artist-detail-body" id="artistDetailBody">
-        <!-- JS populated -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Old overlay removed as it was redundant with articleDetail at line 1226 -->
+  <!-- Old overlay removed as it was redundant with articleDetail at line 1255 -->
 
 
   <!-- ===== CART PANEL ===== -->
@@ -443,9 +418,12 @@
   <!-- ===== CHECKOUT OVERLAY ===== -->
   <div class="checkout-overlay" id="checkoutOverlay" onclick="handleOverlayClick(event,'checkoutOverlay')">
     <div class="checkout-box">
-      <div class="checkout-header">
-        <h2>Complete Your Order</h2>
-        <p>Fueled By Creation — Abidjan, Côte d'Ivoire</p>
+      <div class="checkout-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <h2>Complete Your Order</h2>
+          <p>Fueled By Creation — Abidjan, Côte d'Ivoire</p>
+        </div>
+        <button class="btn-close" onclick="closeCheckout()">✕</button>
       </div>
       <div class="checkout-body">
         <form id="checkoutForm" onsubmit="submitOrder(event)">
@@ -583,7 +561,7 @@
               <div class="img-slots" id="adminImgSlots"></div>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" id="btnSaveLabel" onclick="saveProduct()">💾 Save to Supabase</button>
+              <button class="btn-save" id="btnSaveLabel" onclick="saveProduct(event)">💾 Save to Supabase</button>
               <button class="btn-cancel-admin" onclick="cancelEditProduct()">Cancel</button>
             </div>
           </div>
@@ -674,7 +652,7 @@
               </div>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveArtist()">💾 Save Artist</button>
+              <button class="btn-save" onclick="saveArtist(event)">💾 Save Artist</button>
               <button class="btn-cancel-admin" onclick="cancelEditArtist()">Cancel</button>
             </div>
           </div>
@@ -718,7 +696,7 @@
             </div>
             <div><label>TikTok URL</label><input type="url" id="influencerTikTok" placeholder="TikTok URL"></div>
             <div class="admin-form-actions" style="margin-top:1.5rem">
-              <button class="btn-save" onclick="saveInfluencer()">💾 Save Influencer</button>
+              <button class="btn-save" onclick="saveInfluencer(event)">💾 Save Influencer</button>
               <button class="btn-cancel-admin" onclick="cancelEditInfluencer()">Cancel</button>
             </div>
           </div>
@@ -787,7 +765,7 @@
                   id="articleTrending" style="accent-color:#ef4444;width:18px;height:18px"> 🔥 Trending</label>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveArticle()">💾 Save Article</button>
+              <button class="btn-save" onclick="saveArticle(event)">💾 Save Article</button>
               <button class="btn-cancel-admin" onclick="cancelEditArticle()">Cancel</button>
             </div>
           </div>
@@ -861,7 +839,7 @@
                   id="threadPinned" style="accent-color:var(--primary);width:18px;height:18px"> 📌 Pin to Top</label>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveThread()">💾 Save Thread</button>
+              <button class="btn-save" onclick="saveThread(event)">💾 Save Thread</button>
               <button class="btn-cancel-admin" onclick="cancelEditThread()">Cancel</button>
             </div>
           </div>
@@ -1029,7 +1007,7 @@
                 </select></div>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveEvent()">💾 Save Event</button>
+              <button class="btn-save" onclick="saveEvent(event)">💾 Save Event</button>
               <button class="btn-cancel-admin" onclick="cancelEditEvent()">Cancel</button>
             </div>
           </div>
@@ -1069,7 +1047,7 @@
                   placeholder="app://artist/uuid or app://event/uuid"></div>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveNotification()">💾 Save Draft</button>
+              <button class="btn-save" onclick="saveNotification(event)">💾 Save Draft</button>
               <button class="btn-save" onclick="sendNotification()" style="background:#22c55e">📣 Send Now</button>
               <button class="btn-cancel-admin" onclick="cancelEditNotification()">Cancel</button>
             </div>
@@ -1237,7 +1215,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; 2026 Fueled By Creation. v1.2.9 All rights reserved.</p>
+        <p>&copy; 2026 Fueled By Creation. v1.3.0 All rights reserved.</p>
         <p class="made-with">
           <button id="adminToggleBtn" onclick="handleAdminClick()" title=""
             style="background:none;border:none;cursor:pointer;color:#1a1a1a;font-size:0.6rem;margin-right:0.5rem;opacity:0.15;transition:opacity 0.3s;padding:2px 4px;border-radius:3px;"
@@ -1249,6 +1227,38 @@
   </footer>
 
   <!-- Detail Overlays -->
+  <div id="influencerDetail" class="overlay">
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="influencer">INFLUENCER</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn"
+          onclick="shareContent(document.getElementById('influencerNameDetail').textContent, window.location.href)">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
+      </div>
+      <div id="influencerHero" class="artist-hero-detail">
+        <div id="influencerHeroMedia"></div>
+        <div class="influencer-hero-inner">
+          <img id="influencerProfileImgDetail" src="" alt="" class="artist-profile-img-large">
+          <h2 id="influencerNameDetail" class="premium-title"></h2>
+          <p id="influencerBioDetail" class="artist-bio-large"></p>
+        </div>
+      </div>
+      <div class="detail-container">
+        <div class="detail-section">
+          <h3>📱 Connect</h3>
+          <div class="social-links-detail">
+            <a id="influencerInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
+            <a id="influencerYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
+            <a id="influencerTikTokDetail" href="#" target="_blank" class="social-icon">TIKTOK</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="artistDetail" class="overlay">
     <div class="overlay-content premium" style="position:relative">
       <div class="overlay-header-bar">
@@ -1340,40 +1350,7 @@
     </div>
   </div>
 
-  <div id="influencerDetail" class="overlay">
-    <div class="overlay-content premium" style="position:relative">
-      <div class="overlay-header-bar">
-        <h2 data-i18n="influencer">INFLUENCER</h2>
-        <div style="flex:1"></div>
-        <button class="overlay-share-btn"
-          onclick="shareContent(document.getElementById('influencerNameDetail').textContent, window.location.href)">
-          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
-        </button>
-        <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
-      </div>
-      <div id="influencerHero" class="artist-hero-detail">
-        <div id="influencerHeroMedia"></div>
-        <div class="influencer-hero-inner">
-          <img id="influencerProfileImgDetail" src="" alt="" class="artist-profile-img-large">
-          <h2 id="influencerNameDetail" class="premium-title"></h2>
-          <p id="influencerBioDetail" class="artist-bio-large"></p>
-        </div>
-      </div>
-      <div class="detail-container">
-        <div class="detail-section">
-          <h3>📱 Connect</h3>
-          <div class="social-links-detail">
-            <a id="influencerInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
-            <a id="influencerYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
-            <a id="influencerTikTokDetail" href="#" target="_blank" class="social-icon">TIKTOK</a>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
-
-
-
 
   <!-- Chat Widget -->
   <div class="chat-widget" id="chatWidget">
@@ -1398,31 +1375,6 @@
 
 
 
-  <!-- FINAL EMERGENCY INITIALIZATION & DEBUG -->
-  <script>
-    (function() {
-      console.log('--- FBC SYSTEM CHECK ---');
-      
-      // Monitor for function availability
-      let checkCount = 0;
-      const checker = setInterval(() => {
-        checkCount++;
-        const isReady = typeof window.handleAdminClick === 'function' && typeof window.openEventDetail === 'function';
-        
-        if (isReady) {
-          console.log('✅ Global functions linked successfully after ' + (checkCount * 500) + 'ms');
-          clearInterval(checker);
-        } else if (checkCount > 10) {
-          console.warn('⚠️ Global functions still not linked after 5s. Possible module load failure.');
-          clearInterval(checker);
-        }
-      }, 500);
-
-      // Global error catcher for better debugging
-      window.onerror = function(msg, url, lineNo, columnNo, error) {
-        console.error('🚀 FBC CRASH:', msg, '\nAt:', url, 'line:', lineNo);
-        return false;
-      };
     })();
   </script>
 </body>
