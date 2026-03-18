@@ -3037,7 +3037,7 @@ function addTrackRow(data = null) {
         <div class="input-upload-group">
             <input type="text" class="track-url" placeholder="Audio URL" value="${url}">
             <button class="btn-upload-trigger" onclick="this.nextElementSibling.click()">🎵</button>
-            <input type="file" accept="audio/*" style="display:none" onchange="handleAdminMediaUpload(event, this.previousElementSibling.previousElementSibling, 'radio-media')">
+            <input type="file" accept="audio/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, this.previousElementSibling.previousElementSibling, 'radio-media')">
         </div>
         <button class="btn-sm btn-danger" onclick="this.parentElement.remove()" style="padding:0.4rem">✕</button>
     `;
@@ -3081,20 +3081,26 @@ async function savePlaylist(e) {
             }
         });
 
-        // Simplified: Delete all old tracks and insert new ones to avoid complex diffing
-        if (id) await sbClient.from(TRACKS_TABLE).delete().eq('playlist_id', id);
+        // Delete all old tracks and insert new ones to avoid complex diffing
+        if (id) {
+            const { error: delErr } = await sbClient.from(TRACKS_TABLE).delete().eq('playlist_id', id);
+            if (delErr) throw delErr;
+        }
+
         if (tracksToUpsert.length > 0) {
             // Remove IDs for the re-insertion
             const cleanTracks = tracksToUpsert.map(({id, ...rest}) => rest);
-            await sbClient.from(TRACKS_TABLE).insert(cleanTracks);
+            console.log('Upserting tracks:', cleanTracks);
+            const { error: insErr } = await sbClient.from(TRACKS_TABLE).insert(cleanTracks);
+            if (insErr) throw insErr;
         }
 
         alert('Playlist saved successfully!');
         cancelEditPlaylist();
         loadAdminRadio();
-    } catch (e) {
-        console.error(e);
-        alert('Error saving playlist.');
+    } catch (err) {
+        console.error('Save Playlist Error:', err);
+        alert('Error saving playlist: ' + (err.message || 'Unknown error'));
     }
 }
 
