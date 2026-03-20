@@ -165,7 +165,7 @@ const translations = {
 
 function getLang() {
     const userLang = navigator.language || navigator.userLanguage;
-    return userLang.startsWith('fr') ? 'fr' : 'en';
+    return userLang.startsWith('en') ? 'en' : 'fr';
 }
 
 function t(key) {
