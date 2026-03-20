@@ -224,16 +224,16 @@ async function saveHeroConfig() {
         radio_hero_url: document.getElementById('radioHeroInput')?.value.trim() || ''
     };
 
-    if (!urls.hero_video_url) { showToast('Error', 'Main hero video URL cannot be empty.', '#ef4444'); return; }
+    if (!urls.hero_video_url) { showToast(window.t('error'), window.t('hero_video_empty'), '#ef4444'); return; }
     
     if (!sbClient) { 
-        showToast('Demo Mode', 'URLs saved locally.'); 
+        showToast(window.t('demo_mode'), window.t('urls_saved_locally')); 
         currentHeroUrl = urls.hero_video_url; 
         loadHeroMedia(); 
         return; 
     }
 
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
     try {
         const configs = Object.keys(urls).filter(k => urls[k]).map(k => ({ key: k, value: urls[k] }));
         if(configs.length === 0) return;
@@ -241,13 +241,13 @@ async function saveHeroConfig() {
         const { error } = await sbClient.from(CONFIG_TABLE).upsert(configs, { onConflict: 'key' });
         if (error) throw error;
         
-        showToast('Saved! ✓', 'All Hero configurations updated.');
+        showToast(window.t('saved'), window.t('hero_config_updated'));
         
         // Reload to apply visual changes
         loadHeroConfig();
     } catch (e) {
         console.error('Save hero config error:', e);
-        showToast('Error', 'Could not save configs: ' + e.message, '#ef4444');
+        showToast(window.t('error'), window.t('save_error_msg', { error: e.message }), '#ef4444');
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = originalText; }
     }
@@ -289,17 +289,17 @@ async function saveFeaturedPromoConfig() {
     const btnLink = document.getElementById('featuredPromoBtnLinkInput').value.trim();
 
     if (!title || !desc || !media) {
-        showToast('Error', 'Title, Description, and Media are required.', '#ef4444');
+        showToast(window.t('error'), window.t('required_fields_msg'), '#ef4444');
         return;
     }
 
     if (!sbClient) {
-        showToast('Demo Mode', 'Saved locally.');
+        showToast(window.t('demo_mode'), window.t('saved_locally'));
         renderFeaturedPromo();
         return;
     }
 
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
     try {
         const configs = [
             { key: 'featured_promo_title', value: title },
@@ -311,10 +311,10 @@ async function saveFeaturedPromoConfig() {
         const { error } = await sbClient.from(CONFIG_TABLE).upsert(configs, { onConflict: 'key' });
         if (error) throw error;
         renderFeaturedPromo();
-        showToast('Saved! ✓', 'Featured promo updated successfully.');
+        showToast(window.t('saved'), window.t('promo_updated_success'));
     } catch (e) {
         console.error('Save featured promo config error:', e);
-        showToast('Error', 'Could not save featured promo config: ' + e.message, '#ef4444');
+        showToast(window.t('error'), window.t('save_error_msg', { error: e.message }), '#ef4444');
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = originalText; }
     }
@@ -367,12 +367,12 @@ function setSupabaseStatus(state, msg) {
 async function loadProducts() {
     var tries = 0;
     while (!sbClient && tries < 10) { await new Promise(function (r) { setTimeout(r, 300); }); tries++; }
-    if (!sbClient) { products = getDefaultProducts(); showLoadedCatalogue(); showToast('Demo Mode', 'Supabase connection unavailable.', '#f59e0b'); return; }
+    if (!sbClient) { products = getDefaultProducts(); showLoadedCatalogue(); showToast(window.t('demo_mode'), window.t('disconnected_supabase'), '#f59e0b'); return; }
     try {
         var res = await sbClient.from(PRODUCTS_TABLE).select('*').order('id', { ascending: true });
         if (res.error) throw res.error;
         products = res.data || []; showLoadedCatalogue();
-    } catch (e) { products = getDefaultProducts(); showLoadedCatalogue(); showToast('Demo Mode', 'Supabase not configured — using demo data.', '#f59e0b'); }
+    } catch (e) { products = getDefaultProducts(); showLoadedCatalogue(); showToast(window.t('demo_mode'), window.t('disconnected_supabase'), '#f59e0b'); }
 }
 
 function showLoadedCatalogue() {
@@ -417,7 +417,7 @@ function renderCatalogue(filter) {
     filter = filter || 'all'; activeFilter = filter;
     var grid = document.getElementById('productsGrid'); if (!grid) return;
     var filtered = filter === 'all' ? products : products.filter(function (p) { return p.category === filter; });
-    if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No products in this category.</p></div>'; return; }
+    if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>' + window.t('no_products') + '</p></div>'; return; }
     grid.innerHTML = filtered.map(function (p) {
         var disc = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
         var imgSrc = p.imgs && p.imgs[0];
@@ -438,7 +438,7 @@ function renderCatalogue(filter) {
 
 function renderArtists(targetGridId, artistList) {
     var grid = document.getElementById(targetGridId); if (!grid) return;
-    if (!artistList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎤</div><p>No artists to display yet.</p></div>'; return; }
+    if (!artistList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎤</div><p>' + window.t('no_artists') + '</p></div>'; return; }
     grid.innerHTML = artistList.map(function (a) {
         var imgHtml = a.profile_image_url ? '<img src="' + a.profile_image_url + '" alt="' + a.name + '" loading="lazy">' : '';
         var featuredBadge = a.is_featured ? '<span class="featured-badge">⭐ ' + window.t('featured_artist') + '</span>' : '';
@@ -456,7 +456,7 @@ function renderArtists(targetGridId, artistList) {
 
 function renderArticles(targetGridId, articleList) {
     var grid = document.getElementById(targetGridId); if (!grid) return;
-    if (!articleList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📰</div><p>No articles yet.</p></div>'; return; }
+    if (!articleList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📰</div><p>' + window.t('no_articles') + '</p></div>'; return; }
     // Clean any prior classes
     grid.className = 'articles-grid';
     grid.innerHTML = articleList.map(function (a) {
@@ -505,7 +505,7 @@ function renderFeaturedArticlesSplit(targetContainerId, articleList) {
 
 function renderThreads(targetListId, threadList) {
     var list = document.getElementById(targetListId); if (!list) return;
-    if (!threadList.length) { list.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>No threads yet.</p></div>'; return; }
+    if (!threadList.length) { list.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>' + window.t('no_threads') + '</p></div>'; return; }
 
     // Separate pinned from regular
     var pinnedItem = threadList.find(function(t) { return t.is_pinned; });
@@ -551,7 +551,7 @@ function renderThreads(targetListId, threadList) {
 
 function renderEvents(targetGridId, eventList) {
     var grid = document.getElementById(targetGridId); if (!grid) return;
-    if (!eventList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎫</div><p>No events scheduled yet.</p></div>'; return; }
+    if (!eventList.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎫</div><p>' + window.t('no_events') + '</p></div>'; return; }
     grid.innerHTML = eventList.map(function (e) {
         var d = new Date(e.event_date);
         var enMonths = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -684,7 +684,7 @@ function addCartItem(p, qty, size) {
     var ex = cart.find(function (c) { return c.key === key; });
     if (ex) ex.qty += qty;
     else cart.push({ key: key, id: p.id, name: p.name, price: p.price, qty: qty, size: size, img: p.imgs && p.imgs[0] || '' });
-    renderCart(); showToast('Added! 🛍', p.name + ' added to cart.');
+    renderCart(); showToast(window.t('added_cart_title'), window.t('added_cart_body', { name: p.name }));
 }
 function removeFromCart(key) { cart = cart.filter(function (c) { return c.key !== key; }); renderCart(); }
 function renderCart() {
@@ -774,7 +774,7 @@ function finishOrder(name) {
     closeCheckout(); 
     cart = []; 
     renderCart(); 
-    showToast('Order confirmed! 🎉', 'Thanks ' + name + '! We\'ll contact you within 24h.'); 
+    showToast(window.t('order_confirmed_title'), window.t('order_confirmed_body', { name: name })); 
 }
 
 
@@ -820,15 +820,15 @@ async function doLogin() {
     var email = document.getElementById('loginEmail').value.trim();
     var password = document.getElementById('loginPassword').value;
     document.getElementById('loginError').textContent = '';
-    if (!email || !password) { document.getElementById('loginError').textContent = 'Please fill in all fields.'; return; }
+    if (!email || !password) { document.getElementById('loginError').textContent = window.t('fill_all_fields'); return; }
     try {
         await sbClient.auth.signOut().catch(function () { });
         var res = await sbClient.auth.signInWithPassword({ email: email, password: password });
         if (res.error) throw res.error;
         currentUser = res.data.user; closeLogin(); openAdmin();
-    } catch (e) { document.getElementById('loginError').textContent = 'Invalid email or password.'; }
+    } catch (e) { document.getElementById('loginError').textContent = window.t('invalid_login'); }
 }
-async function doLogout() { await sbClient.auth.signOut(); currentUser = null; closeAdmin(); showToast('Logged out', 'Admin session ended.'); }
+async function doLogout() { await sbClient.auth.signOut(); currentUser = null; closeAdmin(); showToast(window.t('logged_out'), window.t('admin_session_ended')); }
 function updateAdminUI() {
     var btn = document.getElementById('adminToggleBtn'); if (!btn) return;
     if (currentUser) { btn.textContent = '⚙●'; btn.style.color = '#22c55e'; btn.style.opacity = '0.4'; }
@@ -861,17 +861,17 @@ async function checkSupabaseConnection() {
     try {
         var res = await sbClient.from(PRODUCTS_TABLE).select('id').limit(1);
         if (res.error) throw res.error;
-        setSupabaseStatus('connected', '✓ Connected to Supabase — real-time data');
-    } catch (e) { setSupabaseStatus('disconnected', '✗ Supabase not configured'); }
+        setSupabaseStatus('connected', '✓ ' + window.t('connected_supabase'));
+    } catch (e) { setSupabaseStatus('disconnected', '✗ ' + window.t('disconnected_supabase')); }
 }
 async function loadAdminProducts() {
     var list = document.getElementById('adminProductList');
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '</p>';
     try {
         var res = await sbClient.from(PRODUCTS_TABLE).select('*').order('id');
         if (res.error) throw res.error;
         products = res.data || []; renderCatalogue(activeFilter); renderAdminProductList();
-    } catch (e) { list.innerHTML = '<p style="color:#f87171;text-align:center;padding:2rem">Error: database not configured.</p>'; }
+    } catch (e) { list.innerHTML = '<p style="color:#f87171;text-align:center;padding:2rem">' + window.t('db_not_configured') + '</p>'; }
 }
 function renderAdminProductList() {
     document.getElementById('adminProductList').innerHTML = products.length ? products.map(function (p) {
@@ -882,11 +882,11 @@ function renderAdminProductList() {
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + thumb + '</div>' +
             '<div class="admin-product-meta"><h4>' + p.name + badge + '</h4>' +
-            '<p>' + priceInfo + ' · ' + (p.category === 't-shirt' ? 'T-Shirts' : 'Sets') + ' · ' + ((p.sizes || []).join(', ') || '—') + '</p></div>' +
+            '<p>' + priceInfo + ' · ' + (p.category === 't-shirt' ? window.t('tshirts') : window.t('sets')) + ' · ' + ((p.sizes || []).join(', ') || '—') + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="editProduct(' + p.id + ')">✏ Edit</button>' +
-            '<button class="btn-delete" onclick="deleteProduct(' + p.id + ')">🗑 Delete</button></div></div>';
-    }).join('') : '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">📦</div><p>No products. Click <strong style="color:var(--primary)">+ Add Product</strong>.</p></div>';
+            '<button class="btn-edit" onclick="editProduct(' + p.id + ')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteProduct(' + p.id + ')">🗑 ' + window.t('delete') + '</button></div></div>';
+    }).join('') : '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">📦</div><p>' + window.t('add_product_hint') + '</p></div>';
 }
 function editProduct(id) {
     var p = products.find(function (x) { return x.id === id; }); if (!p) return;
@@ -900,12 +900,12 @@ function editProduct(id) {
     document.getElementById('adminBadge').value = p.badge || '';
     adminImgSlots = (p.imgs || []).concat(['', '', '', '', '']).slice(0, 5);
     renderAdminImgSlots();
-    document.getElementById('adminFormTitle').textContent = '✏ Edit — ' + p.name;
-    document.getElementById('btnSaveLabel').textContent = '💾 Update';
+    document.getElementById('adminFormTitle').textContent = '✏ ' + window.t('edit') + ' — ' + p.name;
+    document.getElementById('btnSaveLabel').textContent = '💾 ' + window.t('update');
     showAdminTab('add', document.querySelectorAll('.admin-tab')[1]);
 }
 async function deleteProduct(id) {
-    if (!confirm('Delete this product permanently?')) return;
+    if (!confirm(window.t('delete_confirm_product'))) return;
     var isDemo = isDemoId(id);
     try {
         if (!isDemo) {
@@ -914,8 +914,8 @@ async function deleteProduct(id) {
         }
         products = products.filter(function (p) { return p.id !== id; });
         renderAdminProductList(); renderCatalogue(activeFilter);
-        showToast('Deleted', 'Product removed from catalogue.');
-    } catch (e) { showToast('Error', 'Could not delete.', '#ef4444'); }
+        showToast(window.t('deleted'), window.t('product_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
 }
 async function saveProduct() {
     var name = document.getElementById('adminName').value.trim();
@@ -928,12 +928,12 @@ async function saveProduct() {
     var imgs = adminImgSlots.filter(Boolean);
     var editId = document.getElementById('editProductId').value;
     var isDemo = isDemoId(editId);
-    if (!name || !price) { showToast('Required fields', 'Name and price are required.', '#f59e0b'); return; }
+    if (!name || !price) { showToast(window.t('required_fields'), window.t('name_price_required'), '#f59e0b'); return; }
     var payload = { name: name, category: cat, price: price, old_price: old_price, description: description, badge: badge, sizes: sizes, imgs: imgs };
     
     var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveProduct"]');
-    var originalText = btn ? btn.textContent : '💾 Save to Supabase';
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
 
     try {
         if (editId && !isDemo) {
@@ -943,8 +943,8 @@ async function saveProduct() {
             var res2 = await sbClient.from(PRODUCTS_TABLE).insert(payload);
             if (res2.error) throw res2.error;
         }
-        showToast('Saved! ✓', '"' + name + '" updated in Supabase.');
-    } catch (e) { showToast('Supabase Error', e.message || 'Check configuration.', '#ef4444'); }
+        showToast(window.t('saved'), window.t('item_updated_msg', { name: name }));
+    } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); }
     finally { if (btn) { btn.disabled = false; btn.textContent = originalText; } }
 }
 function cancelEditProduct() {
@@ -958,8 +958,8 @@ function cancelEditProduct() {
     document.getElementById('adminBadge').value = '';
     adminImgSlots = ['', '', '', '', ''];
     renderAdminImgSlots();
-    document.getElementById('adminFormTitle').textContent = '+ New Product';
-    document.getElementById('btnSaveLabel').textContent = '💾 Save to Supabase';
+    document.getElementById('adminFormTitle').textContent = window.t('new_product');
+    document.getElementById('btnSaveLabel').textContent = '💾 ' + window.t('save_supabase');
 }
 function showAdminTab(tab, el) {
     document.querySelectorAll('.admin-tab').forEach(function (t) { t.classList.remove('active'); }); el.classList.add('active');
@@ -1010,7 +1010,7 @@ function renderAdminImgSlots() {
             mediaHtml +
             '<span class="img-slot-label">' + labels[i] + '</span>' +
             (src ? '<button class="img-slot-clear" onclick="clearSlot(event,' + i + ')">✕</button>' : '') +
-            '<div class="upload-progress" id="slotProgress_' + i + '">↻ Upload...</div>' +
+            '<div class="upload-progress" id="slotProgress_' + i + '">↻ ' + window.t('uploading') + '</div>' +
             '<input type="file" accept="image/*,video/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2" onchange="uploadImageToStorage(event,' + i + ')">' +
             '</div>' +
             '<input type="text" placeholder="Upload or paste URL" value="' + (src || '') + '" onchange="updateAdminImgSlotFromInput(event, ' + i + ')" style="width:100%;font-size:0.85rem;padding:0.4rem;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;">' +
@@ -1039,7 +1039,7 @@ async function uploadImageToStorage(event, slotIndex) {
         
         if (prog) prog.classList.remove('show');
         renderAdminImgSlots();
-        showToast('Photo uploaded ✓', 'Image saved and preview updated.');
+        showToast(window.t('upload_success'), window.t('media_uploaded'));
     } catch (e) {
         if (prog) prog.classList.remove('show');
         if (e.message && (e.message.includes('bucket') || e.message.includes('Bucket') || e.message.includes('not found'))) {
@@ -1047,15 +1047,15 @@ async function uploadImageToStorage(event, slotIndex) {
             reader.onload = function (ev) { 
                 adminImgSlots[slotIndex] = ev.target.result; 
                 renderAdminImgSlots(); 
-                showToast('Photo loaded (local)', 'Note: Create the "product-images" bucket in Supabase.', '#f59e0b'); 
+                showToast(window.t('upload_success'), window.t('media_ready'), '#f59e0b'); 
             };
             reader.readAsDataURL(file);
         } else {
-            var msg = e.message || 'Check storage permissions.';
+            var msg = e.message || window.t('upload_error');
             if (msg.includes('payload too large') || msg.includes('oversized') || e.status === 413) {
-                msg = 'File too large (Max 50MB).';
+                msg = window.t('file_too_large');
             }
-            showToast('Upload error', msg, '#ef4444');
+            showToast(window.t('upload_error'), msg, '#ef4444');
         }
     }
 }
@@ -1071,7 +1071,7 @@ var adminArtists = [];
 
 async function loadAdminArtists() {
     var list = document.getElementById('adminArtistList'); if (!list) return;
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading artists...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading_artists') + '</p>';
     try {
         var res = await sbClient.from('artists').select('*').order('created_at', { ascending: false });
         console.log('DEBUG loadAdminArtists: res.error=', res.error, 'res.data length=', res.data ? res.data.length : 'null');
@@ -1092,16 +1092,16 @@ function renderAdminArtistList() {
     var list = document.getElementById('adminArtistList');
     list.style.display = 'flex';
     list.style.flexDirection = 'column';
-    if (!adminArtists.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🎤</div><p>No artists yet. Add your first artist below.</p></div>'; return; }
+    if (!adminArtists.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🎤</div><p>' + window.t('no_artists_hint') + '</p></div>'; return; }
     list.innerHTML = adminArtists.map(function (a) {
         var statusColor = a.status === 'Published' ? '#22c55e' : a.status === 'Hidden' ? '#ef4444' : '#f59e0b';
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + (a.profile_image_url ? '<img src="' + a.profile_image_url + '" alt="' + a.name + '">' : '🎤') + '</div>' +
             '<div class="admin-product-meta"><h4>' + a.name + (a.is_featured ? ' ⭐' : '') + '</h4>' +
-            '<p><span style="color:' + statusColor + '">' + a.status + '</span> · 🎵 ' + (a.latest_release_title || '—') + '</p></div>' +
+            '<p><span style="color:' + statusColor + '">' + window.t(a.status.toLowerCase()) + '</span> · 🎵 ' + (a.latest_release_title || '—') + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="editArtist(\'' + a.id + '\')">✏ Edit</button>' +
-            '<button class="btn-delete" onclick="deleteArtist(\'' + a.id + '\')">🗑 Delete</button></div></div>';
+            '<button class="btn-edit" onclick="editArtist(\'' + a.id + '\')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteArtist(\'' + a.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
     }).join('');
 }
 
@@ -1123,7 +1123,7 @@ function editArtist(id) {
     document.getElementById('artistTiktok').value = a.tiktok_spotify_url || '';
     document.getElementById('artistMerchId').value = a.merch_product_id || '';
     document.getElementById('artistFeatured').checked = a.is_featured || false;
-    document.getElementById('artistFormTitle').textContent = '✏ Edit — ' + a.name;
+    document.getElementById('artistFormTitle').textContent = '✏ ' + window.t('edit') + ' — ' + a.name;
 }
 
 function cancelEditArtist() {
@@ -1131,13 +1131,13 @@ function cancelEditArtist() {
     ['artistName', 'artistBio', 'artistProfileImg', 'artistBannerImg', 'artistPromoVideo', 'artistReleaseTitle', 'artistReleaseDate', 'artistReleaseCover', 'artistReleaseListen', 'artistInstagram', 'artistYoutube', 'artistTiktok', 'artistMerchId'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('artistStatus').value = 'Draft';
     document.getElementById('artistFeatured').checked = false;
-    document.getElementById('artistFormTitle').textContent = '+ New Artist';
+    document.getElementById('artistFormTitle').textContent = window.t('new_artist');
 }
 
 async function saveArtist(event) {
     if (event) event.preventDefault();
     var name = document.getElementById('artistName').value.trim();
-    if (!name) { showToast('Required', 'Artist name is required.', '#f59e0b'); return; }
+    if (!name) { showToast(window.t('required'), window.t('artist_name_required'), '#f59e0b'); return; }
     var payload = {
         name: name,
         bio: document.getElementById('artistBio').value.trim() || null,
@@ -1159,8 +1159,8 @@ async function saveArtist(event) {
     var isDemo = isDemoId(editId);
     
     var btn = (event && event.target) || (window.event && window.event.target) || document.querySelector('button[onclick*="saveArtist"]');
-    var originalText = btn ? btn.textContent : '💾 Save Artist';
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
 
     try {
         if (editId && !isDemo) {
@@ -1173,13 +1173,13 @@ async function saveArtist(event) {
                 demoArtists = demoArtists.filter(function (d) { return d.id !== editId; });
             }
         }
-        showToast('Saved! ✓', '"' + name + '" saved to Supabase.');
-    } catch (e) { showToast('Error', e.message || 'Could not save artist.', '#ef4444'); }
+        showToast(window.t('saved'), window.t('item_saved_msg', { name: name }));
+    } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); }
     finally { if (btn) { btn.disabled = false; btn.textContent = originalText; } }
 }
 
 async function deleteArtist(id) {
-    if (!confirm('Delete this artist permanently?')) return;
+    if (!confirm(window.t('delete_confirm_artist'))) return;
     var isDemo = isDemoId(id);
     try {
         if (!isDemo) {
@@ -1190,8 +1190,8 @@ async function deleteArtist(id) {
         }
         adminArtists = adminArtists.filter(function (a) { return a.id !== id; });
         renderAdminArtistList(); refreshFrontendData();
-        showToast('Deleted', 'Artist removed.');
-    } catch (e) { showToast('Error', 'Could not delete artist.', '#ef4444'); }
+        showToast(window.t('deleted'), window.t('artist_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
 }
 
 // ===================================================================
@@ -1201,7 +1201,7 @@ var adminArticles = [];
 
 async function loadAdminArticles() {
     var list = document.getElementById('adminArticleList'); if (!list) return;
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading articles...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '</p>';
     try {
         var res = await sbClient.from('articles').select('*').order('created_at', { ascending: false });
         var liveArticles = (res.data && res.data.length > 0) ? res.data : [];
@@ -1218,7 +1218,7 @@ async function loadAdminArticles() {
 
 async function loadAdminFeaturedArticles() {
     var list = document.getElementById('featuredArticlesAdminList'); if (!list) return;
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading featured articles...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '</p>';
     // We already have adminArticles loaded or can load them
     if (!adminArticles.length) {
         await loadAdminArticles();
@@ -1234,7 +1234,7 @@ function renderAdminFeaturedArticlesList() {
     list.style.flexDirection = 'column';
     
     if (!featured.length) { 
-        list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">⭐</div><p>No featured articles yet. Mark articles as "Featured" in the Articles tab.</p></div>'; 
+        list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">⭐</div><p>' + window.t('no_featured_articles_hint') + '</p></div>'; 
         return; 
     }
     
@@ -1245,10 +1245,10 @@ function renderAdminFeaturedArticlesList() {
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + (a.cover_image_url ? '<img src="' + a.cover_image_url + '" alt="' + a.title + '">' : (catIcons[a.category] || '📄')) + '</div>' +
             '<div class="admin-product-meta"><h4>' + a.title + '</h4>' +
-            '<p><span style="color:' + statusColor + '">' + a.status + '</span> · ' + (catIcons[a.category] || '') + ' ' + (a.category || '') + '</p></div>' +
+            '<p><span style="color:' + statusColor + '">' + window.t(a.status.toLowerCase()) + '</span> · ' + (catIcons[a.category] || '') + ' ' + (a.category || '') + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="showAdminTab(\'articles-admin\', document.querySelector(\'[onclick*=\\\'articles-admin\\\']\')); editArticle(\'' + a.id + '\')">✏ Edit</button>' +
-            '<button class="btn-delete" onclick="deleteArticle(\'' + a.id + '\')">🗑 Delete</button></div></div>';
+            '<button class="btn-edit" onclick="showAdminTab(\'articles-admin\', document.querySelector(\'[onclick*=\\\'articles-admin\\\']\')); editArticle(\'' + a.id + '\')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteArticle(\'' + a.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
     }).join('');
 }
 
@@ -1256,17 +1256,17 @@ function renderAdminArticleList() {
     var list = document.getElementById('adminArticleList');
     list.style.display = 'flex';
     list.style.flexDirection = 'column';
-    if (!adminArticles.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">📰</div><p>No articles yet. Create your first article below.</p></div>'; return; }
+    if (!adminArticles.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">📰</div><p>' + window.t('no_articles_hint') + '</p></div>'; return; }
     var catIcons = { article: '📰', vlog: '🎥', howto: '💡', hot: '🔥' };
     list.innerHTML = adminArticles.map(function (a) {
         var statusColor = a.status === 'Published' ? '#22c55e' : a.status === 'Hidden' ? '#ef4444' : '#f59e0b';
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + (a.cover_image_url ? '<img src="' + a.cover_image_url + '" alt="' + a.title + '">' : (catIcons[a.category] || '📄')) + '</div>' +
             '<div class="admin-product-meta"><h4>' + a.title + (a.is_featured ? ' ⭐' : '') + (a.is_trending ? ' 🔥' : '') + '</h4>' +
-            '<p><span style="color:' + statusColor + '">' + a.status + '</span> · ' + (catIcons[a.category] || '') + ' ' + (a.category || '') + ' · By ' + (a.author || 'FBC') + '</p></div>' +
+            '<p><span style="color:' + statusColor + '">' + window.t(a.status.toLowerCase()) + '</span> · ' + (catIcons[a.category] || '') + ' ' + (a.category || '') + ' · ' + window.t('by') + ' ' + (a.author || 'FBC') + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="editArticle(\'' + a.id + '\')">✏ Edit</button>' +
-            '<button class="btn-delete" onclick="deleteArticle(\'' + a.id + '\')">🗑 Delete</button></div></div>';
+            '<button class="btn-edit" onclick="editArticle(\'' + a.id + '\')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteArticle(\'' + a.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
     }).join('');
 }
 
@@ -1285,7 +1285,7 @@ function editArticle(id) {
     document.getElementById('articleStatus').value = a.status || 'Draft';
     document.getElementById('articleFeatured').checked = a.is_featured || false;
     document.getElementById('articleTrending').checked = a.is_trending || false;
-    document.getElementById('articleFormTitle').textContent = '✏ Edit — ' + a.title;
+    document.getElementById('articleFormTitle').textContent = '✏ ' + window.t('edit') + ' — ' + a.title;
 }
 
 function cancelEditArticle() {
@@ -1295,12 +1295,12 @@ function cancelEditArticle() {
     document.getElementById('articleStatus').value = 'Draft';
     document.getElementById('articleFeatured').checked = false;
     document.getElementById('articleTrending').checked = false;
-    document.getElementById('articleFormTitle').textContent = '+ New Article';
+    document.getElementById('articleFormTitle').textContent = window.t('new_article');
 }
 
 async function saveArticle() {
     var title = document.getElementById('articleTitle').value.trim();
-    if (!title) { showToast('Required', 'Article title is required.', '#f59e0b'); return; }
+    if (!title) { showToast(window.t('required'), window.t('article_title_required'), '#f59e0b'); return; }
     var payload = {
         title: title,
         category: document.getElementById('articleCategory').value,
@@ -1318,9 +1318,9 @@ async function saveArticle() {
     var editId = document.getElementById('editArticleId').value;
     var isDemo = isDemoId(editId);
     var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveArticle"]');
-    var originalText = btn ? btn.textContent : '💾 Save Article';
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
 
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from('articles').update(payload).eq('id', editId);
@@ -1333,7 +1333,7 @@ async function saveArticle() {
             }
         }
         cancelEditArticle(); await loadAdminArticles(); refreshFrontendData();
-        showToast('Saved! ✓', '"' + title + '" saved.');
+        showToast(window.t('saved'), window.t('item_saved_msg', { name: title }));
     } catch (e) { 
         console.error('saveArticle error:', e);
         showToast('Error', e.message || 'Could not save article.', '#ef4444'); 
@@ -1343,7 +1343,7 @@ async function saveArticle() {
 }
 
 async function deleteArticle(id) {
-    if (!confirm('Delete this article permanently?')) return;
+    if (!confirm(window.t('delete_confirm_article'))) return;
     var isDemo = isDemoId(id);
     try {
         if (!isDemo) {
@@ -1354,8 +1354,8 @@ async function deleteArticle(id) {
         }
         adminArticles = adminArticles.filter(function (a) { return a.id !== id; });
         renderAdminArticleList(); refreshFrontendData();
-        showToast('Deleted', 'Article removed.');
-    } catch (e) { showToast('Error', 'Could not delete article.', '#ef4444'); }
+        showToast(window.t('deleted'), window.t('article_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
 }
 
 // ===================================================================
@@ -1365,7 +1365,7 @@ var adminThreads = [];
 
 async function loadAdminThreads() {
     var list = document.getElementById('adminThreadList'); if (!list) return;
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading threads...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '</p>';
     try {
         var res = await sbClient.from('threads').select('*').order('priority_order', { ascending: true });
         var liveThreads = (res.data && res.data.length > 0) ? res.data : [];
@@ -1379,17 +1379,17 @@ function renderAdminThreadList() {
     var list = document.getElementById('adminThreadList');
     list.style.display = 'flex';
     list.style.flexDirection = 'column';
-    if (!adminThreads.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">💬</div><p>No threads yet. Start a conversation below.</p></div>'; return; }
+    if (!adminThreads.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">💬</div><p>' + window.t('no_threads_hint') + '</p></div>'; return; }
     var tagIcons = { Hot: '🔥', Trend: '📈', News: '📰' };
     list.innerHTML = adminThreads.map(function (t) {
         var statusColor = t.status === 'Active' ? '#22c55e' : '#ef4444';
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + (tagIcons[t.tag] || '💬') + '</div>' +
             '<div class="admin-product-meta"><h4>' + (t.is_pinned ? '📌 ' : '') + t.title + '</h4>' +
-            '<p><span style="color:' + statusColor + '">' + t.status + '</span> · ' + t.tag + ' · Priority: ' + t.priority_order + '</p></div>' +
+            '<p><span style="color:' + statusColor + '">' + window.t(t.status.toLowerCase()) + '</span> · ' + window.t(t.tag.toLowerCase()) + ' · ' + window.t('priority') + ': ' + t.priority_order + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="editThread(\'' + t.id + '\')">✏ Edit</button>' +
-            '<button class="btn-delete" onclick="deleteThread(\'' + t.id + '\')">🗑 Delete</button></div></div>';
+            '<button class="btn-edit" onclick="editThread(\'' + t.id + '\')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteThread(\'' + t.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
     }).join('');
 }
 
@@ -1405,7 +1405,7 @@ function editThread(id) {
     document.getElementById('threadStatus').value = t.status || 'Active';
     document.getElementById('threadPriority').value = t.priority_order || 0;
     document.getElementById('threadPinned').checked = t.is_pinned || false;
-    document.getElementById('threadFormTitle').textContent = '✏ Edit — ' + t.title;
+    document.getElementById('threadFormTitle').textContent = '✏ ' + window.t('edit') + ' — ' + t.title;
 }
 
 function cancelEditThread() {
@@ -1415,12 +1415,12 @@ function cancelEditThread() {
     document.getElementById('threadStatus').value = 'Active';
     document.getElementById('threadPriority').value = '0';
     document.getElementById('threadPinned').checked = false;
-    document.getElementById('threadFormTitle').textContent = '+ New Thread';
+    document.getElementById('threadFormTitle').textContent = window.t('new_thread');
 }
 
 async function saveThread() {
     var title = document.getElementById('threadTitle').value.trim();
-    if (!title) { showToast('Required', 'Thread title is required.', '#f59e0b'); return; }
+    if (!title) { showToast(window.t('required'), window.t('thread_title_required'), '#f59e0b'); return; }
     var payload = {
         title: title,
         tag: document.getElementById('threadTag').value,
@@ -1436,8 +1436,8 @@ async function saveThread() {
     var isDemo = isDemoId(editId);
     
     var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveThread"]');
-    var originalText = btn ? btn.textContent : '💾 Save Thread';
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
 
     try {
         if (editId && !isDemo) {
@@ -1451,12 +1451,12 @@ async function saveThread() {
             }
         }
         cancelEditThread(); await loadAdminThreads(); refreshFrontendData();
-        showToast('Saved! ✓', '"' + title + '" saved.');
-    } catch (e) { showToast('Error', e.message || 'Could not save thread.', '#ef4444'); }
+        showToast(window.t('saved'), window.t('item_saved_msg', { name: title }));
+    } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); }
 }
 
 async function deleteThread(id) {
-    if (!confirm('Delete this thread permanently?')) return;
+    if (!confirm(window.t('delete_confirm_thread'))) return;
     var isDemo = isDemoId(id);
     try {
         if (!isDemo) {
@@ -1467,8 +1467,8 @@ async function deleteThread(id) {
         }
         adminThreads = adminThreads.filter(function (t) { return t.id !== id; });
         renderAdminThreadList(); refreshFrontendData();
-        showToast('Deleted', 'Thread removed.');
-    } catch (e) { showToast('Error', 'Could not delete thread.', '#ef4444'); }
+        showToast(window.t('deleted'), window.t('thread_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
 }
 
 // ===================================================================
@@ -1478,7 +1478,7 @@ var adminEvents = [];
 
 async function loadAdminEvents() {
     var list = document.getElementById('adminEventList'); if (!list) return;
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading events...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '</p>';
     try {
         var res = await sbClient.from('events').select('*').order('event_date', { ascending: true });
         var liveEvents = (res.data && res.data.length > 0) ? res.data : [];
@@ -1492,18 +1492,18 @@ function renderAdminEventList() {
     var list = document.getElementById('adminEventList');
     list.style.display = 'flex';
     list.style.flexDirection = 'column';
-    if (!adminEvents.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🎫</div><p>No events yet. Create your first event below.</p></div>'; return; }
+    if (!adminEvents.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🎫</div><p>' + window.t('no_events_hint') + '</p></div>'; return; }
     list.innerHTML = adminEvents.map(function (e) {
         var statusColor = e.status === 'Published' ? '#22c55e' : e.status === 'Hidden' ? '#ef4444' : '#f59e0b';
         var d = new Date(e.event_date);
-        var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        var dateStr = d.toLocaleDateString(window.getLang() === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + (e.cover_image_url ? '<img src="' + e.cover_image_url + '" alt="' + e.title + '">' : '🎫') + '</div>' +
             '<div class="admin-product-meta"><h4>' + e.title + '</h4>' +
-            '<p><span style="color:' + statusColor + '">' + e.status + '</span> · 📅 ' + dateStr + ' · 📍 ' + e.location_name + '</p></div>' +
+            '<p><span style="color:' + statusColor + '">' + window.t(e.status.toLowerCase()) + '</span> · 📅 ' + dateStr + ' · 📍 ' + e.location_name + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="editEvent(\'' + e.id + '\')">✏ Edit</button>' +
-            '<button class="btn-delete" onclick="deleteEvent(\'' + e.id + '\')">🗑 Delete</button></div></div>';
+            '<button class="btn-edit" onclick="editEvent(\'' + e.id + '\')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteEvent(\'' + e.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
     }).join('');
 }
 
@@ -1521,21 +1521,21 @@ function editEvent(id) {
     document.getElementById('eventTicketUrl').value = e.ticketing_url || '';
     document.getElementById('eventArtistId').value = e.featured_artist_id || '';
     document.getElementById('eventStatus').value = e.status || 'Draft';
-    document.getElementById('eventFormTitle').textContent = '✏ Edit — ' + e.title;
+    document.getElementById('eventFormTitle').textContent = '✏ ' + window.t('edit') + ' — ' + e.title;
 }
 
 function cancelEditEvent() {
     document.getElementById('editEventId').value = '';
     ['eventTitle', 'eventDate', 'eventDescription', 'eventVenue', 'eventAddress', 'eventCoverImg', 'eventPromoVideo', 'eventExtLink', 'eventTicketUrl', 'eventArtistId'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('eventStatus').value = 'Draft';
-    document.getElementById('eventFormTitle').textContent = '+ New Event';
+    document.getElementById('eventFormTitle').textContent = window.t('new_event');
 }
 
 async function saveEvent() {
     var title = document.getElementById('eventTitle').value.trim();
     var eventDate = document.getElementById('eventDate').value;
     var venue = document.getElementById('eventVenue').value.trim();
-    if (!title || !eventDate || !venue) { showToast('Required', 'Title, date, and venue are required.', '#f59e0b'); return; }
+    if (!title || !eventDate || !venue) { showToast(window.t('required'), window.t('event_fields_required'), '#f59e0b'); return; }
     var payload = {
         title: title,
         event_date: eventDate,
@@ -1553,8 +1553,8 @@ async function saveEvent() {
     var isDemo = isDemoId(editId);
     
     var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveEvent"]');
-    var originalText = btn ? btn.textContent : '💾 Save Event';
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
 
     try {
         if (editId && !isDemo) {
@@ -1568,12 +1568,12 @@ async function saveEvent() {
             }
         }
         cancelEditEvent(); await loadAdminEvents(); refreshFrontendData();
-        showToast('Saved! ✓', '"' + title + '" saved.');
-    } catch (e) { showToast('Error', e.message || 'Could not save event.', '#ef4444'); }
+        showToast(window.t('saved'), window.t('item_saved_msg', { name: title }));
+    } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); }
 }
 
 async function deleteEvent(id) {
-    if (!confirm('Delete this event permanently?')) return;
+    if (!confirm(window.t('delete_confirm_event'))) return;
     var isDemo = isDemoId(id);
     try {
         if (!isDemo) {
@@ -1584,8 +1584,8 @@ async function deleteEvent(id) {
         }
         adminEvents = adminEvents.filter(function (e) { return e.id !== id; });
         renderAdminEventList(); refreshFrontendData();
-        showToast('Deleted', 'Event removed.');
-    } catch (e) { showToast('Error', 'Could not delete event.', '#ef4444'); }
+        showToast(window.t('deleted'), window.t('event_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
 }
 
 // ===================================================================
@@ -1596,7 +1596,7 @@ var adminInfluencers = [];
 
 async function loadAdminInfluencers() {
     var list = document.getElementById('adminInfluencerList'); if (!list) return;
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading influencers...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '</p>';
     try {
         var res = await sbClient.from(INFLUENCERS_TABLE).select('*').order('name');
         var liveInfluencers = (res.data && res.data.length > 0) ? res.data : [];
@@ -1613,15 +1613,16 @@ function renderAdminInfluencerList() {
     var list = document.getElementById('adminInfluencerList');
     list.style.display = 'flex';
     list.style.flexDirection = 'column';
-    if (!adminInfluencers.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🌟</div><p>No influencers yet. Add your first influencer below.</p></div>'; return; }
+    if (!adminInfluencers.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🌟</div><p>' + window.t('no_influencers_hint') + '</p></div>'; return; }
     list.innerHTML = adminInfluencers.map(function (i) {
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + (i.profile_image_url ? '<img src="' + i.profile_image_url + '" alt="' + i.name + '">' : '🌟') + '</div>' +
             '<div class="admin-product-meta"><h4>' + i.name + '</h4>' +
-            '<p>' + (i.category || 'Influencer') + '</p></div>' +
+            '<div class="admin-product-meta"><h4>' + i.name + '</h4>' +
+            '<p>' + (i.category || window.t('cultural_icon')) + '</p></div>' +
             '<div class="admin-product-actions">' +
-            '<button class="btn-edit" onclick="editInfluencer(\'' + i.id + '\')">✏ Edit</button>' +
-            '<button class="btn-delete" onclick="deleteInfluencer(\'' + i.id + '\')">🗑 Delete</button></div></div>';
+            '<button class="btn-edit" onclick="editInfluencer(\'' + i.id + '\')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteInfluencer(\'' + i.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
     }).join('');
 }
 
@@ -1638,7 +1639,7 @@ function editInfluencer(id) {
     document.getElementById('influencerTikTok').value = i.tiktok_spotify_url || '';
     document.getElementById('influencerFeatured').checked = i.is_featured || false;
     document.getElementById('influencerTrending').checked = i.is_trending || false;
-    document.getElementById('influencerFormTitle').textContent = '✏ Edit — ' + i.name;
+    document.getElementById('influencerFormTitle').textContent = '✏ ' + window.t('edit') + ' — ' + i.name;
 }
 
 function cancelEditInfluencer() {
@@ -1646,13 +1647,13 @@ function cancelEditInfluencer() {
     ['influencerName', 'influencerCategory', 'influencerBio', 'influencerProfileImg', 'influencerBannerImg', 'influencerInstagram', 'influencerYoutube', 'influencerTikTok'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('influencerFeatured').checked = false;
     document.getElementById('influencerTrending').checked = false;
-    document.getElementById('influencerFormTitle').textContent = '+ New Influencer';
+    document.getElementById('influencerFormTitle').textContent = window.t('new_influencer');
 }
 
 async function saveInfluencer(event) {
     if (event) event.preventDefault();
     var name = document.getElementById('influencerName').value.trim();
-    if (!name) { showToast('Required', 'Influencer name is required.', '#f59e0b'); return; }
+    if (!name) { showToast(window.t('required'), window.t('influencer_name_required'), '#f59e0b'); return; }
     var payload = {
         name: name,
         category: document.getElementById('influencerCategory').value.trim() || null,
@@ -1670,9 +1671,9 @@ async function saveInfluencer(event) {
     
     // Attempt to get button from event or DOM
     var btn = (event && event.target) || (window.event && window.event.target) || document.querySelector('button[onclick*="saveInfluencer"]');
-    var originalText = btn ? btn.textContent : '💾 Save Influencer';
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
 
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
     try {
         if (editId && !isDemo) {
             var res = await sbClient.from(INFLUENCERS_TABLE).update(payload).eq('id', editId);
@@ -1685,15 +1686,15 @@ async function saveInfluencer(event) {
             }
         }
         cancelEditInfluencer(); await loadAdminInfluencers(); refreshFrontendData();
-        showToast('Saved! ✓', '"' + name + '" saved to Supabase.');
-    } catch (e) { showToast('Error', e.message || 'Could not save influencer.', '#ef4444'); }
+        showToast(window.t('saved'), window.t('item_saved_msg', { name: name }));
+    } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); }
     finally {
         if (btn) { btn.disabled = false; btn.textContent = originalText; }
     }
 }
 
 async function deleteInfluencer(id) {
-    if (!confirm('Delete this influencer permanently?')) return;
+    if (!confirm(window.t('delete_confirm_influencer'))) return;
     var isDemo = isDemoId(id);
     try {
         if (!isDemo) {
@@ -1704,8 +1705,8 @@ async function deleteInfluencer(id) {
         }
         adminInfluencers = adminInfluencers.filter(function (i) { return i.id !== id; });
         renderAdminInfluencerList(); refreshFrontendData();
-        showToast('Deleted', 'Influencer removed.');
-    } catch (e) { showToast('Error', 'Could not delete influencer.', '#ef4444'); }
+        showToast(window.t('deleted'), window.t('influencer_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
 }
 
 // ===================================================================
@@ -1715,7 +1716,7 @@ var adminNotifications = [];
 
 async function loadAdminNotifications() {
     var list = document.getElementById('adminNotificationList'); if (!list) return;
-    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading notifications...</p>';
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading_notifications') + '</p>';
     try {
         var res = await sbClient.from('notifications').select('*').order('created_at', { ascending: false });
         if (res.error) throw res.error;
@@ -1727,31 +1728,31 @@ async function loadAdminNotifications() {
 
 function renderAdminNotificationList() {
     var list = document.getElementById('adminNotificationList');
-    if (!adminNotifications.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">📣</div><p>No notifications sent yet. Compose your first notification below.</p></div>'; return; }
+    if (!adminNotifications.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">📣</div><p>' + window.t('no_notifications_hint') + '</p></div>'; return; }
     list.innerHTML = adminNotifications.map(function (n) {
         var statusIcon = n.status === 'sent' ? '✅' : '📝';
         var openRate = n.total_sent ? Math.round((n.total_opened / n.total_sent) * 100) : 0;
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + statusIcon + '</div>' +
             '<div class="admin-product-meta"><h4>' + n.title + '</h4>' +
-            '<p>' + statusIcon + ' ' + n.status + ' · 📤 ' + (n.total_sent || 0) + ' sent · 👀 ' + (n.total_opened || 0) + ' opened (' + openRate + '%)</p></div>' +
+            '<p>' + statusIcon + ' ' + window.t(n.status) + ' · 📤 ' + (n.total_sent || 0) + ' ' + window.t('sent') + ' · 👀 ' + (n.total_opened || 0) + ' ' + window.t('opened') + ' (' + openRate + '%)</p></div>' +
             '<div class="admin-product-actions">' +
-            (n.status === 'draft' ? '<button class="btn-edit" onclick="editNotification(\'' + n.id + '\')">✏ Edit</button>' +
-                '<button class="btn-save" onclick="sendNotification(\'' + n.id + '\')" style="background:#22c55e;font-size:.75rem;padding:4px 10px;border-radius:6px;color:white;border:none;cursor:pointer">📣 Send</button>' : '') +
-            '<button class="btn-delete" onclick="deleteNotification(\'' + n.id + '\')">🗑 Delete</button></div></div>';
+            (n.status === 'draft' ? '<button class="btn-edit" onclick="editNotification(\'' + n.id + '\')">✏ ' + window.t('edit') + '</button>' +
+                '<button class="btn-save" onclick="sendNotification(\'' + n.id + '\')" style="background:#22c55e;font-size:.75rem;padding:4px 10px;border-radius:6px;color:white;border:none;cursor:pointer">📣 ' + window.t('send') + '</button>' : '') +
+            '<button class="btn-delete" onclick="deleteNotification(\'' + n.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
     }).join('');
 }
 
 function renderNotifAnalytics() {
     var el = document.getElementById('notifAnalytics'); if (!el) return;
-    if (!adminNotifications.length) { el.innerHTML = 'No data yet.'; return; }
+    if (!adminNotifications.length) { el.innerHTML = window.t('no_data'); return; }
     var totalSent = adminNotifications.reduce(function (s, n) { return s + (n.total_sent || 0); }, 0);
     var totalOpened = adminNotifications.reduce(function (s, n) { return s + (n.total_opened || 0); }, 0);
     var avgRate = totalSent ? Math.round((totalOpened / totalSent) * 100) : 0;
     el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center">' +
-        '<div><div style="font-size:1.5rem;font-weight:700;color:white">' + adminNotifications.length + '</div><div>Total Notifications</div></div>' +
-        '<div><div style="font-size:1.5rem;font-weight:700;color:white">' + totalSent + '</div><div>Total Sent</div></div>' +
-        '<div><div style="font-size:1.5rem;font-weight:700;color:var(--primary)">' + avgRate + '%</div><div>Avg Open Rate</div></div></div>';
+        '<div><div style="font-size:1.5rem;font-weight:700;color:white">' + adminNotifications.length + '</div><div>' + window.t('total_notifications') + '</div></div>' +
+        '<div><div style="font-size:1.5rem;font-weight:700;color:white">' + totalSent + '</div><div>' + window.t('total_sent_label') + '</div></div>' +
+        '<div><div style="font-size:1.5rem;font-weight:700;color:var(--primary)">' + avgRate + '%</div><div>' + window.t('avg_open_rate_label') + '</div></div></div>';
 }
 
 function editNotification(id) {
@@ -1762,20 +1763,20 @@ function editNotification(id) {
     document.getElementById('notifBody').value = n.body || '';
     document.getElementById('notifImage').value = n.image_url || '';
     document.getElementById('notifDeepLink').value = n.deep_link || '';
-    document.getElementById('notificationFormTitle').textContent = '✏ Edit Notification';
+    document.getElementById('notificationFormTitle').textContent = '✏ ' + window.t('edit_notification');
 }
 
 function cancelEditNotification() {
     document.getElementById('editNotificationId').value = '';
     ['notifTitle', 'notifBody', 'notifImage', 'notifDeepLink'].forEach(function (id) { document.getElementById(id).value = ''; });
     document.getElementById('notifType').value = 'general';
-    document.getElementById('notificationFormTitle').textContent = '📣 Compose Notification';
+    document.getElementById('notificationFormTitle').textContent = '📣 ' + window.t('compose_notification');
 }
 
 async function saveNotification() {
     var title = document.getElementById('notifTitle').value.trim();
     var body = document.getElementById('notifBody').value.trim();
-    if (!title || !body) { showToast('Required', 'Title and body are required.', '#f59e0b'); return; }
+    if (!title || !body) { showToast(window.t('required'), window.t('title_body_required'), '#f59e0b'); return; }
     var payload = {
         title: title,
         body: body,
@@ -1786,8 +1787,8 @@ async function saveNotification() {
     };
     var editId = document.getElementById('editNotificationId').value;
     var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveNotification"]');
-    var originalText = btn ? btn.textContent : '💾 Save Draft';
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_draft');
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
     try {
         if (editId) {
             var res = await sbClient.from('notifications').update(payload).eq('id', editId);
@@ -1796,8 +1797,8 @@ async function saveNotification() {
             var res2 = await sbClient.from('notifications').insert(payload);
             if (res2.error) throw res2.error;
         }
-        showToast('Saved! ✓', 'Notification draft saved.');
-    } catch (e) { showToast('Error', e.message || 'Could not save notification.', '#ef4444'); }
+        showToast(window.t('saved'), window.t('item_saved_msg', { name: title }));
+    } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); }
     finally { if (btn) { btn.disabled = false; btn.textContent = originalText; } }
 }
 
@@ -1807,7 +1808,7 @@ async function sendNotification(idOverride) {
     if (!notifId) {
         var title = document.getElementById('notifTitle').value.trim();
         var body = document.getElementById('notifBody').value.trim();
-        if (!title || !body) { showToast('Required', 'Title and body are required.', '#f59e0b'); return; }
+        if (!title || !body) { showToast(window.t('required'), window.t('title_body_required'), '#f59e0b'); return; }
         try {
             var insertRes = await sbClient.from('notifications').insert({
                 title: title, body: body, type: document.getElementById('notifType').value,
@@ -1817,7 +1818,7 @@ async function sendNotification(idOverride) {
             }).select().single();
             if (insertRes.error) throw insertRes.error;
             notifId = insertRes.data.id;
-        } catch (e) { showToast('Error', e.message || 'Could not create notification.', '#ef4444'); return; }
+        } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); return; }
     }
     // Invoke the Edge Function
     try {
@@ -1826,22 +1827,22 @@ async function sendNotification(idOverride) {
         });
         if (fnRes.error) throw fnRes.error;
         cancelEditNotification(); await loadAdminNotifications();
-        showToast('📣 Sent!', 'Notification dispatched to all devices.');
+        showToast('📣 ' + window.t('send'), window.t('dispatched'));
     } catch (e) {
-        showToast('Send Error', e.message || 'Edge function not configured. Save the notification draft and deploy the send-notification function.', '#ef4444');
+        showToast(window.t('error'), e.message || window.t('send_error_edge'), '#ef4444');
         await loadAdminNotifications();
     }
 }
 
 async function deleteNotification(id) {
-    if (!confirm('Delete this notification permanently?')) return;
+    if (!confirm(window.t('delete_confirm_notif'))) return;
     try {
         var res = await sbClient.from('notifications').delete().eq('id', id);
         if (res.error) throw res.error;
         adminNotifications = adminNotifications.filter(function (n) { return n.id !== id; });
         renderAdminNotificationList(); renderNotifAnalytics();
-        showToast('Deleted', 'Notification removed.');
-    } catch (e) { showToast('Error', 'Could not delete.', '#ef4444'); }
+        showToast(window.t('deleted'), window.t('notif_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
 }
 
 // ===================================================================
@@ -1908,7 +1909,7 @@ function handleNewsletter(e) {
     e.preventDefault();
     var name = e.target.name.value;
     fetch('https://formsubmit.co/ajax/contact@fueledbycreation.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(e.target) }).catch(function () { });
-    showToast('Welcome to the Tribe! 🎉', 'Thanks ' + name + '!');
+    showToast(window.t('welcome_tribe'), window.t('thanks_name', { name: name }));
     e.target.reset();
 }
 
@@ -1951,7 +1952,7 @@ async function openArtistDetail(id) {
     document.getElementById('artistProfileImgDetail').src = a.profile_image_url || 'https://via.placeholder.com/150';
 
     // Release
-    document.getElementById('releaseTitleDetail').textContent = a.latest_release_title || 'No recent release';
+    document.getElementById('releaseTitleDetail').textContent = a.latest_release_title || window.t('no_recent_release');
     document.getElementById('releaseCoverDetail').src = a.latest_release_cover_url || 'https://via.placeholder.com/300';
     document.getElementById('releaseLinkDetail').href = a.latest_release_listen_url || '#';
 
@@ -1985,8 +1986,8 @@ async function openArticleDetail(id) {
 
     document.getElementById('articleTitleDetail').textContent = a.title;
     document.getElementById('articleAuthorDetail').innerHTML = 
-        '<span style="color:var(--primary);font-weight:700">' + (a.author || 'FBC Editorial') + '</span> · ' + 
-        formatDate(a.publish_date) + ' · <span style="opacity:0.7">⏱️ ' + readTime + ' min read</span>';
+        '<span style="color:var(--primary);font-weight:700">' + (a.author || window.t('fbc_editorial')) + '</span> · ' + 
+        formatDate(a.publish_date) + ' · <span style="opacity:0.7">⏱️ ' + window.t('min_read', { n: readTime }) + '</span>';
     
     var mediaWrap = document.getElementById('articleMediaWrap');
     if (mediaWrap) {
@@ -2000,11 +2001,11 @@ async function openArticleDetail(id) {
     }
 
     // Add External Link if exists
-    var bodyContent = a.body_content || '<p style="color:#888;font-style:italic">No content available for this article.</p>';
+    var bodyContent = a.body_content || '<p style="color:#888;font-style:italic">' + window.t('no_content_msg') + '</p>';
     if (a.external_link) {
         bodyContent += '<div style="margin-top:3rem;text-align:center;padding:2rem;background:var(--light);border-radius:12px">' +
-                       '<p style="margin-bottom:1rem;font-weight:600">Want to dive deeper?</p>' +
-                       '<a href="' + a.external_link + '" target="_blank" class="btn-primary" style="display:inline-block;width:auto;padding:1rem 2.5rem;font-size:1.1rem;box-shadow:0 10px 20px rgba(255,107,53,0.3)">Explore More Content &rarr;</a>' +
+                       '<p style="margin-bottom:1rem;font-weight:600">' + window.t('want_dive_deeper') + '</p>' +
+                       '<a href="' + a.external_link + '" target="_blank" class="btn-primary" style="display:inline-block;width:auto;padding:1rem 2.5rem;font-size:1.1rem;box-shadow:0 10px 20px rgba(255,107,53,0.3)">' + window.t('explore_more') + '</a>' +
                        '</div>';
     }
     
@@ -2047,7 +2048,7 @@ async function openEventDetail(id) {
     // Add External Link if exists
     var eventDesc = e.description || '';
     if (e.external_link) {
-        eventDesc += '\n\nMore info: ' + e.external_link;
+        eventDesc += '\n\n' + window.t('more_info') + e.external_link;
     }
     document.getElementById('eventDescDetail').textContent = eventDesc;
 
@@ -2065,11 +2066,11 @@ async function openEventDetail(id) {
     var joinBtn = document.getElementById('eventJoinBtn');
     if (joinBtn) {
         if (unlockedEvents.includes(e.id)) {
-            joinBtn.textContent = '🎟️ Access Granted';
+            joinBtn.textContent = window.t('access_granted');
             joinBtn.disabled = true;
             joinBtn.classList.add('btn-success');
         } else {
-            joinBtn.textContent = 'Join Exclusive Event';
+            joinBtn.textContent = window.t('join_exclusive');
             joinBtn.disabled = false;
             joinBtn.classList.remove('btn-success');
             joinBtn.onclick = function() { 
@@ -2086,7 +2087,7 @@ async function openEventDetail(id) {
 // ===== INFLUENCERS IMPLEMENTATION =====
 function renderInfluencers(targetGridId, list) {
     var grid = document.getElementById(targetGridId); if (!grid) return;
-    if (!list.length) { grid.innerHTML = '<div class="empty-state"><p>No influencers yet.</p></div>'; return; }
+    if (!list.length) { grid.innerHTML = '<div class="empty-state"><p>' + window.t('no_influencers') + '</p></div>'; return; }
     grid.innerHTML = list.map(function (a) {
         var imgHtml = a.profile_image_url ? '<img src="' + a.profile_image_url + '" alt="' + a.name + '" loading="lazy">' : '';
         return '<div class="artist-card" onclick="openInfluencerDetail(\'' + a.id + '\')">' +
@@ -2166,7 +2167,7 @@ function closeArtistDetail() { closeDetail(); }
 function closeArticleDetail() { closeDetail(); }
 
 // ===== UTILITIES =====
-function fmt(n) { return Number(n).toLocaleString('fr-FR') + ' FCFA'; }
+function fmt(n) { return Number(n).toLocaleString('fr-FR') + ' ' + window.t('fcfa'); }
 function fmtUSD(n) { return (n / 655).toFixed(2); }
 function formatDate(dateStr) {
     if (!dateStr) return '';
@@ -2198,9 +2199,9 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
             previewBtn.innerHTML = '📷';
         }
     }
-    targetInput.value = 'Uploading...';
+    targetInput.value = window.t('uploading');
 
-    showToast('Uploading...', 'Please wait while we fuel the tribe media.', '#3b82f6');
+    showToast(window.t('uploading'), window.t('uploading_wait'), '#3b82f6');
 
     try {
         // Optional: auth check. If using Anon key with public policies, we can bypass this.
@@ -2228,15 +2229,15 @@ async function handleAdminMediaUpload(event, targetInputId, bucket) {
         // Clean up object URL
         URL.revokeObjectURL(previewUrl);
         
-        showToast('Success!', 'Media uploaded successfully.', '#22c55e');
+        showToast(window.t('success'), window.t('media_uploaded_success'), '#22c55e');
     } catch (e) {
         console.error('Admin upload error:', e);
         targetInput.value = '';
-        var msg = e.message || 'Check connection.';
+        var msg = e.message || window.t('connect_supabase');
         if (msg.includes('payload too large') || msg.includes('oversized') || e.status === 413) {
-            msg = 'File too large (Max 50MB for video).';
+            msg = window.t('file_too_large');
         }
-        showToast('Upload Error', msg, '#ef4444');
+        showToast(window.t('upload_error'), msg, '#ef4444');
     }
 }
 
@@ -2299,7 +2300,7 @@ window.shareContent = async function (title, link) {
     } else {
         // Clipboard fallback
         navigator.clipboard.writeText(shareText + "\n" + link).then(function () {
-            showToast('Link Copied', 'Share link copied to clipboard.', '#3b82f6');
+            showToast(window.t('link_copied'), window.t('share_link_copied'), '#3b82f6');
         });
     }
 };
@@ -2319,7 +2320,7 @@ function openContentUpload() {
     document.getElementById('contentEventDate').value = '';
     document.getElementById('contentEventLocation').value = '';
     contentUploadedUrl = '';
-    document.getElementById('contentMediaPreview').innerHTML = '📷 Click to upload image';
+    document.getElementById('contentMediaPreview').innerHTML = '📷 ' + window.t('click_to_upload');
     document.getElementById('contentUploadOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
     toggleContentFields();
@@ -2362,10 +2363,10 @@ async function handleContentFileSelect(event) {
         // Clean up object URL after upload completes or updates
         // URL.revokeObjectURL(previewUrl); // Keep it for the preview display though
         
-        showToast('Media Ready ✓', 'Your media has been uploaded to the cloud.');
+        showToast(window.t('media_ready_title'), window.t('media_cloud_ready'));
     } catch (e) {
         console.error('Content upload failed:', e);
-        showToast('Upload Failed', e.message || 'Supabase Storage error.', '#ef4444');
+        showToast(window.t('upload_error'), e.message || window.t('db_not_configured'), '#ef4444');
     } finally {
         progress.classList.remove('show');
         preview.style.opacity = '1';
@@ -2378,14 +2379,14 @@ async function submitCommunityContent() {
     var category = document.getElementById('contentCategory').value;
 
     if (!title || !body) {
-        showToast('Required Fields', 'Title and Content are required.', '#f59e0b');
+        showToast(window.t('required_fields'), window.t('title_body_required'), '#f59e0b');
         return;
     }
 
     var btn = document.getElementById('btnContentSubmit');
     var originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Processing...';
+    btn.textContent = window.t('processing');
 
     try {
         var payload = {
@@ -2405,12 +2406,12 @@ async function submitCommunityContent() {
         }
 
         await window.saveCommunityTopic(payload);
-        showToast('Success! 🚀', 'Your contribution has been fueled to the tribe.');
+        showToast(window.t('success'), window.t('contribution_fueled'));
         closeContentUpload();
         loadHotTopics(); // Refresh the feed
     } catch (e) {
         console.error('submitCommunityContent error:', e);
-        showToast('Submission Failed', e.message || 'Check your connection.', '#ef4444');
+        showToast(window.t('submission_failed'), e.message || window.t('db_not_configured'), '#ef4444');
     } finally {
         btn.disabled = false;
         btn.textContent = originalText;
@@ -2444,10 +2445,10 @@ async function loadHotTopics() {
                     <div class="pinned-article-card" onclick="viewTopicDetail('${pinnedItem.id}')">
                         <div class="pinned-media">${mediaHtml}</div>
                         <div class="pinned-content">
-                            <span class="badge-featured">PINNED</span>
+                            <span class="badge-featured">' + window.t('pinned') + '</span>
                             <h3 class="pinned-title">${pinnedItem.title}</h3>
                             <p class="pinned-hook">${pinnedItem.content.substring(0, 150)}...</p>
-                            <span class="pinned-cta">Read the full story →</span>
+                            <span class="pinned-cta">' + window.t('read_full_story') + '</span>
                         </div>
                     </div>
                 `;
@@ -2586,7 +2587,7 @@ async function handleTopicLike(id) {
         // loadHotTopics(); 
     } catch (e) {
         console.error('Like failed:', e);
-        showToast('Like failed', 'Server error.', '#ef4444');
+        showToast(window.t('like_failed'), window.t('server_error'), '#ef4444');
     }
 }
 
@@ -2623,7 +2624,7 @@ async function viewTopicDetail(id) {
         <h2 class="topic-main-title">${t.title}</h2>
         <div class="topic-main-body">${t.content}</div>
         
-        ${t.external_link ? `<a href="${t.external_link}" target="_blank" class="btn-primary" style="display:inline-block; margin-top: 1rem;">View External Link ↗</a>` : ''}
+        ${t.external_link ? `<a href="${t.external_link}" target="_blank" class="btn-primary" style="display:inline-block; margin-top: 1rem;">` + window.t('view_external_link') + `</a>` : ''}
         
         <div class="topic-main-stats">
             <button class="topic-stat-btn" onclick="handleTopicLike('${id}')">
@@ -2639,7 +2640,7 @@ async function viewTopicDetail(id) {
     `;
 
     document.getElementById('topicDetailContent').innerHTML = tContent;
-    document.getElementById('topicCommentsList').innerHTML = '<p style="color:#888; text-align:center; padding: 2rem;">Loading comments...</p>';
+    document.getElementById('topicCommentsList').innerHTML = '<p style="color:#888; text-align:center; padding: 2rem;">' + window.t('loading_comments') + '</p>';
     
     const overlay = document.getElementById('topicDetailOverlay');
     overlay.classList.add('open');
@@ -2677,7 +2678,7 @@ function renderComments(comments) {
         list.innerHTML = `
             <div class="empty-comments">
                 <div style="font-size:2rem; margin-bottom: 0.5rem;">🤫</div>
-                <p>No comments yet. Be the first to start the conversation!</p>
+                <p>' + window.t('be_first_comment') + '</p>
             </div>
         `;
         return;
@@ -2686,7 +2687,7 @@ function renderComments(comments) {
     list.innerHTML = comments.map(c => {
         // Since we don't have user profiles heavily fleshed out yet, we use generic avatars or anon names.
         // We can extract initials if user_name was stored, but falling back to simple icons.
-        const fallbackName = c.user_id ? 'Tribe Member' : 'Anonymous';
+        const fallbackName = c.user_id ? window.t('tribe_member') : window.t('anonymous');
         return `
             <div class="comment-item">
                 <div class="comment-avatar">👤</div>
@@ -2716,18 +2717,18 @@ window.submitNewComment = async function() {
     const userId = currentUser ? currentUser.id : null; 
     
     const originalText = input.value;
-    input.value = 'Sending...';
+    input.value = window.t('saving');
     input.disabled = true;
 
     try {
         await window.submitTopicComment(currentTopicId, userId, content);
         input.value = '';
         await loadCommentsForTopic(currentTopicId);
-        showToast('Comment Posted', 'Your voice was added to the tribe.', '#22c55e');
+        showToast(window.t('comment_posted'), window.t('voice_added'), '#22c55e');
     } catch (e) {
         input.value = originalText;
         console.error('Failed to comment:', e);
-        showToast('Error', 'Failed to post comment. Ensure you are signed in.', '#ef4444');
+        showToast(window.t('error'), window.t('failed_comment'), '#ef4444');
     } finally {
         input.disabled = false;
         input.focus();
@@ -2762,7 +2763,7 @@ async function openEventPaymentGate(id) {
     }
     
     var gateTitle = document.getElementById('gateEventTitle');
-    if (gateTitle) gateTitle.textContent = e ? e.title : 'Exclusive FBC Event';
+    if (gateTitle) gateTitle.textContent = e ? e.title : window.t('fbc_event_exclusive');
     
     var overlay = document.getElementById('eventPaymentOverlay');
     if (overlay) {
@@ -2785,7 +2786,7 @@ function closeEventPaymentGate() {
 async function processEventPayment() {
     if (!window.currentEvent) {
         console.error('No event selected for payment.');
-        showToast('Error', 'Please select an event first.');
+        showToast(window.t('error'), window.t('select_event_first'));
         return;
     }
     
@@ -2977,7 +2978,7 @@ let audioPlayer = new Audio();
 async function loadAdminRadio() {
     const listDiv = document.getElementById('adminPlaylistList');
     if (!listDiv) return;
-    listDiv.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading playlists...</p>';
+    listDiv.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading_playlists') + '</p>';
 
     try {
         const { data, error } = await sbClient.from(PLAYLISTS_TABLE).select('*').order('priority_order', { ascending: false });
@@ -2986,27 +2987,27 @@ async function loadAdminRadio() {
         renderAdminPlaylistList(allPlaylists);
     } catch (e) {
         console.error('Error loading playlists:', e);
-        listDiv.innerHTML = '<p style="color:#ef4444;text-align:center;padding:2rem">Error loading playlists.</p>';
+        listDiv.innerHTML = '<p style="color:#ef4444;text-align:center;padding:2rem">' + window.t('error') + '</p>';
     }
 }
 
 function renderAdminPlaylistList(playlists) {
     const listDiv = document.getElementById('adminPlaylistList');
     if (playlists.length === 0) {
-        listDiv.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">No playlists found. Create one below.</p>';
+        listDiv.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('no_playlists') + '</p>';
         return;
     }
 
-    let html = '<table class="admin-table"><thead><tr><th>Cover</th><th>Title</th><th>Artist</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>' + window.t('cover') + '</th><th>' + window.t('title') + '</th><th>' + window.t('artist') + '</th><th>' + window.t('status') + '</th><th>' + window.t('actions') + '</th></tr></thead><tbody>';
     playlists.forEach(p => {
         html += `<tr>
             <td><img src="${p.cover_image_url || 'placeholder.jpg'}" style="width:40px;height:40px;object-fit:cover;border-radius:4px"></td>
             <td>${p.title}</td>
             <td>${p.artist_name || ''}</td>
-            <td><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
+            <td><span class="badge ${p.status.toLowerCase()}">${window.t(p.status.toLowerCase())}</span></td>
             <td>
-                <button class="btn-sm" onclick="editPlaylist('${p.id}')">Edit</button>
-                <button class="btn-sm btn-danger" onclick="deletePlaylist('${p.id}')">Delete</button>
+                <button class="btn-sm" onclick="editPlaylist('${p.id}')">✏ ' + window.t('edit') + '</button>
+                <button class="btn-sm btn-danger" onclick="deletePlaylist('${p.id}')">🗑 ' + window.t('delete') + '</button>
             </td>
         </tr>`;
     });
@@ -3026,10 +3027,10 @@ async function editPlaylist(id) {
     document.getElementById('playlistStatus').value = p.status;
     document.getElementById('playlistFeatured').checked = p.is_featured || false;
     document.getElementById('playlistTrending').checked = p.is_trending || false;
-    document.getElementById('radioFormTitle').textContent = 'Edit Playlist: ' + p.title;
+    document.getElementById('radioFormTitle').textContent = window.t('edit_playlist') + ': ' + p.title;
 
     // Load Tracks
-    document.getElementById('adminTracksList').innerHTML = '<p style="color:#666">Loading tracks...</p>';
+    document.getElementById('adminTracksList').innerHTML = '<p style="color:#666">' + window.t('loading') + '...</p>';
     const { data: tracks, error } = await sbClient.from(TRACKS_TABLE).select('*').eq('playlist_id', p.id).order('track_order', { ascending: true });
     
     document.getElementById('adminTracksList').innerHTML = '';
@@ -3057,9 +3058,9 @@ function addTrackRow(data = null) {
 
     row.innerHTML = `
         <input type="hidden" class="track-id" value="${id}">
-        <input type="text" class="track-title" placeholder="Track Title" value="${title}">
+        <input type="text" class="track-title" placeholder="${window.t('track_title')}" value="${title}">
         <div class="input-upload-group">
-            <input type="text" class="track-url" placeholder="Audio URL" value="${url}">
+            <input type="text" class="track-url" placeholder="${window.t('audio_url')}" value="${url}">
             <button class="btn-upload-trigger" onclick="this.nextElementSibling.click()">🎵</button>
             <input type="file" accept="audio/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, this.previousElementSibling.previousElementSibling, 'radio-media')">
         </div>
@@ -3081,7 +3082,7 @@ async function savePlaylist(e) {
         is_trending: document.getElementById('playlistTrending').checked
     };
 
-    if (!playlistData.title) return alert('Title is required');
+    if (!playlistData.title) return alert(window.t('playlist_required'));
 
     try {
         let pId = id;
@@ -3127,12 +3128,12 @@ async function savePlaylist(e) {
         await refreshFrontendData();
     } catch (err) {
         console.error('Save Playlist Error:', err);
-        alert('Error saving playlist: ' + (err.message || 'Unknown error'));
+        showToast(window.t('error'), (err.message || window.t('db_not_configured')), '#ef4444');
     }
 }
 
 async function deletePlaylist(id) {
-    if (!confirm('Are you sure you want to delete this playlist?')) return;
+    if (!confirm(window.t('delete_confirm_playlist'))) return;
     try {
         await sbClient.from(PLAYLISTS_TABLE).delete().eq('id', id);
         loadAdminRadio();
@@ -3148,14 +3149,14 @@ function cancelEditPlaylist() {
     document.getElementById('playlistFeatured').checked = false;
     document.getElementById('playlistTrending').checked = false;
     document.getElementById('adminTracksList').innerHTML = '';
-    document.getElementById('radioFormTitle').textContent = '+ New Playlist';
+    document.getElementById('radioFormTitle').textContent = window.t('new_playlist');
 }
 
 // FRONTEND
 async function renderRadio(targetGridId = 'playlistGrid', filterFn = null) {
     const grid = document.getElementById(targetGridId);
     if (!grid) return;
-    grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading Radio...</p>';
+    grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '...</p>';
 
     try {
         const { data, error } = await sbClient.from(PLAYLISTS_TABLE).select('*').eq('status', 'Published').order('priority_order', { ascending: false });
@@ -3165,7 +3166,7 @@ async function renderRadio(targetGridId = 'playlistGrid', filterFn = null) {
         if (filterFn) displayData = data.filter(filterFn);
         
         if (!displayData || displayData.length === 0) {
-            grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">No playlists available yet.</p>';
+            grid.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('no_playlists') + '</p>';
             return;
         }
 
@@ -3177,7 +3178,7 @@ async function renderRadio(targetGridId = 'playlistGrid', filterFn = null) {
                 </div>
                 <div class="playlist-card-info">
                     <h4>${p.title}</h4>
-                    <p>${p.artist_name || 'Various Artists'}</p>
+                    <p>${p.artist_name || window.t('various_artists')}</p>
                 </div>
             </div>
         `).join('');

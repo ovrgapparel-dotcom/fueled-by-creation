@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation — V1.3.5</title>
+  <title>Fueled By Creation — V1.3.6</title>
   <meta name="description"
     content="Fueled By Creation — Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
@@ -134,28 +134,28 @@
     <!-- Featured Radio Preview -->
     <section class="artists-section" id="featuredRadioPreview">
       <div class="section-header">
-        <div class="section-label">📻 Featured Mixes</div>
-        <h2 class="section-title">THE RADIO</h2>
+        <div class="section-label" data-i18n="featured_mixes">📻 Featured Mixes</div>
+        <h2 class="section-title" data-i18n="radio_title">THE RADIO</h2>
       </div>
       <div class="playlist-grid" id="featuredRadioGrid">
         <!-- JS populated -->
       </div>
       <div style="text-align:center; margin-top:2rem">
-        <button class="btn-premium-rect" onclick="switchPage('radio')">Hear All Mixes</button>
+        <button class="btn-premium-rect" onclick="switchPage('radio')" data-i18n="hear_all_mixes">Hear All Mixes</button>
       </div>
     </section>
 
     <!-- Cultural Influencers Preview -->
     <section class="artists-section" id="featuredInfluencersPreview">
       <div class="section-header">
-        <div class="section-label">🔥 Cultural Icons</div>
-        <h2 class="section-title">THE INFLUENCERS</h2>
+        <div class="section-label" data-i18n="cultural_icons">🔥 Cultural Icons</div>
+        <h2 class="section-title" data-i18n="influencers_title">THE INFLUENCERS</h2>
       </div>
       <div class="artists-grid" id="featuredInfluencersGrid">
         <!-- JS populated -->
       </div>
       <div style="text-align:center; margin-top:2rem">
-        <button class="btn-premium-rect" onclick="switchPage('influencers')">View All Influencers</button>
+        <button class="btn-premium-rect" onclick="switchPage('influencers')" data-i18n="view_all_influencers">View All Influencers</button>
       </div>
     </section>
 
@@ -752,23 +752,24 @@
           <!-- Article Form -->
           <div class="admin-form" id="articleFormSection">
             <h3 id="articleFormTitle"
-              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem"
+              data-i18n="new_article">
               + New Article</h3>
             <input type="hidden" id="editArticleId" value="">
             <div class="admin-grid">
-              <div><label>Title *</label><input type="text" id="articleTitle" placeholder="The Rise of Afrobeat...">
+              <div><label data-i18n="title">Title *</label><input type="text" id="articleTitle" placeholder="The Rise of Afrobeat...">
               </div>
-              <div><label>Category *</label><select id="articleCategory">
-                  <option value="article">📰 Article</option>
-                  <option value="vlog">🎥 Vlog</option>
-                  <option value="howto">💡 How-To</option>
-                  <option value="hot">🔥 Hot Topic</option>
+              <div><label data-i18n="category">Category *</label><select id="articleCategory">
+                  <option value="article" data-i18n="article">📰 Article</option>
+                  <option value="vlog" data-i18n="vlogs">🎥 Vlog</option>
+                  <option value="howto" data-i18n="how_to">💡 How-To</option>
+                  <option value="hot" data-i18n="hot">🔥 Hot Topic</option>
                 </select></div>
             </div>
             <div class="admin-grid">
-              <div><label>Author</label><input type="text" id="articleAuthor" placeholder="FBC Editorial"></div>
+              <div><label data-i18n="artist_name">Author</label><input type="text" id="articleAuthor" placeholder="FBC Editorial"></div>
               <div class="field-with-upload">
-                <label>Cover Image URL</label>
+                <label data-i18n="cover_img">Cover Image URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="articleCoverImg" placeholder="Upload or paste URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('articleCoverImgFile').click()">📷</button>
@@ -776,38 +777,38 @@
                 </div>
               </div>
             </div>
-            <div><label>Excerpt (short summary)</label><textarea id="articleExcerpt"
+            <div><label data-i18n="description">Excerpt (short summary)</label><textarea id="articleExcerpt"
                 placeholder="Brief 1-2 line summary..." style="min-height:50px"></textarea></div>
-            <div><label>Body Content (HTML)</label><textarea id="articleBody"
+            <div><label data-i18n="body_content">Body Content (HTML)</label><textarea id="articleBody"
                 placeholder="<p>Full article content...</p>" style="min-height:200px"></textarea></div>
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Promo Video URL</label>
+                <label data-i18n="promo_video_url">Promo Video URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="articlePromoVideo" placeholder="Upload or paste video URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('articlePromoVideoFile').click()">🎥</button>
                   <input type="file" id="articlePromoVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'articlePromoVideo', 'articles')">
                 </div>
               </div>
-              <div><label>External Link (Optional)</label><input type="text" id="articleExtLink" placeholder="https://..."></div>
+              <div><label data-i18n="external_link">External Link (Optional)</label><input type="text" id="articleExtLink" placeholder="https://..."></div>
             </div>
             <div class="admin-grid">
-              <div><label>Publish Date</label><input type="datetime-local" id="articlePublishDate"></div>
-              <div><label>Status</label><select id="articleStatus">
-                  <option value="Draft">Draft</option>
-                  <option value="Published">Published</option>
-                  <option value="Hidden">Hidden</option>
+              <div><label data-i18n="date">Publish Date</label><input type="datetime-local" id="articlePublishDate"></div>
+              <div><label data-i18n="status">Status</label><select id="articleStatus">
+                  <option value="Draft" data-i18n="draft">Draft</option>
+                  <option value="Published" data-i18n="published">Published</option>
+                  <option value="Hidden" data-i18n="hidden">Hidden</option>
                 </select></div>
             </div>
             <div style="display:flex;gap:1.5rem;align-items:center;padding:.5rem 0">
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
-                  id="articleFeatured" style="accent-color:var(--primary);width:18px;height:18px"> ⭐ Featured</label>
+                  id="articleFeatured" style="accent-color:var(--primary);width:18px;height:18px"> <span data-i18n="featured_label">⭐ Featured</span></label>
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
-                  id="articleTrending" style="accent-color:#ef4444;width:18px;height:18px"> 🔥 Trending</label>
+                  id="articleTrending" style="accent-color:#ef4444;width:18px;height:18px"> <span data-i18n="trending">🔥 Trending</span></label>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveArticle(event)">💾 Save Article</button>
-              <button class="btn-cancel-admin" onclick="cancelEditArticle()">Cancel</button>
+              <button class="btn-save" onclick="saveArticle(event)" data-i18n="save_supabase">💾 Save Article</button>
+              <button class="btn-cancel-admin" onclick="cancelEditArticle()" data-i18n="cancel">Cancel</button>
             </div>
           </div>
         </div>
@@ -830,36 +831,37 @@
           <!-- Thread Form -->
           <div class="admin-form" id="threadFormSection">
             <h3 id="threadFormTitle"
-              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem"
+              data-i18n="new_thread">
               + New Thread</h3>
             <input type="hidden" id="editThreadId" value="">
             <div class="admin-grid">
-              <div><label>Thread Title *</label><input type="text" id="threadTitle"
+              <div><label data-i18n="title">Thread Title *</label><input type="text" id="threadTitle"
                   placeholder="Who's the most underrated artist?"></div>
-              <div><label>Tag *</label><select id="threadTag">
-                  <option value="Hot">🔥 Hot</option>
-                  <option value="Trend">📈 Trend</option>
-                  <option value="News">📰 News</option>
+              <div><label data-i18n="tag">Tag *</label><select id="threadTag">
+                  <option value="Hot" data-i18n="hot">🔥 Hot</option>
+                  <option value="Trend" data-i18n="trending">📈 Trend</option>
+                  <option value="News" data-i18n="news">📰 News</option>
                 </select></div>
             </div>
-            <div><label>Hook Text</label><textarea id="threadHook"
+            <div><label data-i18n="hook_text">Hook Text</label><textarea id="threadHook"
                 placeholder="Drop your picks — the culture needs to hear them." style="min-height:50px"></textarea>
             </div>
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Cover Image URL</label>
+                <label data-i18n="cover_img">Cover Image URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="threadCoverImg" placeholder="Optional cover image">
                   <button class="btn-upload-trigger" onclick="document.getElementById('threadCoverImgFile').click()">📷</button>
                   <input type="file" id="threadCoverImgFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'threadCoverImg', 'threads')">
                 </div>
               </div>
-              <div><label>External Link</label><input type="text" id="threadExtLink"
+              <div><label data-i18n="external_link">External Link</label><input type="text" id="threadExtLink"
                   placeholder="Optional link to external content"></div>
             </div>
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Promo Video URL</label>
+                <label data-i18n="promo_video_url">Promo Video URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="threadPromoVideo" placeholder="Upload or paste video URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('threadPromoVideoFile').click()">🎥</button>
@@ -868,20 +870,20 @@
               </div>
             </div>
             <div class="admin-grid">
-              <div><label>Status</label><select id="threadStatus">
-                  <option value="Active">Active</option>
-                  <option value="Hidden">Hidden</option>
+              <div><label data-i18n="status">Status</label><select id="threadStatus">
+                  <option value="Active" data-i18n="active">Active</option>
+                  <option value="Hidden" data-i18n="hidden">Hidden</option>
                 </select></div>
-              <div><label>Priority Order</label><input type="number" id="threadPriority" placeholder="0" value="0">
+              <div><label data-i18n="priority">Priority Order</label><input type="number" id="threadPriority" placeholder="0" value="0">
               </div>
             </div>
             <div style="padding:.5rem 0">
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
-                  id="threadPinned" style="accent-color:var(--primary);width:18px;height:18px"> 📌 Pin to Top</label>
+                  id="threadPinned" style="accent-color:var(--primary);width:18px;height:18px"> <span data-i18n="pinned_label">📌 Pin to Top</span></label>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveThread(event)">💾 Save Thread</button>
-              <button class="btn-cancel-admin" onclick="cancelEditThread()">Cancel</button>
+              <button class="btn-save" onclick="saveThread(event)" data-i18n="save_supabase">💾 Save Thread</button>
+              <button class="btn-cancel-admin" onclick="cancelEditThread()" data-i18n="cancel">Cancel</button>
             </div>
           </div>
         </div>
@@ -889,12 +891,13 @@
         <!-- Hero Media Management Tab -->
         <div id="adminTabHeroMedia" style="display:none">
           <div class="admin-form">
-            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem"
+              data-i18n="hero_media_config">
               Manage Hero Media</h3>
-            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem">Update the backgrounds for the different sections of the app. Enter a direct media URL or upload one.</p>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem" data-i18n="hero_media_desc">Update the backgrounds for the different sections of the app. Enter a direct media URL or upload one.</p>
             
             <div class="field-with-upload" style="margin-bottom: 2rem; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: #fafafa;">
-              <label><strong>Main Home Hero</strong> (Video recommended)</label>
+              <label><strong data-i18n="home_hero_video">Main Home Hero</strong> <span data-i18n="video_recommended">(Video recommended)</span></label>
               <div class="input-upload-group">
                 <input type="text" id="heroVideoInput" placeholder="https://example.com/main_hero.mp4">
                 <button class="btn-upload-trigger" onclick="document.getElementById('heroVideoFile').click()">🎥</button>
@@ -902,11 +905,11 @@
               </div>
             </div>
 
-            <h4 style="font-family:'DM Sans',sans-serif; font-size:1.1rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border);">Section Banners (Image or Video)</h4>
+            <h4 style="font-family:'DM Sans',sans-serif; font-size:1.1rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border);" data-i18n="section_banners">Section Banners (Image or Video)</h4>
 
             <div class="admin-grid" style="margin-bottom: 1rem;">
               <div class="field-with-upload">
-                <label>Shop Hero URL</label>
+                <label data-i18n="shop_hero_img">Shop Hero URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="shopHeroInput" placeholder="https://example.com/shop.jpg">
                   <button class="btn-upload-trigger" onclick="document.getElementById('shopHeroFile').click()">📷</button>
@@ -914,7 +917,7 @@
                 </div>
               </div>
               <div class="field-with-upload">
-                <label>Artists Hero URL</label>
+                <label data-i18n="artists_hero_img">Artists Hero URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="artistsHeroInput" placeholder="https://example.com/artists.jpg">
                   <button class="btn-upload-trigger" onclick="document.getElementById('artistsHeroFile').click()">📷</button>
@@ -925,7 +928,7 @@
 
             <div class="admin-grid" style="margin-bottom: 1rem;">
               <div class="field-with-upload">
-                <label>Trends Hero URL</label>
+                <label data-i18n="trends_hero_img">Trends Hero URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="trendsHeroInput" placeholder="https://example.com/trends.jpg">
                   <button class="btn-upload-trigger" onclick="document.getElementById('trendsHeroFile').click()">📷</button>
@@ -933,7 +936,7 @@
                 </div>
               </div>
               <div class="field-with-upload">
-                <label>Events Hero URL</label>
+                <label data-i18n="events_hero_img">Events Hero URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="eventsHeroInput" placeholder="https://example.com/events.jpg">
                   <button class="btn-upload-trigger" onclick="document.getElementById('eventsHeroFile').click()">📷</button>
@@ -944,7 +947,7 @@
 
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Radio Hero URL</label>
+                <label data-i18n="radio_hero_img">Radio Hero URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="radioHeroInput" placeholder="https://example.com/radio.jpg">
                   <button class="btn-upload-trigger" onclick="document.getElementById('radioHeroFile').click()">📷</button>
@@ -954,7 +957,7 @@
             </div>
             
             <div class="admin-form-actions" style="margin-top:2rem">
-              <button class="btn-save" onclick="saveHeroConfig()">💾 Save All Hero Configurations</button>
+              <button class="btn-save" onclick="saveHeroConfig()" data-i18n="save_all_hero">💾 Save All Hero Configurations</button>
             </div>
           </div>
         </div>
@@ -962,17 +965,18 @@
         <!-- Featured Promo Management Tab (v1.0.5) -->
         <div id="adminTabFeaturedPromo" style="display:none">
           <div class="admin-form">
-            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem"
+              data-i18n="manage_promo">
               Manage Featured Promo</h3>
-            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem">Update the "THE CREW IN SESSION" section on the home page.</p>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:1.5rem" data-i18n="manage_promo_desc">Update the "THE CREW IN SESSION" section on the home page.</p>
             
             <div class="admin-grid">
               <div>
-                <label>Section Title *</label>
+                <label data-i18n="section_title">Section Title *</label>
                 <input type="text" id="featuredPromoTitleInput" placeholder="THE CREW IN SESSION">
               </div>
               <div class="field-with-upload">
-                <label>Media URL (Image or Video) *</label>
+                <label data-i18n="cover_img">Media URL (Image or Video) *</label>
                 <div class="input-upload-group">
                   <input type="text" id="featuredPromoMediaInput" placeholder="Upload or paste URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('featuredPromoMediaFile').click()">📷</button>
@@ -982,85 +986,84 @@
             </div>
             
             <div>
-              <label>Description *</label>
+              <label data-i18n="description">Description *</label>
               <textarea id="featuredPromoDescInput" placeholder="Go behind the scenes..." style="min-height:80px"></textarea>
             </div>
             
             <div class="admin-grid">
               <div>
-                <label>Button Text</label>
+                <label data-i18n="btn_text">Button Text</label>
                 <input type="text" id="featuredPromoBtnTextInput" placeholder="Watch Documentary">
               </div>
               <div>
-                <label>Button Link (Page ID or URL)</label>
+                <label data-i18n="btn_link">Button Link (Page ID or URL)</label>
                 <input type="text" id="featuredPromoBtnLinkInput" placeholder="trends">
               </div>
             </div>
             
             <div class="admin-form-actions" style="margin-top:2rem">
-              <button class="btn-save" onclick="saveFeaturedPromoConfig()">💾 Save Featured Configuration</button>
+              <button class="btn-save" onclick="saveFeaturedPromoConfig()" data-i18n="save_supabase">💾 Save Featured Configuration</button>
             </div>
           </div>
         </div>
 
         <!-- EVENTS ADMIN TAB -->
+        <div id="adminTabEvents" style="display:none">
           <!-- Event List -->
           <div id="adminEventList" class="admin-product-list" style="margin-bottom:2rem">
-            <p style="color:#666;text-align:center;padding:2rem">Loading events...</p>
+            <p style="color:#666;text-align:center;padding:2rem" data-i18n="no_content">Loading events...</p>
           </div>
           <!-- Event Form -->
           <div class="admin-form" id="eventFormSection">
             <h3 id="eventFormTitle"
-              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem"
+              data-i18n="new_event">
               + New Event</h3>
             <input type="hidden" id="editEventId" value="">
             <div class="admin-grid">
-              <div><label>Event Title *</label><input type="text" id="eventTitle"
+              <div><label data-i18n="title">Event Title *</label><input type="text" id="eventTitle"
                   placeholder="FBC Live: Kwame Blaze in Concert"></div>
-              <div><label>Event Date & Time *</label><input type="datetime-local" id="eventDate"></div>
+              <div><label data-i18n="date">Event Date & Time *</label><input type="datetime-local" id="eventDate"></div>
             </div>
-            <div><label>Description</label><textarea id="eventDescription"
+            <div><label data-i18n="description">Description</label><textarea id="eventDescription"
                 placeholder="An electrifying night of live performance..."></textarea></div>
             <div class="admin-grid">
-              <div><label>Venue Name *</label><input type="text" id="eventVenue" placeholder="Sofitel Abidjan"></div>
-              <div><label>Venue Address</label><input type="text" id="eventAddress" placeholder="Plateau, Abidjan">
+              <div><label data-i18n="venue_name">Venue Name *</label><input type="text" id="eventVenue" placeholder="Sofitel Abidjan"></div>
+              <div><label data-i18n="venue_address">Venue Address</label><input type="text" id="eventAddress" placeholder="Plateau, Abidjan">
               </div>
             </div>
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Cover Image URL</label>
+                <label data-i18n="cover_img">Cover Image URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="eventCoverImg" placeholder="Upload or paste URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('eventCoverImgFile').click()">📷</button>
                   <input type="file" id="eventCoverImgFile" accept="image/*,video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'eventCoverImg', 'events')">
                 </div>
               </div>
-              <div><label>Ticketing URL</label><input type="text" id="eventTicketUrl"
+              <div><label data-i18n="ticketing_url">Ticketing URL</label><input type="text" id="eventTicketUrl"
                   placeholder="https://tickets.example.com/..."></div>
             </div>
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Promo Video URL</label>
+                <label data-i18n="promo_video_url">Promo Video URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="eventPromoVideo" placeholder="Upload or paste video URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('eventPromoVideoFile').click()">🎥</button>
                   <input type="file" id="eventPromoVideoFile" accept="video/*" style="display:none" onchange="handleAdminMediaUpload(event, 'eventPromoVideo', 'events')">
                 </div>
               </div>
-              <div><label>External Link (Optional)</label><input type="text" id="eventExtLink" placeholder="https://..."></div>
+              <div><label data-i18n="external_link">External Link (Optional)</label><input type="text" id="eventExtLink" placeholder="https://..."></div>
             </div>
             <div class="admin-grid">
-              <div><label>Featured Artist ID</label><input type="text" id="eventArtistId"
+              <div><label data-i18n="artist_id">Featured Artist ID</label><input type="text" id="eventArtistId"
                   placeholder="UUID of featured artist (optional)"></div>
-              <div><label>Status</label><select id="eventStatus">
-                  <option value="Draft">Draft</option>
-                  <option value="Published">Published</option>
-                  <option value="Hidden">Hidden</option>
+              <div><label data-i18n="status">Status</label><select id="eventStatus">
+                  <option value="Draft" data-i18n="draft">Draft</option>
+                  <option value="Published" data-i18n="published">Published</option>
+                  <option value="Hidden" data-i18n="hidden">Hidden</option>
                 </select></div>
             </div>
-            <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveEvent(event)">💾 Save Event</button>
-              <button class="btn-cancel-admin" onclick="cancelEditEvent()">Cancel</button>
             </div>
           </div>
         </div>
@@ -1069,46 +1072,47 @@
         <div id="adminTabNotifications" style="display:none">
           <!-- Notification History -->
           <div id="adminNotificationList" class="admin-product-list" style="margin-bottom:2rem">
-            <p style="color:#666;text-align:center;padding:2rem">Loading notifications...</p>
+            <p style="color:#666;text-align:center;padding:2rem" data-i18n="loading">Loading notifications...</p>
           </div>
           <!-- Notification Composer -->
           <div class="admin-form" id="notificationFormSection">
             <h3 id="notificationFormTitle"
-              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem">
+              style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em;color:var(--primary);margin-bottom:0.5rem"
+              data-i18n="compose_notif">
               📣 Compose Notification</h3>
             <input type="hidden" id="editNotificationId" value="">
             <div class="admin-grid">
-              <div><label>Title *</label><input type="text" id="notifTitle" placeholder="🔥 New Artist Drop!"></div>
-              <div><label>Type</label><select id="notifType">
-                  <option value="new_artist">New Artist</option>
-                  <option value="music_drop">Music Drop</option>
-                  <option value="merch_drop">Merch Drop</option>
-                  <option value="article">Featured Article</option>
-                  <option value="event">New Event</option>
-                  <option value="hot_topic">Hot Topic</option>
-                  <option value="general">General</option>
+              <div><label data-i18n="title">Title *</label><input type="text" id="notifTitle" placeholder="🔥 New Artist Drop!"></div>
+              <div><label data-i18n="category">Type</label><select id="notifType">
+                  <option value="new_artist" data-i18n="new_artist">New Artist</option>
+                  <option value="music_drop" data-i18n="music_drop">Music Drop</option>
+                  <option value="merch_drop" data-i18n="merch_drop">Merch Drop</option>
+                  <option value="article" data-i18n="article">Featured Article</option>
+                  <option value="event" data-i18n="event">New Event</option>
+                  <option value="hot_topic" data-i18n="hot_topic">Hot Topic</option>
+                  <option value="general" data-i18n="general">General</option>
                 </select></div>
             </div>
-            <div><label>Body *</label><textarea id="notifBody"
+            <div><label data-i18n="description">Body *</label><textarea id="notifBody"
                 placeholder="Check out the latest drop from Kwame Blaze — now live on FBC!"
                 style="min-height:80px"></textarea></div>
             <div class="admin-grid">
-              <div><label>Image URL</label><input type="text" id="notifImage" placeholder="Optional notification image">
+              <div><label data-i18n="cover_img">Image URL</label><input type="text" id="notifImage" placeholder="Optional notification image">
               </div>
-              <div><label>Deep Link</label><input type="text" id="notifDeepLink"
+              <div><label data-i18n="external_link">Deep Link / URL</label><input type="text" id="notifDeepLink"
                   placeholder="app://artist/uuid or app://event/uuid"></div>
             </div>
             <div class="admin-form-actions">
-              <button class="btn-save" onclick="saveNotification(event)">💾 Save Draft</button>
-              <button class="btn-save" onclick="sendNotification()" style="background:#22c55e">📣 Send Now</button>
-              <button class="btn-cancel-admin" onclick="cancelEditNotification()">Cancel</button>
+              <button class="btn-save" onclick="saveNotification(event)" data-i18n="save_supabase">💾 Save Draft</button>
+              <button class="btn-save" onclick="sendNotification()" style="background:#22c55e">📣 <span data-i18n="send">Send Now</span></button>
+              <button class="btn-cancel-admin" onclick="cancelEditNotification()" data-i18n="cancel">Cancel</button>
             </div>
           </div>
           <!-- Analytics Summary -->
           <div style="margin-top:2rem;background:#111;border-radius:10px;padding:1.5rem">
             <h4 style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--primary);margin-bottom:1rem">📊
-              Analytics</h4>
-            <div id="notifAnalytics" style="color:#888;font-size:.85rem">Analytics data will appear here once
+              <span data-i18n="analytics">Analytics</span></h4>
+            <div id="notifAnalytics" style="color:#888;font-size:.85rem" data-i18n="analytics_placeholder">Analytics data will appear here once
               notifications are sent.</div>
           </div>
         </div>
@@ -1116,56 +1120,56 @@
         <!-- ===== RADIO ADMIN TAB ===== -->
         <div id="adminTabRadio" style="display:none">
           <div id="adminPlaylistList" class="admin-product-list" style="margin-bottom:2rem">
-            <p style="color:#666;text-align:center;padding:2rem">Loading playlists...</p>
+            <p style="color:#666;text-align:center;padding:2rem" data-i18n="loading_playlists">Loading playlists...</p>
           </div>
 
           <div class="admin-form" id="radioFormSection">
-            <h3 id="radioFormTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--primary);margin-bottom:0.5rem">+ New Playlist</h3>
+            <h3 id="radioFormTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--primary);margin-bottom:0.5rem" data-i18n="new_playlist">+ New Playlist</h3>
             <input type="hidden" id="editPlaylistId" value="">
             
             <div class="admin-grid">
-              <div><label>Playlist Title *</label><input type="text" id="playlistTitle" placeholder="Summer Vibes 2026"></div>
-              <div><label>Artist / DJ Name *</label><input type="text" id="playlistArtist" placeholder="DJ Phantom"></div>
+              <div><label data-i18n="title">Playlist Title *</label><input type="text" id="playlistTitle" placeholder="Summer Vibes 2026"></div>
+              <div><label data-i18n="artist_dj_name">Artist / DJ Name *</label><input type="text" id="playlistArtist" placeholder="DJ Phantom"></div>
             </div>
 
-            <div><label>Description</label><textarea id="playlistDesc" placeholder="The ultimate Afrobeat mix..." style="min-height:60px"></textarea></div>
+            <div><label data-i18n="description">Description</label><textarea id="playlistDesc" placeholder="The ultimate Afrobeat mix..." style="min-height:60px"></textarea></div>
 
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Cover Image URL</label>
+                <label data-i18n="cover_img">Cover Image URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="playlistCoverImg" placeholder="Upload or paste URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('playlistCoverImgFile').click()">📷</button>
                   <input type="file" id="playlistCoverImgFile" accept="image/*" style="display:none" onchange="handleAdminMediaUpload(event, 'playlistCoverImg', 'playlists')">
                 </div>
               </div>
-              <div><label>Status</label>
+              <div><label data-i18n="status">Status</label>
                 <select id="playlistStatus">
-                  <option value="Draft">Draft</option>
-                  <option value="Published">Published</option>
-                  <option value="Hidden">Hidden</option>
+                  <option value="Draft" data-i18n="draft">Draft</option>
+                  <option value="Published" data-i18n="published">Published</option>
+                  <option value="Hidden" data-i18n="hidden">Hidden</option>
                 </select>
               </div>
             </div>
 
-            <!-- Tracks Section -->
+             <!-- Tracks Section -->
             <div style="margin-top:2rem; background:#111; padding:1.5rem; border-radius:12px; border:1px solid #333">
-              <h4 style="color:var(--primary); margin-bottom:1rem">🎵 Tracks (Max 15)</h4>
+              <h4 style="color:var(--primary); margin-bottom:1rem" data-i18n="tracks_max">🎵 Tracks (Max 15)</h4>
               <div id="adminTracksList" style="display:flex; flex-direction:column; gap:0.75rem">
                 <!-- Track rows injected via JS -->
               </div>
-              <button class="btn-sm" onclick="addTrackRow()" style="margin-top:1rem; background:#333; color:white; border:1px solid #444">+ Add Track</button>
+              <button class="btn-sm" onclick="addTrackRow()" style="margin-top:1rem; background:#333; color:white; border:1px solid #444" data-i18n="add_track">+ Add Track</button>
             </div>
 
             <div style="display:flex;gap:1.5rem;align-items:center;padding:.5rem 0">
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
-                  id="playlistFeatured" style="accent-color:var(--primary);width:18px;height:18px"> ⭐ Featured</label>
+                  id="playlistFeatured" style="accent-color:var(--primary);width:18px;height:18px"> <span data-i18n="featured_label">⭐ Featured</span></label>
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
-                  id="playlistTrending" style="accent-color:#ef4444;width:18px;height:18px"> 🔥 Trending</label>
+                  id="playlistTrending" style="accent-color:#ef4444;width:18px;height:18px"> <span data-i18n="trending">🔥 Trending</span></label>
             </div>
             <div class="admin-form-actions" style="margin-top:2rem">
-              <button class="btn-save" onclick="savePlaylist(event)">💾 Save Playlist</button>
-              <button class="btn-cancel-admin" onclick="cancelEditPlaylist()">Cancel</button>
+              <button class="btn-save" onclick="savePlaylist(event)" data-i18n="save_playlist">💾 Save Playlist</button>
+              <button class="btn-cancel-admin" onclick="cancelEditPlaylist()" data-i18n="cancel">Cancel</button>
             </div>
           </div>
         </div>
@@ -1177,7 +1181,7 @@
   <div class="overlay" id="contentUploadOverlay" onclick="handleOverlayClick(event,'contentUploadOverlay')">
     <div class="modal-box" style="max-width:700px">
       <div class="modal-top">
-        <h3 id="contentFormTitle" style="font-family:'Bebas Neue',sans-serif; font-size:1.5rem">New Community Submission
+        <h3 id="contentFormTitle" style="font-family:'Bebas Neue',sans-serif; font-size:1.5rem" data-i18n="community_submission">New Community Submission
         </h3>
         <button class="btn-close" onclick="closeContentUpload()">✕</button>
       </div>
@@ -1185,59 +1189,59 @@
         <div class="admin-form" style="padding:0">
           <div class="admin-grid">
             <div>
-              <label>Submission Title *</label>
-              <input type="text" id="contentTitle" placeholder="The Next Wave of Afrobeat...">
+              <label data-i18n="submission_title">Submission Title *</label>
+              <input type="text" id="contentTitle" data-i18n-placeholder="placeholder_title">
             </div>
             <div>
-              <label>Category *</label>
+              <label data-i18n="category">Category *</label>
               <select id="contentCategory" onchange="toggleContentFields()">
-                <option value="thread">💬 Thread / Discussion</option>
-                <option value="article">📰 Article / Feature</option>
-                <option value="event">🎫 Event / Showcase</option>
+                <option value="thread" data-i18n="thread_discussion">💬 Thread / Discussion</option>
+                <option value="article" data-i18n="article_feature">📰 Article / Feature</option>
+                <option value="event" data-i18n="event_showcase">🎫 Event / Showcase</option>
               </select>
             </div>
           </div>
 
           <div id="eventFields" style="display:none">
             <div class="admin-grid">
-              <div><label>Event Date & Time</label><input type="datetime-local" id="contentEventDate"></div>
-              <div><label>Venue / Location</label><input type="text" id="contentEventLocation"
-                  placeholder="Sofitel Abidjan"></div>
+              <div><label data-i18n="date">Event Date & Time</label><input type="datetime-local" id="contentEventDate"></div>
+              <div><label data-i18n="venue_location">Venue / Location</label><input type="text" id="contentEventLocation"
+                  placeholder="Sofitel Abidjan" data-i18n-placeholder="placeholder_venue"></div>
             </div>
           </div>
 
           <div>
-            <label>Detailed Description / Content *</label>
-            <textarea id="contentBody" placeholder="Share the details with the community..."
+            <label data-i18n="detailed_description">Detailed Description / Content *</label>
+            <textarea id="contentBody" data-i18n-placeholder="placeholder_share"
               style="min-height:120px"></textarea>
           </div>
 
           <div class="admin-grid">
             <div>
-              <label>External Link (Optional)</label>
+              <label data-i18n="external_link">External Link (Optional)</label>
               <input type="url" id="contentExternalLink" placeholder="https://youtube.com/...">
             </div>
             <div>
-              <label>Media Type</label>
+              <label data-i18n="media_type">Media Type</label>
               <select id="contentMediaType">
-                <option value="image">Image Attachment</option>
-                <option value="video">Video Upload / Link</option>
+                <option value="image" data-i18n="image_attachment">Image Attachment</option>
+                <option value="video" data-i18n="video_attachment">Video Upload / Link</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label>Cover Media Attachment</label>
+            <label data-i18n="cover_media">Cover Media Attachment</label>
             <div class="img-slot" id="contentMediaSlot" style="width:100%; height:180px; margin-top:0.5rem">
-              <div id="contentMediaPreview" class="img-slot-icon">📷 Click to upload image or video</div>
+              <div id="contentMediaPreview" class="img-slot-icon" data-i18n="upload_prompt">📷 Click to upload image or video</div>
               <input type="file" id="contentFileInput" accept="image/*,video/*"
                 style="position:absolute; inset:0; opacity:0; cursor:pointer" onchange="handleContentFileSelect(event)">
-              <div class="upload-progress" id="contentUploadProgress">↻ Uploading to Supabase...</div>
+              <div class="upload-progress" id="contentUploadProgress" data-i18n="uploading">↻ Uploading to Supabase...</div>
             </div>
           </div>
 
           <div class="admin-form-actions" style="margin-top:2rem">
-            <button class="btn-save" id="btnContentSubmit" onclick="submitCommunityContent()" style="width:100%">🚀 Fuel
+            <button class="btn-save" id="btnContentSubmit" onclick="submitCommunityContent()" style="width:100%" data-i18n="btn_fuel_community">🚀 Fuel
               the Community</button>
           </div>
         </div>
@@ -1256,7 +1260,7 @@
 
   <!-- Toast Notification -->
   <div class="toast" id="toast">
-    <div class="toast-title">✅ <span id="toastTitle">Success</span></div>
+    <div class="toast-title">✅ <span id="toastTitle" data-i18n="success">Success</span></div>
     <div class="toast-body" id="toastBody"></div>
   </div>
 
@@ -1309,7 +1313,7 @@
           <h4 data-i18n="contact">CONTACT</h4>
           <p>+225 07 99 10 81 08</p>
           <p><a href="https://wa.me/2250799108108" target="_blank"
-              style="color:inherit;text-decoration:none">Chat on WhatsApp</a></p>
+              style="color:inherit;text-decoration:none" data-i18n="chat_whatsapp">Chat on WhatsApp</a></p>
           <p>Abidjan, Côte d'Ivoire</p>
         </div>
 
@@ -1324,12 +1328,12 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; 2026 Fueled By Creation. v1.3.0 All rights reserved.</p>
+        <p data-i18n="copyright">© 2026 Fueled By Creation. v1.3.5 All rights reserved.</p>
         <p class="made-with">
           <button id="adminToggleBtn" onclick="handleAdminClick()" title=""
             style="background:none;border:none;cursor:pointer;color:#1a1a1a;font-size:0.6rem;margin-right:0.5rem;opacity:0.15;transition:opacity 0.3s;padding:2px 4px;border-radius:3px;"
             onmouseenter="this.style.opacity='0.5'" onmouseleave="this.style.opacity='0.15'">⚙</button>
-          Made with 🔥
+          <span data-i18n="made_with">Made with</span> 🔥
         </p>
       </div>
     </div>
@@ -1357,7 +1361,7 @@
       </div>
       <div class="detail-container">
         <div class="detail-section">
-          <h3>📱 Connect</h3>
+          <h3 data-i18n="connect">📱 Connect</h3>
           <div class="social-links-detail">
             <a id="influencerInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
             <a id="influencerYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
@@ -1389,17 +1393,17 @@
       </div>
       <div class="detail-container">
         <div class="detail-section">
-          <h3>🎵 Latest Release</h3>
+          <h3 data-i18n="latest_release_title">🎵 Latest Release</h3>
           <div class="artist-release-card">
             <img id="releaseCoverDetail" src="" alt="Cover">
             <div class="artist-release-info">
               <h4 id="releaseTitleDetail"></h4>
-              <a id="releaseLinkDetail" href="#" target="_blank" class="btn-primary">Listen Now</a>
+              <a id="releaseLinkDetail" href="#" target="_blank" class="btn-primary" data-i18n="listen_now_btn">Listen Now</a>
             </div>
           </div>
         </div>
         <div class="detail-section">
-          <h3>📱 Connect</h3>
+          <h3 data-i18n="connect">📱 Connect</h3>
           <div class="social-links-detail">
             <a id="artistInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
             <a id="artistYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
@@ -1453,8 +1457,8 @@
           <p id="eventLocDetail"></p>
         </div>
         <p id="eventDescDetail" class="event-desc"></p>
-        <a id="eventTicketBtnDetail" href="#" target="_blank" class="btn-secondary btn-full" style="text-decoration:none;display:block;text-align:center;margin-bottom:1rem">🎫 Get Tickets</a>
-        <button id="eventJoinBtn" class="btn-primary btn-full">Join Exclusive Event</button>
+        <a id="eventTicketBtnDetail" href="#" target="_blank" class="btn-secondary btn-full" style="text-decoration:none;display:block;text-align:center;margin-bottom:1rem" data-i18n="buy_tickets">🎫 Get Tickets</a>
+        <button id="eventJoinBtn" class="btn-primary btn-full" data-i18n="join_exclusive_event">Join Exclusive Event</button>
       </div>
     </div>
   </div>
@@ -1490,7 +1494,7 @@
             <div class="player-progress-bar"><div id="playerProgressFill"></div></div>
             <span id="playerDuration">0:00</span>
         </div>
-        <div id="playerNowPlaying" class="now-playing-txt">Select a track to play</div>
+        <div id="playerNowPlaying" class="now-playing-txt" data-i18n="select_track">Select a track to play</div>
       </div>
 
       <div class="detail-container">
@@ -1506,15 +1510,15 @@
     <div class="chat-channels" id="chatChannels">
       <a href="https://wa.me/2250799108108" target="_blank" class="chat-channel-btn btn-whatsapp-float">
         <div class="ch-icon">💬</div>
-        <div class="ch-label">WhatsApp<span class="ch-sub">Direct support</span></div>
+        <div class="ch-label">WhatsApp<span class="ch-sub" data-i18n="direct_support">Direct support</span></div>
       </a>
       <a href="https://m.me/fueledbycreation" target="_blank" class="chat-channel-btn btn-messenger-float">
         <div class="ch-icon">✉️</div>
-        <div class="ch-label">Messenger<span class="ch-sub">Send a message</span></div>
+        <div class="ch-label">Messenger<span class="ch-sub" data-i18n="send_messaging">Send a message</span></div>
       </a>
     </div>
     <button class="chat-toggle" id="chatToggle" onclick="toggleChat()" aria-label="Support">
-      <span class="chat-tooltip">Support</span>
+      <span class="chat-tooltip" data-i18n="support_tooltip">Support</span>
       <span class="icon-chat">💬</span>
       <span class="icon-close">✕</span>
     </button>
