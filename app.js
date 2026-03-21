@@ -2948,6 +2948,9 @@ document.addEventListener('DOMContentLoaded', function () {
     updateAdminUI();
 
     // Translations & Locales
+    if (!localStorage.getItem('fbc_lang')) {
+        localStorage.setItem('fbc_lang', 'fr');
+    }
     localizeDemoData();
     applyTranslations();
 

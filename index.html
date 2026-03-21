@@ -614,14 +614,14 @@
               + New Artist</h3>
             <input type="hidden" id="editArtistId" value="">
             <div class="admin-grid">
-              <div><label>Artist Name *</label><input type="text" id="artistName" placeholder="Kwame Blaze"></div>
-              <div><label>Status</label><select id="artistStatus">
-                  <option value="Draft">Draft</option>
-                  <option value="Published">Published</option>
-                  <option value="Hidden">Hidden</option>
+              <div><label data-i18n="artist_name_label">Artist Name *</label><input type="text" id="artistName" placeholder="Kwame Blaze"></div>
+              <div><label data-i18n="status">Status</label><select id="artistStatus">
+                  <option value="Draft" data-i18n="draft">Draft</option>
+                  <option value="Published" data-i18n="published">Published</option>
+                  <option value="Hidden" data-i18n="hidden">Hidden</option>
                 </select></div>
             </div>
-            <div><label>Bio</label><textarea id="artistBio" placeholder="Short artist bio (2-3 lines)..."></textarea>
+            <div><label data-i18n="bio">Bio</label><textarea id="artistBio" data-i18n-placeholder="placeholder_bio"></textarea>
             </div>
               <div class="admin-grid">
                 <div class="field-with-upload">
@@ -703,13 +703,13 @@
               + New Influencer</h3>
             <input type="hidden" id="editInfluencerId" value="">
             <div class="admin-grid">
-              <div><label>Influencer Name *</label><input type="text" id="influencerName" placeholder="Name"></div>
-              <div><label>Category</label><input type="text" id="influencerCategory" placeholder="e.g. Fashion Blogger"></div>
+              <div><label data-i18n="influencer_name">Influencer Name *</label><input type="text" id="influencerName" placeholder="Name"></div>
+              <div><label data-i18n="category">Category</label><input type="text" id="influencerCategory" placeholder="e.g. Fashion Blogger"></div>
             </div>
-            <div><label>Bio</label><textarea id="influencerBio" placeholder="Bio..."></textarea></div>
+            <div><label data-i18n="bio">Bio</label><textarea id="influencerBio" placeholder="Bio..."></textarea></div>
             <div class="admin-grid">
               <div class="field-with-upload">
-                <label>Profile Image URL</label>
+                <label data-i18n="profile_img">Profile Image URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="influencerProfileImg" placeholder="URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('influencerProfileImgFile').click()">📷</button>
@@ -717,7 +717,7 @@
                 </div>
               </div>
               <div class="field-with-upload">
-                <label>Banner Image URL</label>
+                <label data-i18n="banner_img">Banner Image URL</label>
                 <div class="input-upload-group">
                   <input type="text" id="influencerBannerImg" placeholder="URL">
                   <button class="btn-upload-trigger" onclick="document.getElementById('influencerBannerImgFile').click()">📷</button>
@@ -726,19 +726,19 @@
               </div>
             </div>
             <div class="admin-grid">
-              <div><label>Instagram URL</label><input type="url" id="influencerInstagram" placeholder="URL"></div>
-              <div><label>YouTube URL</label><input type="url" id="influencerYoutube" placeholder="URL"></div>
+              <div><label data-i18n="instagram_url">Instagram URL</label><input type="url" id="influencerInstagram" placeholder="URL"></div>
+              <div><label data-i18n="youtube_url">YouTube URL</label><input type="url" id="influencerYoutube" placeholder="URL"></div>
             </div>
-            <div><label>TikTok URL</label><input type="url" id="influencerTikTok" placeholder="TikTok URL"></div>
+            <div><label data-i18n="tiktok_url">TikTok URL</label><input type="url" id="influencerTikTok" placeholder="TikTok URL"></div>
             <div style="display:flex;gap:1.5rem;align-items:center;padding:.5rem 0">
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
-                  id="influencerFeatured" style="accent-color:var(--primary);width:18px;height:18px"> ⭐ Featured</label>
+                  id="influencerFeatured" style="accent-color:var(--primary);width:18px;height:18px"> <span data-i18n="featured_label">⭐ Featured</span></label>
               <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox"
-                  id="influencerTrending" style="accent-color:#ef4444;width:18px;height:18px"> 🔥 Trending</label>
+                  id="influencerTrending" style="accent-color:#ef4444;width:18px;height:18px"> <span data-i18n="trending">🔥 Trending</span></label>
             </div>
             <div class="admin-form-actions" style="margin-top:1.5rem">
-              <button class="btn-save" onclick="saveInfluencer(event)">💾 Save Influencer</button>
-              <button class="btn-cancel-admin" onclick="cancelEditInfluencer()">Cancel</button>
+              <button class="btn-save" onclick="saveInfluencer(event)" data-i18n="save_influencer">💾 Save Influencer</button>
+              <button class="btn-cancel-admin" onclick="cancelEditInfluencer()" data-i18n="cancel">Cancel</button>
             </div>
           </div>
         </div>
@@ -1064,6 +1064,9 @@
                   <option value="Hidden" data-i18n="hidden">Hidden</option>
                 </select></div>
             </div>
+            <div class="admin-form-actions" style="margin-top:2rem">
+              <button class="btn-save" onclick="saveEvent(event)" data-i18n="save_supabase">💾 Save Event</button>
+              <button class="btn-cancel-admin" onclick="cancelEditEvent()" data-i18n="cancel">Cancel</button>
             </div>
           </div>
         </div>

@@ -361,9 +361,9 @@ const translations = {
         coming_soon: "Bientôt disponible",
         by: "Par",
         official_merch: "Merch Officiel",
-        artist_showcase: "Vitrine Artistes",
+        artist_showcase: "Pleins Feux Artistes",
         trends_threads: "🔥 Tendances",
-        culture_hub: "HUB CULTUREL",
+        culture_hub: "LE HUB CULTUREL",
         underrated_artist: "Quel est l'artiste le plus sous-estimé en ce moment ?",
         merch_drop: "Nouveau drop de merch 🔥",
         afrobeat_vs_amapiano: "Afrobeat vs Amapiano — qui définit 2026 ?",
@@ -386,7 +386,7 @@ const translations = {
         view_all_influencers: "Voir tous les Influenceurs",
         chat_whatsapp: "Discuter sur WhatsApp",
         made_with: "Fait avec",
-        connect: "Connecter",
+        connect: "Réseaux",
         listen_now_btn: "Écouter",
         join_exclusive_event: "Rejoindre l'Événement",
         select_track: "Sélectionnez un morceau",
@@ -426,10 +426,10 @@ const translations = {
         thanks: "Merci",
         link_copied: "Lien Copié",
         copy_success: "Lien de partage copié dans le presse-papier.",
-        media_ready: "Média Prêt ✓",
+        media_ready: "Média Prêt",
         media_uploaded: "Votre média a été téléchargé sur le cloud.",
         submission_failed: "Échec de la Soumission",
-        contribution_fueled: "Votre contribution a été envoyée à la tribu.",
+        contribution_fueled: "Votre voix a été ajoutée à la Tribu.",
         pinned: "ÉPINGLÉ",
         read_full_story: "Lire l'histoire complète →",
         various_artists: "Artistes Divers",
@@ -590,16 +590,12 @@ const translations = {
 
 function getLang() {
     const stored = localStorage.getItem('fbc_lang');
+    // If we have a stored preference, we respect it, EXCEPT if we are in "calibration" mode
+    // which we can trigger by checking a version or just defaulting to 'fr' on first start.
     if (stored) return stored;
 
-    const userLang = navigator.language || navigator.userLanguage;
-    // Default to 'fr' unless specifically 'en' is detected AND we want to respect it.
-    // Given "default language should be french", we ensure 'fr' is the first experience.
-    if (!userLang || !userLang.startsWith('en')) return 'fr';
-    
-    // For now, even if English is detected, we might want to force French if it's the first visit.
-    // Let's stick to French as the absolute default.
-    return 'fr'; 
+    // Absolute default is French
+    return 'fr';
 }
 
 function t(key, params = {}) {
