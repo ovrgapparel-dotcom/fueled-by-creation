@@ -142,6 +142,20 @@ function switchPage(page) {
 
 function handleRouting() {
     const hash = window.location.hash;
+    const path = window.location.pathname;
+
+    // Admin Route Catch
+    if (path.includes('/admin') || hash === '#admin') {
+        setTimeout(function() {
+            if (window.currentUser) {
+                openAdmin();
+            } else {
+                openLogin();
+            }
+        }, 100);
+        return;
+    }
+
     if (hash.startsWith('#artist/')) {
         const id = hash.replace('#artist/', '');
         openArtistDetail(id);
@@ -1613,16 +1627,19 @@ function renderAdminInfluencerList() {
     var list = document.getElementById('adminInfluencerList');
     list.style.display = 'flex';
     list.style.flexDirection = 'column';
-    if (!adminInfluencers.length) { list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🌟</div><p>' + window.t('no_influencers_hint') + '</p></div>'; return; }
+    if (!adminInfluencers.length) { 
+        list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🌟</div><p>' + window.t('no_influencers_hint') + '</p></div>'; 
+        return; 
+    }
     list.innerHTML = adminInfluencers.map(function (i) {
         return '<div class="admin-product-item">' +
             '<div class="admin-product-thumb">' + (i.profile_image_url ? '<img src="' + i.profile_image_url + '" alt="' + i.name + '">' : '🌟') + '</div>' +
             '<div class="admin-product-meta"><h4>' + i.name + '</h4>' +
-            '<div class="admin-product-meta"><h4>' + i.name + '</h4>' +
             '<p>' + (i.category || window.t('cultural_icon')) + '</p></div>' +
             '<div class="admin-product-actions">' +
             '<button class="btn-edit" onclick="editInfluencer(\'' + i.id + '\')">✏ ' + window.t('edit') + '</button>' +
-            '<button class="btn-delete" onclick="deleteInfluencer(\'' + i.id + '\')">🗑 ' + window.t('delete') + '</button></div></div>';
+            '<button class="btn-delete" onclick="deleteInfluencer(\'' + i.id + '\')">🗑 ' + window.t('delete') + '</button></div>' +
+            '</div>';
     }).join('');
 }
 
@@ -1853,45 +1870,61 @@ async function refreshFrontendData() {
     // Live data fully replaces demo data when available
     try {
         var aRes = await sbClient.from('artists').select('*').eq('status', 'Published').order('created_at', { ascending: false });
-        // Use live data exclusively if available; otherwise fall back to demo
-        var displayArtists = (!aRes.error && aRes.data && aRes.data.length > 0) ? aRes.data : (typeof demoArtists !== 'undefined' ? demoArtists : []);
-        renderArtists('featuredArtistsGrid', displayArtists.filter(function (a) { return a.is_featured; }));
-        renderArtists('allArtistsGrid', displayArtists);
-    } catch (e) { renderArtists('featuredArtistsGrid', demoArtists.filter(a => a.is_featured)); renderArtists('allArtistsGrid', demoArtists); }
+        var displayArtists = (!aRes.error && aRes.data) ? aRes.data : [];
+        if (!aRes.error) localStorage.setItem('cached_artists', JSON.stringify(displayArtists));
+        if (displayArtists.length === 0 && !aRes.error) displayArtists = []; // explicit empty instead of demo
+    } catch (e) {
+        var cached = localStorage.getItem('cached_artists');
+        displayArtists = cached ? JSON.parse(cached) : (typeof demoArtists !== 'undefined' ? demoArtists : []);
+    }
+    renderArtists('featuredArtistsGrid', displayArtists.filter(function (a) { return a.is_featured; }));
+    renderArtists('allArtistsGrid', displayArtists);
 
     try {
         var artRes = await sbClient.from('articles').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
-        var displayArticles = (!artRes.error && artRes.data && artRes.data.length > 0) ? artRes.data : (typeof demoArticles !== 'undefined' ? demoArticles : []);
-        renderFeaturedArticlesSplit('featuredArticlesGrid', displayArticles.filter(function (a) { return a.is_featured; }));
-        renderArticles('allArticlesGrid', displayArticles);
-    } catch (e) { renderFeaturedArticlesSplit('featuredArticlesGrid', demoArticles.filter(a => a.is_featured)); renderArticles('allArticlesGrid', demoArticles); }
+        var displayArticles = (!artRes.error && artRes.data) ? artRes.data : [];
+        if (!artRes.error) localStorage.setItem('cached_articles', JSON.stringify(displayArticles));
+    } catch (e) {
+        var cachedArt = localStorage.getItem('cached_articles');
+        displayArticles = cachedArt ? JSON.parse(cachedArt) : (typeof demoArticles !== 'undefined' ? demoArticles : []);
+    }
+    renderFeaturedArticlesSplit('featuredArticlesGrid', displayArticles.filter(function (a) { return a.is_featured; }));
+    renderArticles('allArticlesGrid', displayArticles);
 
     try {
         var tRes = await sbClient.from('threads').select('*').eq('status', 'Active').order('priority_order');
-        var displayThreads = (!tRes.error && tRes.data && tRes.data.length > 0) ? tRes.data : (typeof demoThreads !== 'undefined' ? demoThreads : []);
-        renderThreads('allThreadsList', displayThreads);
-    } catch (e) { renderThreads('allThreadsList', demoThreads); }
+        var displayThreads = (!tRes.error && tRes.data) ? tRes.data : [];
+        if (!tRes.error) localStorage.setItem('cached_threads', JSON.stringify(displayThreads));
+    } catch (e) {
+        var cachedThr = localStorage.getItem('cached_threads');
+        displayThreads = cachedThr ? JSON.parse(cachedThr) : (typeof demoThreads !== 'undefined' ? demoThreads : []);
+    }
+    renderThreads('allThreadsList', displayThreads);
 
     try {
         var eRes = await sbClient.from('events').select('*').eq('status', 'Published').order('event_date');
-        var displayEvents = (!eRes.error && eRes.data && eRes.data.length > 0) ? eRes.data : (typeof demoEvents !== 'undefined' ? demoEvents : []);
-        renderEvents('featuredEventsGrid', displayEvents.slice(0, 3));
-        renderEvents('allEventsGrid', displayEvents);
-    } catch (e) { renderEvents('featuredEventsGrid', demoEvents.slice(0, 3)); renderEvents('allEventsGrid', demoEvents); }
+        var displayEvents = (!eRes.error && eRes.data) ? eRes.data : [];
+        if (!eRes.error) localStorage.setItem('cached_events', JSON.stringify(displayEvents));
+    } catch (e) {
+        var cachedEvt = localStorage.getItem('cached_events');
+        displayEvents = cachedEvt ? JSON.parse(cachedEvt) : (typeof demoEvents !== 'undefined' ? demoEvents : []);
+    }
+    renderEvents('featuredEventsGrid', displayEvents.slice(0, 3));
+    renderEvents('allEventsGrid', displayEvents);
 
     try {
         var iRes = await sbClient.from(INFLUENCERS_TABLE).select('*').order('name');
-        var liveInfluencers = (!iRes.error && iRes.data && iRes.data.length > 0) ? iRes.data : [];
-        var demo = typeof demoInfluencers !== 'undefined' ? demoInfluencers : [];
-        var displayInfluencers = liveInfluencers.concat(demo.filter(function(d) { return !liveInfluencers.find(function(l) { return l.id === d.id; }); }));
+        var liveInfluencers = (!iRes.error && iRes.data) ? iRes.data : [];
+        if (!iRes.error) localStorage.setItem('cached_influencers', JSON.stringify(liveInfluencers));
+        var displayInfluencers = liveInfluencers;
         influencers = displayInfluencers;
-        renderInfluencers('featuredInfluencersGrid', displayInfluencers.filter(function(i) { return i.is_featured; }));
-        renderInfluencers('allInfluencersGrid', influencers);
     } catch (e) {
-        influencers = typeof demoInfluencers !== 'undefined' ? demoInfluencers : [];
-        renderInfluencers('featuredInfluencersGrid', influencers.filter(function(i) { return i.is_featured; }));
-        renderInfluencers('allInfluencersGrid', influencers);
+        var cachedInf = localStorage.getItem('cached_influencers');
+        influencers = cachedInf ? JSON.parse(cachedInf) : (typeof demoInfluencers !== 'undefined' ? demoInfluencers : []);
+        displayInfluencers = influencers;
     }
+    renderInfluencers('featuredInfluencersGrid', displayInfluencers.filter(function(i) { return i.is_featured; }));
+    renderInfluencers('allInfluencersGrid', influencers);
 
     try {
         await renderRadio('featuredRadioGrid', function(p) { return p.is_featured; });
@@ -2269,8 +2302,52 @@ function applyTranslations() {
 
 
 
-window.shareContent = async function (title, link) {
-    var shareText = "Download the app and join the community: ";
+window.currentShareData = { title: '', url: '', mediaUrl: '' };
+
+window.closeShareModal = function() {
+    var modal = document.getElementById('shareModalOverlay');
+    if (modal) modal.classList.remove('open');
+};
+
+window.shareToFacebook = function() {
+    var url = encodeURIComponent(window.currentShareData.url);
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
+};
+
+window.shareToTwitter = function() {
+    var text = encodeURIComponent("Check this out: " + window.currentShareData.title);
+    var url = encodeURIComponent(window.currentShareData.url);
+    window.open('https://twitter.com/intent/tweet?text=' + text + '&url=' + url, '_blank');
+};
+
+window.shareToWhatsApp = function() {
+    var text = encodeURIComponent("Check this out: " + window.currentShareData.title + "\n" + window.currentShareData.url);
+    window.open('https://api.whatsapp.com/send?text=' + text, '_blank');
+};
+
+window.copyShareLink = function() {
+    var text = "Check this out: " + window.currentShareData.title + "\n" + window.currentShareData.url;
+    navigator.clipboard.writeText(text).then(function () {
+        showToast(window.t('link_copied'), window.t('share_link_copied'), '#3b82f6');
+        window.closeShareModal();
+    });
+};
+
+window.shareContent = async function (title, link, mediaUrl) {
+    if (link) {
+        try {
+            var urlObj = new URL(link);
+            if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1' || urlObj.protocol === 'capacitor:' || urlObj.protocol === 'file:') {
+                urlObj.protocol = 'https:';
+                urlObj.hostname = 'www.fueledbycreation.com';
+                urlObj.port = '';
+                link = urlObj.toString();
+            }
+        } catch (e) {}
+    }
+
+    var shareText = "Download the app and join the community: " + title;
+    window.currentShareData = { title: title || '', url: link || '', mediaUrl: mediaUrl || '' };
     
     // Attempt native share if available (Capacitor)
     try {
@@ -2285,24 +2362,34 @@ window.shareContent = async function (title, link) {
             return;
         }
     } catch (err) {
-        console.warn('Native share failed, falling back:', err);
+        console.warn('Native share failed, falling back to modal:', err);
     }
 
-    // Web Share API fallback
-    if (navigator.share) {
-        navigator.share({
-            title: title,
-            text: shareText,
-            url: link
-        }).catch(function (err) {
-            console.error('Web share error:', err);
-        });
-    } else {
-        // Clipboard fallback
-        navigator.clipboard.writeText(shareText + "\n" + link).then(function () {
-            showToast(window.t('link_copied'), window.t('share_link_copied'), '#3b82f6');
-        });
+    // Always fallback to custom modal to ensure media is shown and works across desktop/tablet
+    var titleEl = document.getElementById('shareTitlePreview');
+    var linkEl = document.getElementById('shareLinkPreview');
+    var mediaEl = document.getElementById('shareMediaPreview');
+    var modalEl = document.getElementById('shareModalOverlay');
+    
+    if (titleEl) titleEl.textContent = title;
+    if (linkEl) linkEl.textContent = link;
+    
+    if (mediaEl) {
+        if (mediaUrl) {
+            mediaEl.style.display = 'flex';
+            var isVideo = mediaUrl.match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+            if (isVideo) {
+                 mediaEl.innerHTML = '<video src="' + mediaUrl + '" autoplay muted loop playsinline style="max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;"></video>';
+            } else {
+                 mediaEl.innerHTML = '<img src="' + mediaUrl + '" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;">';
+            }
+        } else {
+            mediaEl.style.display = 'none';
+            mediaEl.innerHTML = '';
+        }
     }
+    
+    if (modalEl) modalEl.classList.add('open');
 };
 
 
@@ -3009,8 +3096,8 @@ function renderAdminPlaylistList(playlists) {
             <td>${p.artist_name || ''}</td>
             <td><span class="badge ${p.status.toLowerCase()}">${window.t(p.status.toLowerCase())}</span></td>
             <td>
-                <button class="btn-sm" onclick="editPlaylist('${p.id}')">✏ ' + window.t('edit') + '</button>
-                <button class="btn-sm btn-danger" onclick="deletePlaylist('${p.id}')">🗑 ' + window.t('delete') + '</button>
+                <button class="btn-sm" onclick="editPlaylist('${p.id}')">✏ ${window.t('edit')}</button>
+                <button class="btn-sm btn-danger" onclick="deletePlaylist('${p.id}')">🗑 ${window.t('delete')}</button>
             </td>
         </tr>`;
     });
@@ -3303,5 +3390,5 @@ window.playerPlay = playerPlay;
 window.playerNext = playerNext;
 window.playerPrev = playerPrev;
 window.sharePlaylist = () => {
-    if (currentPlaylist) shareContent(currentPlaylist.title, window.location.href);
+    if (currentPlaylist) shareContent(currentPlaylist.title, window.location.href, currentPlaylist.cover_image_url);
 };
