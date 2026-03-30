@@ -10,6 +10,7 @@
   --light: #f5f4f1;
   --white: #ffffff;
   --border: #e8e5e0;
+  --glass: rgba(255, 255, 255, 0.85);
   --success: #22c55e;
   --info: #3b82f6;
   --warning: #f59e0b;
@@ -205,11 +206,37 @@ nav a.active {
 }
 
 .hero-media-bg video, .hero-media-bg img, .hero-media-bg iframe {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: cover;
   opacity: 0.8;
   border: none;
+}
+
+/* Specific ratio logic for frames and videos to cover 16:9 correctly */
+@media (min-aspect-ratio: 16/9) {
+  .hero-media-bg iframe, .hero-media-bg video {
+    width: 100%;
+    height: 56.25vw;
+  }
+}
+@media (max-aspect-ratio: 16/9) {
+  .hero-media-bg iframe, .hero-media-bg video {
+    width: 177.78vh;
+    height: 100%;
+  }
+}
+
+.hero-media-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hero-content {
@@ -1242,13 +1269,13 @@ nav a.active {
 
 /* Artist Detail Premium */
 .artist-hero-detail {
-  height: 400px;
+  min-height: 450px;
   background-size: cover;
   background-position: center;
   position: relative;
   display: flex;
   align-items: flex-end;
-  padding: 3rem;
+  padding: 4rem 3rem;
   overflow: hidden;
 }
 
@@ -1256,7 +1283,20 @@ nav a.active {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, var(--dark) 0%, rgba(13, 13, 13, 0.5) 50%, transparent 100%);
+  background: linear-gradient(0deg, rgba(13, 13, 13, 1) 0%, rgba(13, 13, 13, 0.4) 40%, rgba(13, 13, 13, 0.2) 100%);
+  z-index: 1;
+}
+
+.hero-media-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-media-bg video, .hero-media-bg img, .hero-media-bg iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .artist-hero-inner {
@@ -1328,8 +1368,30 @@ nav a.active {
 }
 
 .artist-release-info h4 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  font-weight: 700;
   margin-bottom: 1rem;
+}
+
+/* Premium Overlay Aesthetics */
+.overlay-content.premium {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.overlay-header-bar {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .social-links-detail {

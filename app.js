@@ -1972,9 +1972,10 @@ async function openArtistDetail(id) {
     var heroWrap = document.getElementById('artistHero');
     var mediaContainer = document.getElementById('artistHeroMedia');
     if (mediaContainer) {
-        var isVideo = a.banner_image_url && (a.banner_image_url.match(/\.(mp4|webm|ogg|mov)$|^data:video/i) || a.promo_video_url);
-        if (isVideo) {
-            mediaContainer.innerHTML = '<video src="' + (a.promo_video_url || a.banner_image_url) + '" autoplay muted loop playsinline controls style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1"></video>';
+        var videoUrl = a.promo_video_url || a.banner_image_url;
+        var mediaHtml = getMediaMarkup(videoUrl, { isHero: true, classes: 'artist-hero-video' });
+        if (mediaHtml.includes('<video') || mediaHtml.includes('<iframe')) {
+            mediaContainer.innerHTML = mediaHtml;
             heroWrap.style.backgroundImage = 'none';
         } else {
             mediaContainer.innerHTML = '';
@@ -2001,6 +2002,38 @@ async function openArtistDetail(id) {
 
     document.getElementById('artistDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // NEW: Fetch and render related articles
+    var articlesSection = document.getElementById('artistArticlesSection');
+    var articlesGrid = document.getElementById('artistArticlesGrid');
+    if (articlesSection && articlesGrid) {
+        articlesSection.style.display = 'none'; // Hide initially
+        articlesGrid.innerHTML = '';
+        
+        if (sbClient) {
+            try {
+                var artRes = await sbClient.from('articles').select('*')
+                    .eq('featured_artist_id', a.id)
+                    .eq('status', 'Published')
+                    .order('publish_date', { ascending: false });
+                
+                if (!artRes.error && artRes.data && artRes.data.length > 0) {
+                    articlesSection.style.display = 'block';
+                    articlesGrid.innerHTML = artRes.data.map(function(art) {
+                        return '<div class="featured-article-card" onclick="event.stopPropagation();openArticleDetail(\'' + art.id + '\')">' +
+                            '<div class="card-img" style="background-image:url(' + (art.cover_image_url || '') + ')"></div>' +
+                            '<div class="card-body">' +
+                            '<h3>' + art.title + '</h3>' +
+                            '<p>' + (art.excerpt || (art.body_content ? art.body_content.substring(0, 100) + '...' : '')) + '</p>' +
+                            '<button class="btn-read">' + window.t('read_more') + '</button>' +
+                            '</div></div>';
+                    }).join('');
+                }
+            } catch (e) {
+                console.error('Error fetching artist articles:', e);
+            }
+        }
+    }
 }
 
 async function openArticleDetail(id) {
@@ -2025,12 +2058,7 @@ async function openArticleDetail(id) {
     var mediaWrap = document.getElementById('articleMediaWrap');
     if (mediaWrap) {
         var videoUrl = a.promo_video_url || a.cover_image_url;
-        var isVideo = videoUrl && videoUrl.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
-        if (isVideo) {
-            mediaWrap.innerHTML = `<video src="${videoUrl}" autoplay muted loop playsinline controls style="width:100%;max-height:500px;object-fit:cover;display:block"></video>`;
-        } else {
-            mediaWrap.innerHTML = '<img id="articleCoverDetail" src="' + (a.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Cover" class="article-detail-cover" style="width:100%;display:block;border-bottom:1px solid rgba(0,0,0,0.05)">';
-        }
+        mediaWrap.innerHTML = getMediaMarkup(videoUrl, { classes: 'article-detail-media' });
     }
 
     // Add External Link if exists
@@ -2070,12 +2098,7 @@ async function openEventDetail(id) {
     var mediaWrap = document.getElementById('eventMediaWrap');
     if (mediaWrap) {
         var videoUrl = e.promo_video_url || e.cover_image_url;
-        var isVideo = videoUrl && videoUrl.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
-        if (isVideo) {
-            mediaWrap.innerHTML = `<video src="${videoUrl}" autoplay muted loop playsinline controls style="width:100%;max-height:400px;object-fit:cover;display:block"></video>`;
-        } else {
-            mediaWrap.innerHTML = '<img id="eventCoverDetail" src="' + (e.cover_image_url || 'https://via.placeholder.com/800x400') + '" alt="Event" class="event-detail-cover" style="width:100%;display:block">';
-        }
+        mediaWrap.innerHTML = getMediaMarkup(videoUrl, { classes: 'event-detail-media' });
     }
 
     // Add External Link if exists
@@ -2178,14 +2201,54 @@ async function openInfluencerDetail(id) {
     
     document.getElementById('influencerNameDetail').textContent = a.name;
     document.getElementById('influencerBioDetail').textContent = a.bio || '';
-    document.getElementById('influencerProfileImgDetail').src = a.profile_image_url || '';
+    document.getElementById('influencerProfileImgDetail').src = a.profile_image_url || 'https://via.placeholder.com/150';
     
+    // Media handling for Influencer Hero
+    var heroWrap = document.getElementById('influencerHero');
+    var mediaContainer = document.getElementById('influencerHeroMedia');
+    if (mediaContainer) {
+        var videoUrl = a.promo_video_url || a.banner_image_url;
+        var mediaHtml = getMediaMarkup(videoUrl, { isHero: true, classes: 'artist-hero-video' });
+        if (mediaHtml.includes('<video') || mediaHtml.includes('<iframe')) {
+            mediaContainer.innerHTML = mediaHtml;
+            heroWrap.style.backgroundImage = 'none';
+        } else {
+            mediaContainer.innerHTML = '';
+            heroWrap.style.backgroundImage = a.banner_image_url ? `url(${a.banner_image_url})` : 'linear-gradient(135deg, #222, #000)';
+        }
+    }
+
     var ig = document.getElementById('influencerInstaDetail');
     if (ig) { ig.href = a.ig_url || '#'; ig.style.display = a.ig_url ? 'inline-flex' : 'none'; }
     var yt = document.getElementById('influencerYoutubeDetail');
     if (yt) { yt.href = a.yt_url || '#'; yt.style.display = a.yt_url ? 'inline-flex' : 'none'; }
     var tiktok = document.getElementById('influencerTikTokDetail');
     if (tiktok) { tiktok.href = a.tiktok_spotify_url || '#'; tiktok.style.display = a.tiktok_spotify_url ? 'inline-flex' : 'none'; }
+}
+
+// Helper to generate the correct media HTML (img, video, iframe for YT/Vimeo)
+function getMediaMarkup(url, options) {
+    if (!url) return '';
+    options = options || {};
+    var isHero = options.isHero || false;
+    var classes = options.classes || '';
+    var isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
+    var isVimeo = url.includes('vimeo.com');
+    var isVideo = url.split('?')[0].match(/\.(mp4|webm|ogg|mov)$|^data:video/i);
+
+    if (isYoutube) {
+        var videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1].split('?')[0];
+        return '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=1&loop=1&playlist=' + videoId + '&controls=' + (isHero ? '0' : '1') + '&showinfo=0" ' +
+               'class="' + classes + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;object-fit:cover"></iframe>';
+    } else if (isVimeo) {
+        var vimeoId = url.split('vimeo.com/')[1].split('?')[0];
+        return '<iframe src="https://player.vimeo.com/video/' + vimeoId + '?autoplay=1&muted=1&loop=1&background=' + (isHero ? '1' : '0') + '" ' +
+               'class="' + classes + '" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;object-fit:cover"></iframe>';
+    } else if (isVideo) {
+        return '<video src="' + url + '" autoplay muted loop playsinline' + (isHero ? '' : ' controls') + ' class="' + classes + '" style="width:100%;height:100%;object-fit:cover"></video>';
+    } else {
+        return '<img src="' + url + '" alt="Media" class="' + classes + '" style="width:100%;height:100%;object-fit:cover">';
+    }
 }
 
 function closeDetail() {
@@ -2594,26 +2657,7 @@ async function loadHotTopics() {
 function loadHeroMedia() {
     var heroMedia = document.getElementById('heroMedia');
     if (!heroMedia) return;
-    var url = currentHeroUrl;
-    // Strip query string for extension detection
-    var urlWithoutQuery = url.split('?')[0].toLowerCase();
-    var isVideo = urlWithoutQuery.match(/\.(mp4|webm|ogg|mov|m4v)$/) || url.includes('play_480p') || url.includes('play_720p') || url.includes('b-cdn.net');
-    var isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
-    var isVimeo = url.includes('vimeo.com');
-
-    if (isYouTube) {
-        var videoId = '';
-        if (url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
-        else if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
-        heroMedia.innerHTML = '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=1&loop=1&playlist=' + videoId + '&controls=0&showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
-    } else if (isVimeo) {
-        var vimeoId = url.split('vimeo.com/')[1].split('?')[0];
-        heroMedia.innerHTML = '<iframe src="https://player.vimeo.com/video/' + vimeoId + '?autoplay=1&muted=1&loop=1&background=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
-    } else if (isVideo) {
-        heroMedia.innerHTML = '<video src="' + url + '" autoplay muted loop playsinline></video>';
-    } else {
-        heroMedia.innerHTML = '<img src="' + url + '" alt="Hero">';
-    }
+    heroMedia.innerHTML = getMediaMarkup(currentHeroUrl, { isHero: true });
 }
 
 function loadSectionHeroMedia(sectionName, containerId) {
@@ -2630,24 +2674,7 @@ function loadSectionHeroMedia(sectionName, containerId) {
     });
 
     if (!url) return;
-
-    var isVideo = url.split('?')[0].match(/\.(mp4|webm|ogg|mov)$/i) || url.match(/^data:video/i);
-    var isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
-    var isVimeo = url.includes('vimeo.com');
-
-    var mediaHtml = '';
-    if(isVideo) {
-        mediaHtml = '<video src="' + url + '" autoplay muted loop playsinline></video>';
-    } else if (isYoutube) {
-        var ytId = url.includes('v') ? url.split('v=')[1]?.split('&')[0] : url.split('youtu.be/')[1]?.split('?')[0];
-        mediaHtml = '<iframe src="https://www.youtube.com/embed/' + ytId + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + ytId + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
-    } else if (isVimeo) {
-        var vimeoId = url.split('vimeo.com/')[1].split('?')[0];
-        mediaHtml = '<iframe src="https://player.vimeo.com/video/' + vimeoId + '?autoplay=1&muted=1&loop=1&background=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
-    } else {
-        mediaHtml = '<img src="' + url + '" alt="' + sectionName + ' Hero">';
-    }
-    
+    var mediaHtml = getMediaMarkup(url, { isHero: true, classes: 'section-hero-media' });
     container.insertAdjacentHTML('afterbegin', mediaHtml);
 }
 

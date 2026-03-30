@@ -1379,11 +1379,13 @@
         <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
       </div>
       <div id="influencerHero" class="artist-hero-detail">
-        <div id="influencerHeroMedia"></div>
-        <div class="influencer-hero-inner">
+        <div id="influencerHeroMedia" class="hero-media-bg"></div>
+        <div class="artist-hero-inner">
           <img id="influencerProfileImgDetail" src="" alt="" class="artist-profile-img-large">
-          <h2 id="influencerNameDetail" class="premium-title"></h2>
-          <p id="influencerBioDetail" class="artist-bio-large"></p>
+          <div class="hero-text-content">
+            <h2 id="influencerNameDetail" class="premium-title"></h2>
+            <p id="influencerBioDetail" class="artist-bio-large"></p>
+          </div>
         </div>
       </div>
       <div class="detail-container">
@@ -1420,7 +1422,7 @@
       </div>
       <div class="detail-container">
         <div class="detail-section">
-          <h3 data-i18n="latest_release_title">🎵 Latest Release</h3>
+          <h3 data-i18n="latest_release">🎵 Latest Release</h3>
           <div class="artist-release-card">
             <img id="releaseCoverDetail" src="" alt="Cover">
             <div class="artist-release-info">
@@ -1429,6 +1431,15 @@
             </div>
           </div>
         </div>
+
+        <!-- NEW: Related Articles Section -->
+        <div id="artistArticlesSection" class="detail-section" style="display:none">
+          <h3 data-i18n="related_articles">📖 Related Articles</h3>
+          <div id="artistArticlesGrid" class="featured-articles-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+            <!-- Articles will be injected here -->
+          </div>
+        </div>
+
         <div class="detail-section">
           <h3 data-i18n="connect">📱 Connect</h3>
           <div class="social-links-detail">
