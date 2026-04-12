@@ -120,7 +120,7 @@ function switchPage(page) {
     var nav = document.getElementById('mainNav');
     if (nav) nav.classList.remove('mobile-nav-active');
     // Hide overlays using the open class (not inline style — avoids CSS conflicts)
-    ['artistDetail', 'articleDetail', 'eventDetail', 'influencerDetail', 'playlistDetail'].forEach(function(id) {
+    ['artistDetail', 'articleDetail', 'eventDetail', 'influencerDetail', 'playlistDetail', 'fashionDetail'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) { el.classList.remove('open'); el.style.display = ''; }
     });
@@ -853,6 +853,9 @@ function openAdmin() {
     closeLogin();
     document.getElementById('adminOverlay').classList.add('open');
     
+    // Check Supabase connection status and update banner
+    checkSupabaseConnection();
+    
     // Ensure the default tab is loaded and highlighted
     var productsTab = document.querySelector('.admin-tabs .admin-tab');
     if (productsTab) {
@@ -943,7 +946,7 @@ async function saveProduct() {
     var editId = document.getElementById('editProductId').value;
     var isDemo = isDemoId(editId);
     if (!name || !price) { showToast(window.t('required_fields'), window.t('name_price_required'), '#f59e0b'); return; }
-    var payload = { name: name, category: cat, price: price, old_price: old_price, description: description, badge: badge, sizes: sizes, imgs: imgs };
+    var payload = { name: name, cat: cat, price: price, old_price: old_price, description: description, badge: badge, sizes: sizes, imgs: imgs };
     
     var btn = (window.event && window.event.target) || document.querySelector('button[onclick*="saveProduct"]');
     var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
@@ -984,6 +987,7 @@ function showAdminTab(tab, el) {
         'threads-admin': 'adminTabThreads', 
         'events-admin': 'adminTabEvents',
         'influencers-admin': 'adminTabInfluencers',
+        'fashions-admin': 'adminTabFashions',
         'radio-admin': 'adminTabRadio',
         'hero-media': 'adminTabHeroMedia',
         'featured-promo': 'adminTabFeaturedPromo',
@@ -1007,6 +1011,7 @@ function showAdminTab(tab, el) {
     else if (tab === 'featured-promo') loadFeaturedPromoConfig();
     else if (tab === 'products') loadAdminProducts();
     else if (tab === 'influencers-admin') loadAdminInfluencers();
+    else if (tab === 'fashions-admin') loadAdminFashions();
     else if (tab === 'radio-admin') loadAdminRadio();
 }
 function renderAdminImgSlots() {
@@ -1606,6 +1611,10 @@ async function deleteEvent(id) {
 // ===== ADMIN CRUD: INFLUENCERS ====================================
 // ===================================================================
 const INFLUENCERS_TABLE = 'influencers';
+const FASHIONS_TABLE = 'fashions';
+var adminFashions = [];
+var fashions = [];
+var demoFashions = []; // Empty fallback for now
 var adminInfluencers = [];
 
 async function loadAdminInfluencers() {
@@ -1927,6 +1936,21 @@ async function refreshFrontendData() {
     renderInfluencers('allInfluencersGrid', influencers);
 
     try {
+        var fRes = await sbClient.from(FASHIONS_TABLE).select('*').order('name');
+        var liveFashions = (!fRes.error && fRes.data) ? fRes.data : [];
+        if (!fRes.error) localStorage.setItem('cached_fashions', JSON.stringify(liveFashions));
+        var displayFashions = liveFashions;
+        fashions = displayFashions;
+    } catch (e) {
+        var cachedFash = localStorage.getItem('cached_fashions');
+        fashions = cachedFash ? JSON.parse(cachedFash) : (typeof demoFashions !== 'undefined' ? demoFashions : []);
+        displayFashions = fashions;
+    }
+    renderFashions('featuredFashionsGrid', displayFashions.filter(function(i) { return i.is_featured; }));
+    renderFashions('allFashionsGrid', fashions);
+
+
+    try {
         await renderRadio('featuredRadioGrid', function(p) { return p.is_featured; });
         await renderRadio('playlistGrid');
     } catch (e) { console.error('Error refreshing radio:', e); }
@@ -2003,6 +2027,26 @@ async function openArtistDetail(id) {
     document.getElementById('artistDetail').classList.add('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    // Check for merch
+    var merchSec = document.getElementById('artistMerchSection');
+    if (merchSec) {
+        if (a.merch_product_id) {
+            merchSec.style.display = 'block';
+            document.getElementById('artistMerchBtn').onclick = function() {
+                closeDetail();
+                switchPage('shop');
+                setTimeout(() => {
+                    var el = document.getElementById('shopProductList');
+                    if (el) el.scrollIntoView({behavior: 'smooth'});
+                }, 500);
+            };
+        } else {
+            merchSec.style.display = 'none';
+        }
+    }
+
+
+
     // NEW: Fetch and render related articles
     var articlesSection = document.getElementById('artistArticlesSection');
     var articlesGrid = document.getElementById('artistArticlesGrid');
@@ -2058,7 +2102,7 @@ async function openArticleDetail(id) {
     var mediaWrap = document.getElementById('articleMediaWrap');
     if (mediaWrap) {
         var videoUrl = a.promo_video_url || a.cover_image_url;
-        mediaWrap.innerHTML = getMediaMarkup(videoUrl, { classes: 'article-detail-media' });
+        mediaWrap.innerHTML = getMediaMarkup(videoUrl, { classes: 'article-detail-cover' });
     }
 
     // Add External Link if exists
@@ -2098,7 +2142,7 @@ async function openEventDetail(id) {
     var mediaWrap = document.getElementById('eventMediaWrap');
     if (mediaWrap) {
         var videoUrl = e.promo_video_url || e.cover_image_url;
-        mediaWrap.innerHTML = getMediaMarkup(videoUrl, { classes: 'event-detail-media' });
+        mediaWrap.innerHTML = getMediaMarkup(videoUrl, { classes: 'event-detail-cover' });
     }
 
     // Add External Link if exists
@@ -2256,11 +2300,13 @@ function closeDetail() {
     document.getElementById('articleDetail').classList.remove('open');
     document.getElementById('eventDetail').classList.remove('open');
     document.getElementById('influencerDetail').classList.remove('open');
+    var fd = document.getElementById('fashionDetail'); if(fd) fd.classList.remove('open');
     window.location.hash = currentPage;
 }
 
 function closeArtistDetail() { closeDetail(); }
 function closeArticleDetail() { closeDetail(); }
+function closeFashionDetail() { closeDetail(); }
 
 // ===== UTILITIES =====
 function fmt(n) { return Number(n).toLocaleString('fr-FR') + ' ' + window.t('fcfa'); }
@@ -3053,6 +3099,13 @@ window.editInfluencer = editInfluencer;
 window.deleteInfluencer = deleteInfluencer;
 window.cancelEditInfluencer = cancelEditInfluencer;
 
+// Fashions
+window.loadAdminFashions = loadAdminFashions;
+window.saveFashion = saveFashion;
+window.editFashion = editFashion;
+window.deleteFashion = deleteFashion;
+window.cancelEditFashion = cancelEditFashion;
+
 // ===== BOOTSTRAP =====
 document.addEventListener('DOMContentLoaded', function () {
     console.log('FBC App Initializing...');
@@ -3419,3 +3472,217 @@ window.playerPrev = playerPrev;
 window.sharePlaylist = () => {
     if (currentPlaylist) shareContent(currentPlaylist.title, window.location.href, currentPlaylist.cover_image_url);
 };
+
+
+// ===================================================================
+// ===== ADMIN CRUD: FASHIONS =======================================
+// ===================================================================
+
+async function loadAdminFashions() {
+    var list = document.getElementById('adminFashionList'); if (!list) return;
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">' + window.t('loading') + '</p>';
+    try {
+        var res = await sbClient.from(FASHIONS_TABLE).select('*').order('name');
+        var liveFashions = (res.data && res.data.length > 0) ? res.data : [];
+        var demo = typeof demoFashions !== 'undefined' ? demoFashions : [];
+        adminFashions = liveFashions.concat(demo.filter(function(d) { return !liveFashions.find(function(l) { return l.id === d.id; }); }));
+    } catch (e) {
+        console.error('ERROR IN loadAdminFashions:', e);
+        adminFashions = typeof demoFashions !== 'undefined' ? demoFashions.slice() : [];
+    }
+    renderAdminFashionList();
+}
+
+function renderAdminFashionList() {
+    var list = document.getElementById('adminFashionList');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
+    if (!adminFashions.length) { 
+        list.innerHTML = '<div style="text-align:center;padding:3rem;color:#555"><div style="font-size:2.5rem;margin-bottom:1rem">🌟</div><p>' + window.t('no_influencers_hint') + '</p></div>'; 
+        return; 
+    }
+    list.innerHTML = adminFashions.map(function (i) {
+        return '<div class="admin-product-item">' +
+            '<div class="admin-product-thumb">' + (i.profile_image_url ? '<img src="' + i.profile_image_url + '" alt="' + i.name + '">' : '🌟') + '</div>' +
+            '<div class="admin-product-meta"><h4>' + i.name + '</h4>' +
+            '<p>' + (i.category || window.t('cultural_icon')) + '</p></div>' +
+            '<div class="admin-product-actions">' +
+            '<button class="btn-edit" onclick="editFashion(\'' + i.id + '\')">✏ ' + window.t('edit') + '</button>' +
+            '<button class="btn-delete" onclick="deleteFashion(\'' + i.id + '\')">🗑 ' + window.t('delete') + '</button></div>' +
+            '</div>';
+    }).join('');
+}
+
+function editFashion(id) {
+    var i = adminFashions.find(function (x) { return x.id === id; }); if (!i) return;
+    document.getElementById('editFashionId').value = id;
+    document.getElementById('fashionName').value = i.name || '';
+    document.getElementById('fashionCategory').value = i.category || '';
+    document.getElementById('fashionBio').value = i.bio || '';
+    document.getElementById('fashionProfileImg').value = i.profile_image_url || '';
+    document.getElementById('fashionBannerImg').value = i.banner_image_url || '';
+    document.getElementById('fashionInstagram').value = i.ig_url || '';
+    document.getElementById('fashionYoutube').value = i.yt_url || '';
+    document.getElementById('fashionTikTok').value = i.tiktok_spotify_url || '';
+    document.getElementById('fashionMerchId').value = i.merch_product_id || '';
+    document.getElementById('fashionFeatured').checked = i.is_featured || false;
+    document.getElementById('fashionTrending').checked = i.is_trending || false;
+    document.getElementById('fashionFormTitle').textContent = '✏ ' + window.t('edit') + ' — ' + i.name;
+}
+
+function cancelEditFashion() {
+    document.getElementById('editFashionId').value = '';
+    ['fashionName', 'fashionCategory', 'fashionBio', 'fashionProfileImg', 'fashionBannerImg', 'fashionInstagram', 'fashionYoutube', 'fashionTikTok', 'fashionMerchId'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('fashionFeatured').checked = false;
+    document.getElementById('fashionTrending').checked = false;
+    document.getElementById('fashionFormTitle').textContent = '+ New Fashion Profile';
+}
+
+async function saveFashion(event) {
+    if (event) event.preventDefault();
+    var name = document.getElementById('fashionName').value.trim();
+    if (!name) { showToast(window.t('required'), window.t('fashion_name_required'), '#f59e0b'); return; }
+    var payload = {
+        name: name,
+        category: document.getElementById('fashionCategory').value.trim() || null,
+        bio: document.getElementById('fashionBio').value.trim() || null,
+        profile_image_url: document.getElementById('fashionProfileImg').value.trim() || null,
+        banner_image_url: document.getElementById('fashionBannerImg').value.trim() || null,
+        ig_url: document.getElementById('fashionInstagram').value.trim() || null,
+        yt_url: document.getElementById('fashionYoutube').value.trim() || null,
+        tiktok_spotify_url: document.getElementById('fashionTikTok').value.trim() || null,
+        merch_product_id: document.getElementById('fashionMerchId').value.trim() || null,
+        is_featured: document.getElementById('fashionFeatured').checked,
+        is_trending: document.getElementById('fashionTrending').checked
+    };
+    var editId = document.getElementById('editFashionId').value;
+    var isDemo = isDemoId(editId);
+    
+    var btn = (event && event.target) || (window.event && window.event.target) || document.querySelector('button[onclick*="saveFashion"]');
+    var originalText = btn ? btn.textContent : '💾 ' + window.t('save_supabase');
+
+    if (btn) { btn.disabled = true; btn.textContent = window.t('saving'); }
+    try {
+        if (editId && !isDemo) {
+            var res = await sbClient.from(FASHIONS_TABLE).update(payload).eq('id', editId);
+            if (res.error) throw res.error;
+        } else {
+            var res2 = await sbClient.from(FASHIONS_TABLE).insert(payload);
+            if (res2.error) throw res2.error;
+            if (isDemo && typeof demoFashions !== 'undefined') {
+                demoFashions = demoFashions.filter(function (d) { return d.id !== editId; });
+            }
+        }
+        cancelEditFashion(); await loadAdminFashions(); refreshFrontendData();
+        showToast(window.t('saved'), window.t('item_saved_msg', { name: name }));
+    } catch (e) { showToast(window.t('error'), e.message || window.t('db_not_configured'), '#ef4444'); }
+    finally {
+        if (btn) { btn.disabled = false; btn.textContent = originalText; }
+    }
+}
+
+async function deleteFashion(id) {
+    if (!confirm(window.t('delete_confirm_fashion'))) return;
+    var isDemo = isDemoId(id);
+    try {
+        if (!isDemo) {
+            var res = await sbClient.from(FASHIONS_TABLE).delete().eq('id', id);
+            if (res.error) throw res.error;
+        } else if (typeof demoFashions !== 'undefined') {
+            demoFashions = demoFashions.filter(function (d) { return d.id !== id; });
+        }
+        adminFashions = adminFashions.filter(function (i) { return i.id !== id; });
+        renderAdminFashionList(); refreshFrontendData();
+        showToast(window.t('deleted'), window.t('influencer_removed'));
+    } catch (e) { showToast(window.t('error'), window.t('db_not_configured'), '#ef4444'); }
+}
+
+// ===== FASHION UI IMPLEMENTATION =====
+function renderFashions(targetGridId, list) {
+    var grid = document.getElementById(targetGridId); if (!grid) return;
+    if (!list.length) { grid.innerHTML = '<div class="empty-state"><p>' + window.t('no_influencers') + '</p></div>'; return; }
+    grid.innerHTML = list.map(function (a) {
+        var imgHtml = a.profile_image_url ? '<img src="' + a.profile_image_url + '" alt="' + a.name + '" loading="lazy">' : '';
+        return '<div class="artist-card" onclick="openFashionDetail(\'' + a.id + '\')">' +
+            '<div class="artist-card-img">' + imgHtml + '</div>' +
+            '<div class="artist-card-body">' +
+            '<h3 class="artist-card-name">' + a.name + '</h3>' +
+            '<p class="artist-card-release">🌟 ' + (a.category || window.t('cultural_icon') || 'Fashion Icon') + '</p>' +
+            '<div class="artist-card-actions">' +
+            '<button class="btn-sm btn-view-profile" onclick="event.stopPropagation();openFashionDetail(\'' + a.id + '\')">' + window.t('view_profile') + '</button>' +
+            '</div></div></div>';
+    }).join('');
+}
+
+async function openFashionDetail(id) {
+    document.querySelectorAll('.overlay').forEach(ov => ov.classList.remove('open'));
+    
+    var infs = typeof fashions !== 'undefined' ? fashions : [];
+    var a = infs.find(function (x) { return x.id == id; });
+    
+    if (!a && typeof demoFashions !== 'undefined') {
+        a = demoFashions.find(x => x.id === id);
+    }
+    if (!a && sbClient) {
+        try {
+            var res = await sbClient.from(FASHIONS_TABLE).select('*').eq('id', id).single();
+            if (!res.error) a = res.data;
+        } catch (e) { console.error('Fashion lookup failed:', e); }
+    }
+    if (!a) return;
+
+    var overlay = document.getElementById('fashionDetail');
+    if (!overlay) return;
+
+    overlay.classList.add('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    document.getElementById('fashionNameDetail').textContent = a.name;
+    document.getElementById('fashionBioDetail').textContent = a.bio || '';
+    document.getElementById('fashionProfileImgDetail').src = a.profile_image_url || 'https://via.placeholder.com/150';
+    
+    // Media handling
+    var heroWrap = document.getElementById('fashionHero');
+    var mediaContainer = document.getElementById('fashionHeroMedia');
+    if (mediaContainer) {
+        var videoUrl = a.promo_video_url || a.banner_image_url;
+        var mediaHtml = getMediaMarkup(videoUrl, { isHero: true, classes: 'artist-hero-video' });
+        if (mediaHtml.includes('<video') || mediaHtml.includes('<iframe')) {
+            mediaContainer.innerHTML = mediaHtml;
+            heroWrap.style.backgroundImage = 'none';
+        } else {
+            mediaContainer.innerHTML = '';
+            heroWrap.style.backgroundImage = a.banner_image_url ? `url(${a.banner_image_url})` : 'linear-gradient(135deg, #222, #000)';
+        }
+    }
+
+    var ig = document.getElementById('fashionInstaDetail');
+    if (ig) { ig.href = a.ig_url || '#'; ig.style.display = a.ig_url ? 'inline-flex' : 'none'; }
+    var yt = document.getElementById('fashionYoutubeDetail');
+    if (yt) { yt.href = a.yt_url || '#'; yt.style.display = a.yt_url ? 'inline-flex' : 'none'; }
+    var tiktok = document.getElementById('fashionTikTokDetail');
+    if (tiktok) { tiktok.href = a.tiktok_spotify_url || '#'; tiktok.style.display = a.tiktok_spotify_url ? 'inline-flex' : 'none'; }
+
+    // Check for merch
+    var merchSec = document.getElementById('fashionMerchSection');
+    if (merchSec) {
+        if (a.merch_product_id) {
+            merchSec.style.display = 'block';
+            document.getElementById('fashionMerchBtn').onclick = function() {
+                closeDetail();
+                switchPage('shop');
+                setTimeout(() => {
+                    var el = document.getElementById('shopProductList');
+                    if (el) el.scrollIntoView({behavior: 'smooth'});
+                }, 500);
+            };
+        } else {
+            merchSec.style.display = 'none';
+        }
+    }
+}
+window.openFashionDetail = openFashionDetail;
+window.saveFashion = saveFashion;
+window.editFashion = editFashion;
+window.deleteFashion = deleteFashion;
+window.cancelEditFashion = cancelEditFashion;

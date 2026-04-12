@@ -87,19 +87,15 @@
   </header>
 
   <nav id="mainNav">
-    <a href="#" class="active" onclick="event.preventDefault();switchPage('home')" data-page="home"
-      data-i18n="home">Home</a>
+    <a href="#" class="active" onclick="event.preventDefault();switchPage('home')" data-page="home" data-i18n="home">Home</a>
     <a href="#" onclick="event.preventDefault();switchPage('shop')" data-page="shop" data-i18n="shop">Shop</a>
-    <a href="#" onclick="event.preventDefault();switchPage('artists')" data-page="artists"
-      data-i18n="artists">Artists</a>
-    <a href="#" onclick="event.preventDefault();switchPage('trends')" data-page="trends"
-      data-i18n="trends">Trends</a>
-    <a href="#" onclick="event.preventDefault();switchPage('events')" data-page="events"
-      data-i18n="events">Events</a>
-    <a href="#" onclick="event.preventDefault();switchPage('radio')" data-page="radio"
-      data-i18n="radio">Radio</a>
-    <a href="#" onclick="event.preventDefault();switchPage('influencers')" data-page="influencers"
-      data-i18n="influencers">Influencers</a>
+    <a href="#" onclick="event.preventDefault();switchPage('artists')" data-page="artists" data-i18n="artists">Artists</a>
+    <a href="#" onclick="event.preventDefault();switchPage('fashions')" data-page="fashions" data-i18n="fashion">Fashion</a>
+    <a href="#" onclick="event.preventDefault();switchPage('influencers')" data-page="influencers" data-i18n="influencers">Influencers</a>
+    <a href="#" onclick="event.preventDefault();switchPage('articles')" data-page="articles" data-i18n="articles">Articles</a>
+    <a href="#" onclick="event.preventDefault();switchPage('trends')" data-page="trends" data-i18n="trends">Trends</a>
+    <a href="#" onclick="event.preventDefault();switchPage('events')" data-page="events" data-i18n="events">Events</a>
+    <a href="#" onclick="event.preventDefault();switchPage('radio')" data-page="radio" data-i18n="radio">Radio</a>
   </nav>
 
 
@@ -156,6 +152,20 @@
       </div>
       <div style="text-align:center; margin-top:2rem">
         <button class="btn-premium-rect" onclick="switchPage('influencers')" data-i18n="view_all_influencers">View All Influencers</button>
+      </div>
+    </section>
+
+    <!-- Fashion & Style Section -->
+    <section class="artists-section" id="featuredFashionsPreview">
+      <div class="section-header">
+        <div class="section-label" data-i18n="fashion">🔥 Trends & Threads</div>
+        <h2 class="section-title" data-i18n="fashion_title">FASHION & STYLE</h2>
+      </div>
+      <div class="artists-grid" id="featuredFashionsGrid">
+        <!-- JS populated -->
+      </div>
+      <div style="text-align:center; margin-top:2rem">
+        <button class="btn-premium-rect" onclick="switchPage('fashions')" data-i18n="view_all_fashion">View All Fashion</button>
       </div>
     </section>
 
@@ -431,6 +441,23 @@
     </div>
   </div>
 
+  <!-- ===== FASHION PAGE ===== -->
+  <div class="page-section" id="page-fashions">
+    <div class="section-hero" id="hero-fashions">
+      <div class="hero-media-bg"></div>
+      <div class="section-hero-overlay"></div>
+      <div class="hero-content">
+        <h1 data-i18n="fashion_title">FASHION & STYLE</h1>
+        <p>Exploring the trends through the eyes of the creators.</p>
+      </div>
+    </div>
+    <div class="section-wrap">
+      <div class="artists-grid" id="allFashionsGrid">
+        <p style="text-align:center;color:#666;padding:4rem" data-i18n="loading_fashions">Loading fashion...</p>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== CART PANEL ===== -->
   <div class="cart-panel" id="cartPanel">
     <div class="cart-header">
@@ -553,6 +580,7 @@
         <div class="admin-tab" onclick="showAdminTab('threads-admin', this)" data-i18n="threads">Threads</div>
         <div class="admin-tab" onclick="showAdminTab('events-admin', this)" data-i18n="events">Events</div>
         <div class="admin-tab" onclick="showAdminTab('influencers-admin', this)" data-i18n="influencers">Influencers</div>
+        <div class="admin-tab" onclick="showAdminTab('fashions-admin', this)" data-i18n="fashion">Fashion</div>
         <div class="admin-tab" onclick="showAdminTab('radio-admin', this)" data-i18n="radio">📻 Radio</div>
         <div class="admin-tab" onclick="showAdminTab('hero-media', this)" data-i18n="hero_media_config">🎬 Hero Media</div>
         <div class="admin-tab" onclick="showAdminTab('featured-promo', this)" data-i18n="manage_promo">💎 Featured Promo</div>
@@ -742,6 +770,56 @@
             <div class="admin-form-actions" style="margin-top:1.5rem">
               <button class="btn-save" onclick="saveInfluencer(event)" data-i18n="save_influencer">💾 Save Influencer</button>
               <button class="btn-cancel-admin" onclick="cancelEditInfluencer()" data-i18n="cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== FASHIONS ADMIN TAB ===== -->
+        <div id="adminTabFashions" style="display:none">
+          <div id="adminFashionList" class="admin-product-list" style="margin-bottom:2rem">
+            <p style="color:#666;text-align:center;padding:2rem">Loading fashion...</p>
+          </div>
+          <div class="admin-form" id="fashionFormSection">
+            <h3 id="fashionFormTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--primary);margin-bottom:0.5rem">+ New Fashion Profile</h3>
+            <input type="hidden" id="editFashionId" value="">
+            <div class="admin-grid">
+              <div><label data-i18n="name">Name / Brand *</label><input type="text" id="fashionName" placeholder="Name"></div>
+              <div><label data-i18n="category">Category</label><input type="text" id="fashionCategory" placeholder="e.g. Designer, Model"></div>
+            </div>
+            <div><label data-i18n="bio">Bio</label><textarea id="fashionBio" placeholder="Bio..."></textarea></div>
+            <div class="admin-grid">
+              <div class="field-with-upload">
+                <label data-i18n="profile_img">Profile Image URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="fashionProfileImg" placeholder="URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('fashionProfileImgFile').click()">📷</button>
+                  <input type="file" id="fashionProfileImgFile" style="display:none" onchange="handleAdminMediaUpload(event, 'fashionProfileImg', 'fashions')">
+                </div>
+              </div>
+              <div class="field-with-upload">
+                <label data-i18n="banner_img_video">Banner / Video URL</label>
+                <div class="input-upload-group">
+                  <input type="text" id="fashionBannerImg" placeholder="URL">
+                  <button class="btn-upload-trigger" onclick="document.getElementById('fashionBannerImgFile').click()">📷</button>
+                  <input type="file" id="fashionBannerImgFile" style="display:none" onchange="handleAdminMediaUpload(event, 'fashionBannerImg', 'fashions')">
+                </div>
+              </div>
+            </div>
+            <div class="admin-grid">
+              <div><label data-i18n="instagram_url">Instagram URL</label><input type="url" id="fashionInstagram" placeholder="URL"></div>
+              <div><label data-i18n="youtube_url">YouTube URL</label><input type="url" id="fashionYoutube" placeholder="URL"></div>
+            </div>
+            <div class="admin-grid">
+               <div><label data-i18n="tiktok_url">TikTok URL</label><input type="url" id="fashionTikTok" placeholder="TikTok URL"></div>
+               <div><label>Merch Product ID</label><input type="text" id="fashionMerchId" placeholder="Supabase ID of shop entry"></div>
+            </div>
+            <div style="display:flex;gap:1.5rem;align-items:center;padding:.5rem 0">
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="fashionFeatured" style="accent-color:var(--primary);width:18px;height:18px"> <span data-i18n="featured_label">⭐ Featured</span></label>
+              <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="fashionTrending" style="accent-color:#ef4444;width:18px;height:18px"> <span data-i18n="trending">🔥 Trending</span></label>
+            </div>
+            <div class="admin-form-actions">
+              <button class="btn-save" onclick="saveFashion(event)" data-i18n="save">💾 Save Fashion</button>
+              <button class="btn-cancel-admin" onclick="cancelEditFashion()" data-i18n="cancel">Cancel</button>
             </div>
           </div>
         </div>
@@ -1396,6 +1474,44 @@
             <a id="influencerYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
             <a id="influencerTikTokDetail" href="#" target="_blank" class="social-icon">TIKTOK</a>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fashionDetail" class="overlay">
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="fashion">FASHION</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn"
+          onclick="shareContent(document.getElementById('fashionNameDetail').textContent, window.location.href, document.getElementById('fashionProfileImgDetail').src)">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
+      </div>
+      <div id="fashionHero" class="artist-hero-detail">
+        <div id="fashionHeroMedia" class="hero-media-bg"></div>
+        <div class="artist-hero-inner">
+          <img id="fashionProfileImgDetail" src="" alt="" class="artist-profile-img-large">
+          <div class="hero-text-content">
+            <h2 id="fashionNameDetail" class="premium-title"></h2>
+            <p id="fashionBioDetail" class="artist-bio-large"></p>
+          </div>
+        </div>
+      </div>
+      <div class="detail-container">
+        <div class="detail-section">
+          <h3 data-i18n="connect">📱 Connect</h3>
+          <div class="social-links-detail">
+            <a id="fashionInstaDetail" href="#" target="_blank" class="social-icon">IG</a>
+            <a id="fashionYoutubeDetail" href="#" target="_blank" class="social-icon">YT</a>
+            <a id="fashionTikTokDetail" href="#" target="_blank" class="social-icon">TIKTOK</a>
+          </div>
+        </div>
+        <div class="detail-section" id="fashionShopSection" style="display:none">
+          <h3 data-i18n="shop_merch">🛍 Shop Merch</h3>
+          <button class="btn-premium-rect" id="fashionMerchBtn" onclick="switchPage('shop')" data-i18n="view_in_shop">View in Shop</button>
         </div>
       </div>
     </div>
