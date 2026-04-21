@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fueled By Creation - V1.3.9 (Code 39)</title>
-  <meta name="description"
-    content="Fueled By Creation - V1.3.9 (Code 39) - Your hub for artist showcases, trending culture, exclusive merch, and live events.">
+  <title>Fueled By Creation - V1.3.11 (Code 41)</title>
+  <meta name="description" content="Fueled By Creation - V1.3.11 (Code 41) - Your hub for artist showcases, trending culture, exclusive merch, and live events.">
   <link rel="canonical" href="/">
   <meta name="theme-color" content="#FF6B35">
   <!-- PWA -->
@@ -133,7 +132,18 @@
         <div class="section-label" data-i18n="featured_mixes">📻 Featured Mixes</div>
         <h2 class="section-title" data-i18n="radio_title">THE RADIO</h2>
       </div>
-      <div class="playlist-grid" id="featuredRadioGrid">
+
+      <!-- WAV3 Premium Banner -->
+      <div class="wav3-banner" onclick="openWav3Detail()">
+        <div class="wav3-banner-bg"></div>
+        <div class="wav3-banner-content">
+          <h3>WAV3 PROJECT</h3>
+          <p>Live Web Radio & Podcasts</p>
+          <span class="wav3-btn">Listen Live ▶</span>
+        </div>
+      </div>
+
+      <div class="playlist-grid" id="featuredRadioGrid" style="margin-top:2rem">
         <!-- JS populated -->
       </div>
       <div style="text-align:center; margin-top:2rem">
@@ -431,6 +441,14 @@
       <div class="hero-content">
         <h1 data-i18n="radio">FBC RADIO</h1>
         <p>Exclusive mixes and artist playlists.</p>
+        
+        <div class="radio-embed-container">
+          <iframe src="https://player.radioking.io/fueled-by-creation/?f=v&v=3&s=0&ii=0&p=1&m=w&cb=6ed42b&ce=eb0b03" allowtransparency="true"></iframe>
+        </div>
+        
+        <a href="https://fueled-by-creation.page.radio" target="_blank" class="radio-external-link" style="color: white; opacity: 0.7;">
+          View on Radio King ↗
+        </a>
       </div>
     </section>
 
@@ -1529,11 +1547,13 @@
         <button class="overlay-close-premium" onclick="closeDetail()">✕</button>
       </div>
       <div id="artistHero" class="artist-hero-detail">
-        <div id="artistHeroMedia"></div>
+        <div id="artistHeroMedia" class="hero-media-bg"></div>
         <div class="artist-hero-inner">
           <img id="artistProfileImgDetail" src="" alt="" class="artist-profile-img-large">
-          <h2 id="artistNameDetail" class="premium-title"></h2>
-          <p id="artistBioDetail" class="artist-bio-large"></p>
+          <div class="artist-info-wrap">
+            <h2 id="artistNameDetail" class="premium-title"></h2>
+            <p id="artistBioDetail" class="artist-bio-large"></p>
+          </div>
         </div>
       </div>
       <div class="detail-container">
@@ -1613,6 +1633,63 @@
         <p id="eventDescDetail" class="event-desc"></p>
         <a id="eventTicketBtnDetail" href="#" target="_blank" class="btn-secondary btn-full" style="text-decoration:none;display:block;text-align:center;margin-bottom:1rem" data-i18n="buy_tickets">🎫 Get Tickets</a>
         <button id="eventJoinBtn" class="btn-primary btn-full" data-i18n="join_exclusive_event">Join Exclusive Event</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="wav3Detail" class="overlay">
+    <div class="overlay-content premium" style="position:relative">
+      <div class="overlay-header-bar">
+        <h2 data-i18n="wav3_project">WAV3 PROJECT</h2>
+        <div style="flex:1"></div>
+        <button class="overlay-share-btn" onclick="shareContent('WAV3 Project', 'https://fueled-by-creation.page.radio', '')">
+          <span style="font-size: 1.2rem;">↗</span> <span data-i18n="share">Share</span>
+        </button>
+        <button class="overlay-close-premium" onclick="closeWav3Detail()">✕</button>
+      </div>
+      
+      <div class="wav3-hero">
+        <div class="wav3-hero-bg"></div>
+        <div class="wav3-hero-content">
+          <h2 class="premium-title">LIVE WEB RADIO</h2>
+          <p class="wav3-subtitle">Broadcasting Culture, Music & Lifestyle</p>
+          
+          <div class="radio-embed-container mini">
+            <iframe src="https://player.radioking.io/fueled-by-creation/?f=h&v=3&s=0&ii=0&p=1&m=w&cb=6ed42b&ce=eb0b03" allowtransparency="true"></iframe>
+          </div>
+          
+          <a href="https://fueled-by-creation.page.radio" target="_blank" class="radio-external-link">
+            Launch Full Radio King 📻 ↗
+          </a>
+        </div>
+      </div>
+      
+      <div class="detail-container">
+        <div class="detail-section">
+          <h3>THE ADVENTURE</h3>
+          <p style="color:var(--gray); font-size:1.05rem; line-height:1.7">WAV3 is our dedicated platform for discovering the freshest talent and deepest cultural discussions. Tune in live or explore our growing library of podcasts featuring the next generation of 15 MCs changing the landscape.</p>
+        </div>
+        
+        <div class="detail-section">
+          <h3>KROMOZONE PODCAST</h3>
+          <p style="color:var(--gray); font-size:1.05rem; line-height:1.7; margin-bottom:1.5rem">Go behind the scenes with our premium podcast series, 'KROMOZONE'. We dive deep into the making-of stories, artist showcases, and raw interviews.</p>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.5rem">
+            <div class="featured-article-card" style="box-shadow:none; border:1px solid var(--border)">
+              <div class="card-img" style="background-image:url('https://images.unsplash.com/photo-1593697821252-0c9137d9fc45?auto=format&fit=crop&q=80&w=600'); height:180px; width:100%; display:block"></div>
+              <div class="card-body" style="padding:1.5rem">
+                <h3 style="font-size:1.4rem">Episode 1: The Genesis</h3>
+                <p>An inside look at the origins of the WAV3 project...</p>
+              </div>
+            </div>
+            <div class="featured-article-card" style="box-shadow:none; border:1px solid var(--border)">
+              <div class="card-img" style="background-image:url('https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&q=80&w=600'); height:180px; width:100%; display:block"></div>
+              <div class="card-body" style="padding:1.5rem">
+                <h3 style="font-size:1.4rem">Episode 2: The Studio</h3>
+                <p>Join us in the studio as we record the first sessions...</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

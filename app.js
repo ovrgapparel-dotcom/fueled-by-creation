@@ -2301,12 +2301,23 @@ function closeDetail() {
     document.getElementById('eventDetail').classList.remove('open');
     document.getElementById('influencerDetail').classList.remove('open');
     var fd = document.getElementById('fashionDetail'); if(fd) fd.classList.remove('open');
+    var wd = document.getElementById('wav3Detail'); if(wd) wd.classList.remove('open');
     window.location.hash = currentPage;
 }
 
 function closeArtistDetail() { closeDetail(); }
 function closeArticleDetail() { closeDetail(); }
 function closeFashionDetail() { closeDetail(); }
+function closeWav3Detail() { closeDetail(); }
+
+function openWav3Detail() {
+    document.querySelectorAll('.overlay').forEach(ov => ov.classList.remove('open'));
+    var wd = document.getElementById('wav3Detail');
+    if (wd) {
+        wd.classList.add('open');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
 
 // ===== UTILITIES =====
 function fmt(n) { return Number(n).toLocaleString('fr-FR') + ' ' + window.t('fcfa'); }
@@ -3034,6 +3045,8 @@ window.openEventDetail = openEventDetail;
 window.openInfluencerDetail = openInfluencerDetail;
 console.log('--- GLOBAL EXPORT: openInfluencerDetail assigned:', typeof window.openInfluencerDetail);
 window.closeDetail = closeDetail;
+window.openWav3Detail = openWav3Detail;
+window.closeWav3Detail = closeWav3Detail;
 window.openEventPaymentGate = openEventPaymentGate;
 window.closeEventPaymentGate = closeEventPaymentGate;
 window.processEventPayment = processEventPayment;
