@@ -5065,3 +5065,98 @@ footer {
 #vlogDetail .detail-meta {
   margin-bottom: 1rem; /* Less space after meta */
 }
+
+/* ===== VLOG SHOWCASE GRID (HOME) ===== */
+.vlogs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.vlog-hero {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+    cursor: pointer;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+}
+
+.vlog-hero:hover {
+    transform: translateY(-5px);
+}
+
+.vlog-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vlog-hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 4rem 2rem 2rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.vlog-hero-tag {
+    background: var(--primary);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: fit-content;
+    margin-bottom: 1rem;
+}
+
+.vlog-hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.vlog-hero-meta {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.vlog-thumbnails-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.vlog-play-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 2px solid white;
+    transition: all 0.3s ease;
+}
+
+.vlog-hero:hover .vlog-play-badge {
+    background: var(--primary);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
