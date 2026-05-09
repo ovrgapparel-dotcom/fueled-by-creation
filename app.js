@@ -129,6 +129,11 @@ function switchPage(page) {
     // When opening Trends page: ensure pinned item is rendered
     if (page === 'trends') loadHotTopics();
     
+    // When opening Articles page: render hero
+    if (page === 'articles') {
+        loadSectionHeroMedia('articles', 'hero-articles');
+    }
+
     // When opening Radio page: render playlists and hero
     if (page === 'radio') {
         renderRadio();
@@ -185,6 +190,7 @@ var currentHeroUrl = HERO_VIDEO_URL;
 var sectionHeroes = {
     shop: '',
     artists: '',
+    articles: '',
     trends: '',
     events: '',
     radio: ''
@@ -194,7 +200,7 @@ async function loadHeroConfig() {
     if (!sbClient) return;
     try {
         const { data, error } = await sbClient.from(CONFIG_TABLE).select('*').in('key', [
-            'hero_video_url', 'shop_hero_url', 'artists_hero_url', 'trends_hero_url', 'events_hero_url', 'radio_hero_url'
+            'hero_video_url', 'shop_hero_url', 'artists_hero_url', 'articles_hero_url', 'trends_hero_url', 'events_hero_url', 'radio_hero_url'
         ]);
         if (error) {
             if (error.code !== 'PGRST116') console.error('Error loading hero config:', error);
@@ -217,6 +223,7 @@ async function loadHeroConfig() {
             loadHeroMedia();
             loadSectionHeroMedia('shop', 'hero-shop');
             loadSectionHeroMedia('artists', 'hero-artists');
+            loadSectionHeroMedia('articles', 'hero-articles');
             loadSectionHeroMedia('trends', 'hero-trends');
             loadSectionHeroMedia('events', 'hero-events');
             loadSectionHeroMedia('radio', 'hero-radio');
@@ -233,6 +240,7 @@ async function saveHeroConfig() {
         hero_video_url: document.getElementById('heroVideoInput')?.value.trim() || '',
         shop_hero_url: document.getElementById('shopHeroInput')?.value.trim() || '',
         artists_hero_url: document.getElementById('artistsHeroInput')?.value.trim() || '',
+        articles_hero_url: document.getElementById('articlesHeroInput')?.value.trim() || '',
         trends_hero_url: document.getElementById('trendsHeroInput')?.value.trim() || '',
         events_hero_url: document.getElementById('eventsHeroInput')?.value.trim() || '',
         radio_hero_url: document.getElementById('radioHeroInput')?.value.trim() || ''
@@ -550,16 +558,184 @@ function renderThreads(targetListId, threadList) {
     list.innerHTML = sortedThreads.map(function (t) {
         var tagClass = { Hot: 'hot', Trend: 'trend', News: 'news' }[t.tag] || 'trend';
         var threadTagText = window.i18n ? window.i18n.t(t.tag.toLowerCase()) : t.tag;
-        return '<div class="thread-card">' +
+        return '<div class="thread-card" style="cursor:pointer" onclick="handleThreadAction(\'' + t.id + '\', \'view\')">' +
             '<div class="thread-tag-wrap"><span class="thread-tag ' + tagClass + '">' + threadTagText + '</span></div>' +
             '<div class="thread-info"><h4 class="thread-title">' + t.title + '</h4><p class="thread-hook">' + (t.hook_text || '') + '</p></div>' +
             '<div class="thread-actions-grid">' +
-            '<button class="thread-action-btn"><span>🔥</span><span class="count">' + (t.likes || 0) + '</span></button>' +
-            '<button class="thread-action-btn"><span>💬</span><span class="count">' + (t.comments || 0) + '</span></button>' +
+            '<button class="thread-action-btn" onclick="event.stopPropagation(); handleThreadAction(\'' + t.id + '\', \'like\', this)"><span>🔥</span><span class="count">' + (t.likes || 0) + '</span></button>' +
+            '<button class="thread-action-btn" onclick="event.stopPropagation(); handleThreadAction(\'' + t.id + '\', \'comment\', this)"><span>💬</span><span class="count">' + (t.comments || 0) + '</span></button>' +
             '<button class="thread-action-btn"><span>👀</span><span class="count">' + (t.views || 0) + '</span></button>' +
             '</div>' +
             '</div>';
     }).join('');
+}
+
+async function handleThreadAction(threadId, action, btn) {
+    if (action === 'comment') {
+        openComments(threadId);
+        return;
+    }
+    
+    if (action === 'like') {
+        var likedKey = 'liked_thread_' + threadId;
+        if (localStorage.getItem(likedKey)) {
+            showToast('Already Liked', 'You have already liked this topic.', '#f59e0b');
+            return;
+        }
+        
+        if (btn) {
+            var countEl = btn.querySelector('.count');
+            if (countEl) {
+                var current = parseInt(countEl.textContent) || 0;
+                countEl.textContent = current + 1;
+            }
+            btn.style.color = '#ef4444';
+            btn.style.borderColor = '#ef4444';
+        }
+        localStorage.setItem(likedKey, 'true');
+        
+        if (typeof sbClient !== 'undefined' && sbClient) {
+            try {
+                var res = await sbClient.from('threads').select('likes').eq('id', threadId).single();
+                if (res.data) {
+                    await sbClient.from('threads').update({ likes: res.data.likes + 1 }).eq('id', threadId);
+                }
+            } catch(e) { console.warn('Like update failed', e); }
+        }
+    }
+    
+    if (action === 'view') {
+        if (typeof sbClient !== 'undefined' && sbClient) {
+            try {
+                var resView = await sbClient.from('threads').select('views').eq('id', threadId).single();
+                if (resView.data) {
+                    await sbClient.from('threads').update({ views: resView.data.views + 1 }).eq('id', threadId);
+                }
+            } catch(e) { console.warn('View update failed', e); }
+        }
+        showToast('Opening Topic', 'Topic details view opening...', '#22c55e');
+    }
+}
+
+var currentCommentThreadId = null;
+
+async function openComments(threadId) {
+    currentCommentThreadId = threadId;
+    var overlay = document.getElementById('commentsOverlay');
+    if (!overlay) return;
+    overlay.classList.add('open');
+    overlay.style.display = 'flex';
+    
+    var feed = document.getElementById('commentsFeed');
+    feed.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--gray);">Loading comments...</div>';
+    
+    if (typeof sbClient !== 'undefined' && sbClient) {
+        try {
+            var tRes = await sbClient.from('threads').select('title').eq('id', threadId).single();
+            if (tRes && tRes.data) {
+                document.getElementById('commentsThreadTitle').textContent = 'Comments: ' + tRes.data.title;
+            } else {
+                document.getElementById('commentsThreadTitle').textContent = 'Community Comments';
+            }
+
+            var { data, error } = await sbClient.from('thread_comments')
+                .select('*')
+                .eq('thread_id', threadId)
+                .order('created_at', { ascending: true });
+                
+            if (error) throw error;
+            renderCommentsFeed(data || []);
+        } catch (e) {
+            console.error('Error fetching comments:', e);
+            feed.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--accent);">Failed to load comments. Did you run the SQL snippet?</div>';
+        }
+    }
+}
+
+function renderCommentsFeed(comments) {
+    var feed = document.getElementById('commentsFeed');
+    if (!comments || comments.length === 0) {
+        feed.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--gray);">No comments yet. Be the first to fuel the culture!</div>';
+        return;
+    }
+    
+    feed.innerHTML = comments.map(function(c) {
+        var d = new Date(c.created_at);
+        var timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        return '<div style="background:rgba(255,255,255,0.05); padding:1rem; border-radius:12px;">' +
+               '<div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.85rem;">' +
+               '<span style="font-weight:bold; color:var(--primary);">' + (c.author_name || 'Guest') + '</span>' +
+               '<span style="color:var(--gray);">' + timeStr + '</span>' +
+               '</div>' +
+               '<div style="color:#eee; line-height:1.4;">' + c.content + '</div>' +
+               '</div>';
+    }).join('');
+    
+    setTimeout(function() { feed.scrollTop = feed.scrollHeight; }, 100);
+}
+
+function closeComments() {
+    var overlay = document.getElementById('commentsOverlay');
+    if (overlay) {
+        overlay.classList.remove('open');
+        overlay.style.display = '';
+    }
+    currentCommentThreadId = null;
+    document.getElementById('commentContentInput').value = '';
+}
+
+async function submitComment() {
+    if (!currentCommentThreadId) return;
+    
+    var authorInput = document.getElementById('commentAuthorInput');
+    var contentInput = document.getElementById('commentContentInput');
+    var btn = document.getElementById('submitCommentBtn');
+    
+    var author = authorInput.value.trim() || 'Guest';
+    var content = contentInput.value.trim();
+    
+    if (!content) {
+        showToast('Error', 'Please write a comment first.', '#ef4444');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = 'Posting...';
+    
+    if (typeof sbClient !== 'undefined' && sbClient) {
+        try {
+            var { error: insertErr } = await sbClient.from('thread_comments').insert([{
+                thread_id: currentCommentThreadId,
+                author_name: author,
+                content: content
+            }]);
+            if (insertErr) throw insertErr;
+            
+            var { data: tData } = await sbClient.from('threads').select('comments').eq('id', currentCommentThreadId).single();
+            if (tData) {
+                await sbClient.from('threads').update({ comments: (tData.comments || 0) + 1 }).eq('id', currentCommentThreadId);
+            }
+            
+            contentInput.value = '';
+            openComments(currentCommentThreadId);
+            showToast('Success', 'Comment posted!', '#22c55e');
+            
+            // Re-render threads locally to show updated count
+            var tRes = await sbClient.from('threads').select('*').eq('status', 'Active').order('priority_order');
+            if(tRes.data) {
+                renderThreads('allThreadsList', tRes.data);
+            }
+            
+        } catch(e) {
+            console.error('Error posting comment:', e);
+            showToast('Error', 'Failed to post comment. Ensure the database table exists.', '#ef4444');
+        }
+    } else {
+        showToast('Demo Mode', 'Comments require database connection.', '#f59e0b');
+    }
+    
+    btn.disabled = false;
+    btn.textContent = 'Post';
 }
 
 
@@ -593,11 +769,13 @@ function filterProducts(filter, btn) {
     btn.classList.add('active'); renderCatalogue(filter);
 }
 
-function filterTrends(filter, btn) {
-    document.querySelectorAll('#trendsFilterTabs .filter-tab').forEach(function (b) { b.classList.remove('active'); });
+function filterArticles(filter, btn) {
+    document.querySelectorAll('#articlesFilterTabs .filter-tab').forEach(function (b) { b.classList.remove('active'); });
     btn.classList.add('active');
-    var filtered = filter === 'all' ? demoArticles : demoArticles.filter(function (a) { return a.category === filter; });
-    renderArticles('allArticlesGrid', filtered);
+    var cachedArt = localStorage.getItem('cached_articles');
+    var articlesList = cachedArt ? JSON.parse(cachedArt) : (typeof demoArticles !== 'undefined' ? demoArticles : []);
+    var filtered = filter === 'all' ? articlesList : articlesList.filter(function (a) { return a.category === filter; });
+    renderArticles('standaloneArticlesGrid', filtered);
 }
 
 
@@ -1899,6 +2077,7 @@ async function refreshFrontendData() {
     }
     renderFeaturedArticlesSplit('featuredArticlesGrid', displayArticles.filter(function (a) { return a.is_featured; }));
     renderArticles('allArticlesGrid', displayArticles);
+    renderArticles('standaloneArticlesGrid', displayArticles);
 
     try {
         var tRes = await sbClient.from('threads').select('*').eq('status', 'Active').order('priority_order');
@@ -3052,9 +3231,13 @@ window.closeEventPaymentGate = closeEventPaymentGate;
 window.processEventPayment = processEventPayment;
 
 window.loadHotTopics = loadHotTopics;
-window.filterTrends = filterTrends;
+window.filterArticles = filterArticles;
+window.handleThreadAction = handleThreadAction;
 window.handleTopicLike = handleTopicLike;
 window.viewTopicDetail = viewTopicDetail;
+window.openComments = openComments;
+window.closeComments = closeComments;
+window.submitComment = submitComment;
 
 window.fmt = fmt;
 window.fmtUSD = fmtUSD;
