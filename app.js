@@ -2875,7 +2875,7 @@ async function loadHotTopics() {
                 '</div>' +
                 '<div class="thread-info">' +
                 '<h4 class="thread-title">' + t.title + '</h4>' +
-                '<p class="thread-hook">' + (t.content.substring(0, 100)) + '...</p>' +
+                '<p class="thread-hook">' + ((t.content || '').substring(0, 100)) + '...</p>' +
                 '</div>' +
                 '<div class="thread-actions-grid">' +
                 '<button class="thread-action-btn" onclick="event.stopPropagation();handleTopicLike(\'' + t.id + '\')">' +

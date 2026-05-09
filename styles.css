@@ -4978,7 +4978,7 @@ footer {
 
 .premium-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 4rem;
+  font-size: 2.5rem;
   color: var(--dark);
   line-height: 1;
   margin-bottom: 1rem;
@@ -5020,3 +5020,34 @@ footer {
   border-radius: 12px;
 }
 
+
+#vlogDetail .overlay-content.premium {
+  max-width: 1100px;
+  width: 95%;
+  padding: 0;
+  overflow: hidden;
+}
+
+#vlogDetail .vlog-player-container {
+  background: #000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+#vlogDetail .overlay-header-bar {
+  padding: 1rem 2rem;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+#vlogDetail .detail-container {
+  padding: 2rem 3rem 3rem;
+}
+
+#vlogDetail .premium-title {
+  font-size: 2.2rem;
+  letter-spacing: -0.02em;
+}
+
+#vlogDetail .detail-layout {
+  gap: 4rem;
+}
