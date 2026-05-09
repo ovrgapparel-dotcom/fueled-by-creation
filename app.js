@@ -2961,20 +2961,50 @@ function renderVlogs(targetGridId, vlogList) {
         grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎥</div><p>' + (window.t ? window.t('no_vlogs') : 'No vlogs yet.') + '</p></div>';
         return;
     }
-    grid.innerHTML = vlogList.map(function (v) {
-        var thumb = v.cover_image_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800';
-        return '<div class="video-card" onclick="openVlogDetail(\'' + v.id + '\')">' +
-            '<div class="video-card-img" style="background-image:url(\'' + thumb + '\')">' +
-            '<div class="play-icon">▶</div>' +
-            '</div>' +
-            '<div class="video-card-body">' +
-            '<span class="video-card-tag">' + (window.t ? window.t('vlog_series') : 'Original Series') + '</span>' +
-            '<h3 class="video-card-title">' + v.title + '</h3>' +
-            '<div class="video-card-meta">' +
-            '<span>👤 ' + (v.author || 'FBC') + '</span>' +
-            '<span>🔥 ' + (v.likes || 0) + '</span>' +
-            '</div></div></div>';
-    }).join('');
+
+    // Split into Hero and Thumbnails
+    var hero = vlogList[0];
+    var thumbnails = vlogList.slice(1);
+
+    var heroHtml = `
+        <div class="vlog-hero" onclick="openVlogDetail('${hero.id}')">
+            <img class="vlog-hero-img" src="${hero.cover_image_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=1200'}" alt="hero">
+            <div class="vlog-play-badge">▶</div>
+            <div class="vlog-hero-overlay">
+                <span class="vlog-hero-tag">${window.t ? window.t('vlog_series') : '🔥 Original Series'}</span>
+                <h3 class="vlog-hero-title">${hero.title}</h3>
+                <div class="vlog-hero-meta">
+                    <span>👤 ${hero.author || 'FBC'}</span> • 
+                    <span>📅 ${formatDate(hero.publish_date)}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    var thumbHtml = thumbnails.length > 0 ? `
+        <div class="vlog-thumbnails-grid">
+            ${thumbnails.map(function(v) {
+                var thumb = v.cover_image_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800';
+                return `
+                    <div class="video-card" onclick="openVlogDetail('${v.id}')">
+                        <div class="video-card-img" style="background-image:url('${thumb}')">
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-card-body">
+                            <span class="video-card-tag">${window.t ? window.t('vlog_series') : 'Original Series'}</span>
+                            <h3 class="video-card-title">${v.title}</h3>
+                            <div class="video-card-meta">
+                                <span>👤 ${v.author || 'FBC'}</span>
+                                <span>🔥 ${v.likes || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    ` : '';
+
+    grid.innerHTML = '<div class="vlogs-container">' + heroHtml + thumbHtml + '</div>';
 }
 
 async function openVlogDetail(vlogId) {
