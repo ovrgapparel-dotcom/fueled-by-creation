@@ -4874,3 +4874,149 @@ footer {
 .radio-external-link:hover {
     opacity: 0.8;
 }
+
+/* ===== VIDEO SHOWCASE ===== */
+#videoShowcaseGrid {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.video-card {
+  background: var(--dark2);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.video-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.video-card-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-card-img .play-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255,107,53,0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  opacity: 0;
+  transition: all 0.3s;
+  transform: scale(0.8);
+}
+
+.video-card:hover .play-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.video-card-body {
+  padding: 1.5rem;
+}
+
+.video-card-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.video-card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.video-card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+/* ===== VLOG DETAIL OVERLAY ===== */
+.vlog-player-container iframe, 
+.vlog-player-container video {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 3rem;
+}
+
+@media (max-width: 1024px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.premium-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;
+  color: var(--dark);
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.detail-meta {
+  font-size: 1rem;
+  color: var(--gray);
+  margin-bottom: 2rem;
+}
+
+.premium-desc {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #444;
+}
+
+.sidebar-interactions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.mini-comments-feed {
+  max-height: 400px;
+  overflow-y: auto;
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mini-comment-input {
+  background: #f0f0f0;
+  padding: 1rem;
+  border-radius: 12px;
+}
+

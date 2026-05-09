@@ -1169,7 +1169,8 @@ function showAdminTab(tab, el) {
         'radio-admin': 'adminTabRadio',
         'hero-media': 'adminTabHeroMedia',
         'featured-promo': 'adminTabFeaturedPromo',
-        'notifications-admin': 'adminTabNotifications'
+        'notifications-admin': 'adminTabNotifications',
+        'vlogs-admin': 'adminTabVlogs'
     };
     Object.values(tabMap).forEach(function (id) { var el2 = document.getElementById(id); if (el2) el2.style.display = 'none'; });
     var target = document.getElementById(tabMap[tab]);
@@ -1177,6 +1178,7 @@ function showAdminTab(tab, el) {
     
     // UI Initialization for specific tabs
     if (tab === 'add') renderAdminImgSlots();
+    if (tab === 'vlogs-admin') loadAdminVlogs();
 
     // Lazy-load data when switching tabs
     if (tab === 'artists-admin') loadAdminArtists();
@@ -2134,6 +2136,12 @@ async function refreshFrontendData() {
         await renderRadio('playlistGrid');
     } catch (e) { console.error('Error refreshing radio:', e); }
 
+    try {
+        var vRes = await sbClient.from('vlogs').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
+        currentVlogs = (!vRes.error && vRes.data) ? vRes.data : [];
+        renderVlogs('videoShowcaseGrid', currentVlogs);
+    } catch (e) { console.error('Error refreshing vlogs:', e); }
+
     if (currentPage === 'home') loadHeroMedia();
 
     // Final translation pass
@@ -2941,6 +2949,223 @@ async function handleTopicLike(id) {
     }
 }
 
+// ===================================================================
+// ===== VLOG SHOWCASE & VIDEO PLAYER ===============================
+// ===================================================================
+var currentVlogs = [];
+var currentVlogId = null;
+
+function renderVlogs(targetGridId, vlogList) {
+    var grid = document.getElementById(targetGridId); if (!grid) return;
+    if (!vlogList.length) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎥</div><p>' + (window.t ? window.t('no_vlogs') : 'No vlogs yet.') + '</p></div>';
+        return;
+    }
+    grid.innerHTML = vlogList.map(function (v) {
+        var thumb = v.cover_image_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800';
+        return '<div class="video-card" onclick="openVlogDetail(\'' + v.id + '\')">' +
+            '<div class="video-card-img" style="background-image:url(\'' + thumb + '\')">' +
+            '<div class="play-icon">▶</div>' +
+            '</div>' +
+            '<div class="video-card-body">' +
+            '<span class="video-card-tag">' + (window.t ? window.t('vlog_series') : 'Original Series') + '</span>' +
+            '<h3 class="video-card-title">' + v.title + '</h3>' +
+            '<div class="video-card-meta">' +
+            '<span>👤 ' + (v.author || 'FBC') + '</span>' +
+            '<span>🔥 ' + (v.likes || 0) + '</span>' +
+            '</div></div></div>';
+    }).join('');
+}
+
+async function openVlogDetail(vlogId) {
+    currentVlogId = vlogId;
+    var vlog = currentVlogs.find(function(v) { return v.id === vlogId; });
+    if (!vlog) {
+        var res = await sbClient.from('vlogs').select('*').eq('id', vlogId).single();
+        if (res.data) vlog = res.data;
+    }
+    if (!vlog) return;
+
+    var overlay = document.getElementById('vlogDetail');
+    if (overlay) {
+        overlay.classList.add('open');
+        overlay.style.display = 'flex';
+        
+        document.getElementById('vlogTitleDetail').textContent = vlog.title;
+        document.getElementById('vlogDescDetail').textContent = vlog.description || '';
+        document.getElementById('vlogAuthorDetail').textContent = vlog.author || 'FBC Collective';
+        document.getElementById('vlogDateDetail').textContent = formatDate(vlog.publish_date);
+        document.getElementById('vlogLikeCount').textContent = vlog.likes || 0;
+        document.getElementById('vlogViewCount').textContent = vlog.views || 0;
+        
+        var playerWrap = document.getElementById('vlogPlayerWrap');
+        if (vlog.video_url.includes('youtube.com') || vlog.video_url.includes('youtu.be')) {
+            var ytId = extractYouTubeId(vlog.video_url);
+            playerWrap.innerHTML = '<iframe src="https://www.youtube.com/embed/' + ytId + '?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+        } else {
+            playerWrap.innerHTML = '<video src="' + vlog.video_url + '" controls autoplay style="width:100%; height:100%; object-fit:cover;"></video>';
+        }
+
+        var socialWrap = document.getElementById('vlogSocialLinks');
+        socialWrap.innerHTML = '';
+        var socials = vlog.social_links || {};
+        if (typeof socials === 'string') { try { socials = JSON.parse(socials); } catch(e) { socials = {}; } }
+        for (var platform in socials) {
+            socialWrap.innerHTML += '<a href="' + socials[platform] + '" target="_blank" class="thread-action-btn" style="text-transform:capitalize;">' + platform + '</a>';
+        }
+
+        loadVlogComments(vlogId);
+        incrementVlogStat(vlogId, 'views');
+        
+        document.getElementById('vlogLikeBtn').onclick = () => incrementVlogStat(vlogId, 'likes');
+        document.getElementById('vlogPostBtn').onclick = () => submitVlogComment(vlogId);
+    }
+}
+
+function closeVlogDetail() {
+    var overlay = document.getElementById('vlogDetail');
+    if (overlay) {
+        overlay.classList.remove('open');
+        overlay.style.display = 'none';
+        document.getElementById('vlogPlayerWrap').innerHTML = '';
+    }
+    currentVlogId = null;
+}
+
+function extractYouTubeId(url) {
+    var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    var match = url.match(regExp);
+    return (match && match[2].length == 11) ? match[2] : null;
+}
+
+async function loadVlogComments(vlogId) {
+    var feed = document.getElementById('vlogCommentsFeed');
+    feed.innerHTML = '<p style="text-align:center; color:#666;">Loading comments...</p>';
+    var res = await sbClient.from('vlog_comments').select('*').eq('vlog_id', vlogId).order('created_at', { ascending: true });
+    if (res.data) {
+        feed.innerHTML = res.data.map(function(c) {
+            return '<div style="background:rgba(0,0,0,0.05); padding:0.8rem; border-radius:8px; margin-bottom:0.5rem;">' +
+                   '<div style="font-weight:bold; color:var(--primary); font-size:0.85rem;">' + c.author_name + '</div>' +
+                   '<div style="font-size:0.9rem;">' + c.content + '</div>' +
+                   '</div>';
+        }).join('');
+    } else {
+        feed.innerHTML = '<p style="text-align:center; color:#666;">No comments yet.</p>';
+    }
+}
+
+async function submitVlogComment(vlogId) {
+    var author = document.getElementById('vlogCommentAuthor').value.trim() || 'Guest';
+    var text = document.getElementById('vlogCommentText').value.trim();
+    if (!text) return;
+    
+    await sbClient.from('vlog_comments').insert([{ vlog_id: vlogId, author_name: author, content: text }]);
+    document.getElementById('vlogCommentText').value = '';
+    loadVlogComments(vlogId);
+    
+    var res = await sbClient.from('vlogs').select('comments_count').eq('id', vlogId).single();
+    if (res.data) {
+        await sbClient.from('vlogs').update({ comments_count: (res.data.comments_count || 0) + 1 }).eq('id', vlogId);
+    }
+}
+
+async function incrementVlogStat(vlogId, field) {
+    try {
+        var res = await sbClient.from('vlogs').select(field).eq('id', vlogId).single();
+        if (res.data) {
+            var newVal = (res.data[field] || 0) + 1;
+            await sbClient.from('vlogs').update({ [field]: newVal }).eq('id', vlogId);
+            if (field === 'likes') {
+                document.getElementById('vlogLikeCount').textContent = newVal;
+                document.getElementById('vlogLikeBtn').style.color = 'var(--danger)';
+            }
+            if (field === 'views') document.getElementById('vlogViewCount').textContent = newVal;
+        }
+    } catch(e) {}
+}
+
+async function loadAdminVlogs() {
+    var list = document.getElementById('adminVlogList'); if (!list) return;
+    list.innerHTML = '<p style="color:#666;text-align:center;padding:2rem">Loading vlogs...</p>';
+    try {
+        var res = await sbClient.from('vlogs').select('*').order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        var vlogs = res.data || [];
+        list.innerHTML = vlogs.map(function(v) {
+            return '<div class="admin-product-item">' +
+                '<div class="admin-product-meta"><h4>' + v.title + '</h4><p>' + v.status + ' • Likes: ' + v.likes + '</p></div>' +
+                '<div class="admin-product-actions">' +
+                '<button class="btn-edit" onclick="editVlog(\'' + v.id + '\')">✏ Edit</button>' +
+                '<button class="btn-delete" onclick="deleteVlog(\'' + v.id + '\')">🗑 Delete</button>' +
+                '</div></div>';
+        }).join('');
+    } catch(e) { list.innerHTML = '<p>Error loading vlogs.</p>'; }
+}
+
+async function saveVlog() {
+    var title = document.getElementById('vlogTitle').value;
+    var url = document.getElementById('vlogVideoUrl').value;
+    if (!title || !url) { showToast('Error', 'Title and Video URL are required.', '#ef4444'); return; }
+    
+    var data = {
+        title: title,
+        video_url: url,
+        description: document.getElementById('vlogDesc').value,
+        cover_image_url: document.getElementById('vlogCoverImg').value,
+        author: document.getElementById('vlogAuthor').value,
+        status: document.getElementById('vlogStatus').value,
+        social_links: document.getElementById('vlogSocialLinksInput').value || '{}',
+        is_featured: document.getElementById('vlogFeatured').checked
+    };
+
+    var id = document.getElementById('editVlogId').value;
+    try {
+        if (id) {
+            await sbClient.from('vlogs').update(data).eq('id', id);
+        } else {
+            await sbClient.from('vlogs').insert([data]);
+        }
+        showToast('Success', 'Vlog saved successfully!');
+        cancelEditVlog(); loadAdminVlogs(); refreshFrontendData();
+    } catch(e) { showToast('Error', 'Failed to save vlog.', '#ef4444'); }
+}
+
+async function editVlog(id) {
+    var res = await sbClient.from('vlogs').select('*').eq('id', id).single();
+    if (res.data) {
+        var v = res.data;
+        document.getElementById('editVlogId').value = v.id;
+        document.getElementById('vlogTitle').value = v.title;
+        document.getElementById('vlogVideoUrl').value = v.video_url;
+        document.getElementById('vlogDesc').value = v.description || '';
+        document.getElementById('vlogCoverImg').value = v.cover_image_url || '';
+        document.getElementById('vlogAuthor').value = v.author || '';
+        document.getElementById('vlogStatus').value = v.status;
+        document.getElementById('vlogSocialLinksInput').value = typeof v.social_links === 'string' ? v.social_links : JSON.stringify(v.social_links);
+        document.getElementById('vlogFeatured').checked = v.is_featured;
+        document.getElementById('vlogFormTitle').textContent = '✏ Edit Vlog';
+        document.getElementById('vlogFormSection').scrollIntoView();
+    }
+}
+
+function cancelEditVlog() {
+    document.getElementById('editVlogId').value = '';
+    document.getElementById('vlogTitle').value = '';
+    document.getElementById('vlogVideoUrl').value = '';
+    document.getElementById('vlogDesc').value = '';
+    document.getElementById('vlogCoverImg').value = '';
+    document.getElementById('vlogAuthor').value = '';
+    document.getElementById('vlogSocialLinksInput').value = '';
+    document.getElementById('vlogFeatured').checked = false;
+    document.getElementById('vlogFormTitle').textContent = '+ New Vlog';
+}
+
+async function deleteVlog(id) {
+    if (!confirm('Are you sure?')) return;
+    await sbClient.from('vlogs').delete().eq('id', id);
+    loadAdminVlogs(); refreshFrontendData();
+}
+
 // Global state to track currently open topic
 let currentTopicId = null;
 
@@ -3238,6 +3463,13 @@ window.viewTopicDetail = viewTopicDetail;
 window.openComments = openComments;
 window.closeComments = closeComments;
 window.submitComment = submitComment;
+
+window.openVlogDetail = openVlogDetail;
+window.closeVlogDetail = closeVlogDetail;
+window.saveVlog = saveVlog;
+window.editVlog = editVlog;
+window.deleteVlog = deleteVlog;
+window.cancelEditVlog = cancelEditVlog;
 
 window.fmt = fmt;
 window.fmtUSD = fmtUSD;
