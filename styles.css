@@ -4877,7 +4877,15 @@ footer {
 
 /* ===== VIDEO SHOWCASE ===== */
 #videoShowcaseGrid {
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  display: block !important; /* Remove grid to allow full-width hero */
+  width: 100%;
+}
+
+.vlogs-container {
+    max-width: 1400px !important; /* Matches Radio Banners width */
+    width: 95% !important;
+    margin: 0 auto 4rem;
+    padding: 0;
 }
 
 .video-card {
