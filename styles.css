@@ -5077,13 +5077,22 @@ footer {
 .vlog-hero {
     position: relative;
     width: 100% !important;
-    height: 700px !important; /* Ultra-tall for impact */
+    aspect-ratio: 21/9; /* Force wide cinematic landscape */
+    height: auto !important; /* Let aspect ratio define height */
+    min-height: 450px;
     border-radius: 30px;
     overflow: hidden;
     margin-bottom: 3rem;
     cursor: pointer;
     box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .vlog-hero {
+        aspect-ratio: 4/5; /* Keep portrait for mobile only */
+        min-height: 500px;
+    }
 }
 
 .vlog-hero:hover {
