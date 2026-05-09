@@ -4970,7 +4970,14 @@ footer {
   width: 100% !important;
   height: 100% !important;
   border: none;
-  object-fit: cover !important; /* Force video to fill the square zone */
+  object-fit: cover !important;
+}
+
+@media (max-width: 768px) {
+  .vlog-player-container iframe, 
+  .vlog-player-container video {
+    object-fit: contain !important; /* Avoid cropping important video content on small screens */
+  }
 }
 
 #vlogPlayerWrap {
@@ -5046,8 +5053,15 @@ footer {
   background: #000;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   width: 100%;
-  height: 500px !important; /* Force a taller height */
-  min-height: 50vh; /* Ensure it feels big on all screens */
+  height: 500px; /* Standard desktop height */
+}
+
+@media (max-width: 768px) {
+  #vlogDetail .vlog-player-container {
+    height: auto !important;
+    aspect-ratio: 16/9; /* Standard mobile video ratio */
+    min-height: unset;
+  }
 }
 
 #vlogDetail .overlay-header-bar {
