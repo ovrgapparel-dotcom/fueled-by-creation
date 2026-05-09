@@ -4962,7 +4962,7 @@ footer {
   width: 100% !important;
   height: 100% !important;
   border: none;
-  object-fit: contain !important;
+  object-fit: cover !important; /* Force video to fill the square zone */
 }
 
 #vlogPlayerWrap {
@@ -5046,14 +5046,19 @@ footer {
 }
 
 #vlogDetail .detail-container {
-  padding: 2rem 3rem 3rem;
+  padding: 1.5rem 2.5rem 2.5rem; /* Reduced top padding */
 }
 
 #vlogDetail .premium-title {
-  font-size: 2.2rem;
+  font-size: 1.8rem; /* Even smaller for a cleaner look */
   letter-spacing: -0.02em;
+  margin-top: 0;
 }
 
 #vlogDetail .detail-layout {
-  gap: 4rem;
+  gap: 2.5rem; /* Tighter gap between main content and sidebar */
+}
+
+#vlogDetail .detail-meta {
+  margin-bottom: 1rem; /* Less space after meta */
 }
