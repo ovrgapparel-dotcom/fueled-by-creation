@@ -2841,7 +2841,7 @@ async function loadHotTopics() {
                         <div class="pinned-content">
                             <span class="badge-featured">' + window.t('pinned') + '</span>
                             <h3 class="pinned-title">${pinnedItem.title}</h3>
-                            <p class="pinned-hook">${pinnedItem.content.substring(0, 150)}...</p>
+                            <p class="pinned-hook">${(pinnedItem.content || '').substring(0, 150)}...</p>
                             <span class="pinned-cta">' + window.t('read_full_story') + '</span>
                         </div>
                     </div>
@@ -2870,7 +2870,7 @@ async function loadHotTopics() {
                 '<div class="thread-info-wrap">' +
                 '<div class="thread-tag-wrap">' +
                 '<span class="thread-tag ' + (t.category === 'event' ? 'news' : (isHot ? 'hot' : 'trend')) + '">' +
-                (isHot ? '🔥 ' : '') + catIcon + ' ' + t.category.toUpperCase() +
+                (isHot ? '🔥 ' : '') + catIcon + ' ' + (t.category ? t.category.toUpperCase() : 'GENERAL') +
                 '</span>' +
                 '</div>' +
                 '<div class="thread-info">' +
