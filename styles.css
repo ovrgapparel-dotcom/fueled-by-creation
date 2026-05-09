@@ -5058,9 +5058,10 @@ footer {
 
 @media (max-width: 768px) {
   #vlogDetail .vlog-player-container {
-    height: auto !important;
-    aspect-ratio: 16/9; /* Standard mobile video ratio */
-    min-height: unset;
+    height: 300px !important; /* Guaranteed visibility */
+    width: 100% !important;
+    min-height: 300px !important;
+    background: #000;
   }
 }
 
