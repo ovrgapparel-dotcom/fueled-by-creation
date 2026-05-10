@@ -140,6 +140,12 @@ function switchPage(page) {
         loadSectionHeroMedia('radio', 'hero-radio');
     }
 
+    // When opening Vlogs page: render vlogs and hero
+    if (page === 'vlogs') {
+        refreshVlogs();
+        loadSectionHeroMedia('vlogs', 'hero-vlogs');
+    }
+
     // When opening Home: refresh hero media
     if (page === 'home') loadHeroMedia();
 }
@@ -2136,16 +2142,29 @@ async function refreshFrontendData() {
         await renderRadio('playlistGrid');
     } catch (e) { console.error('Error refreshing radio:', e); }
 
+    // Load vlogs for the home showcase
     try {
         var vRes = await sbClient.from('vlogs').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
         currentVlogs = (!vRes.error && vRes.data) ? vRes.data : [];
         renderVlogs('videoShowcaseGrid', currentVlogs);
+        renderVlogs('vlogMainGrid', currentVlogs);
     } catch (e) { console.error('Error refreshing vlogs:', e); }
 
     if (currentPage === 'home') loadHeroMedia();
 
     // Final translation pass
     setTimeout(applyTranslations, 100);
+}
+
+// ===== STANDALONE VLOGS LOADER (called when Vlogs tab is opened) =====
+async function refreshVlogs() {
+    if (!sbClient) return;
+    try {
+        var vRes = await sbClient.from('vlogs').select('*').eq('status', 'Published').order('publish_date', { ascending: false });
+        currentVlogs = (!vRes.error && vRes.data) ? vRes.data : [];
+        renderVlogs('videoShowcaseGrid', currentVlogs);
+        renderVlogs('vlogMainGrid', currentVlogs);
+    } catch (e) { console.error('Error in refreshVlogs:', e); }
 }
 
 // ===== NEWSLETTER =====
@@ -3029,11 +3048,27 @@ async function openVlogDetail(vlogId) {
         document.getElementById('vlogViewCount').textContent = vlog.views || 0;
         
         var playerWrap = document.getElementById('vlogPlayerWrap');
-        if (vlog.video_url.includes('youtube.com') || vlog.video_url.includes('youtu.be')) {
+        // Force dimensions on the wrap so it is NEVER collapsed on mobile
+        var playerContainer = playerWrap ? playerWrap.parentElement : null;
+        if (playerContainer) {
+            playerContainer.style.width = '100%';
+            playerContainer.style.minHeight = '300px';
+            playerContainer.style.background = '#000';
+            playerContainer.style.display = 'block';
+        }
+        if (playerWrap) {
+            playerWrap.style.width = '100%';
+            playerWrap.style.height = '100%';
+            playerWrap.style.minHeight = '300px';
+            playerWrap.style.display = 'block';
+        }
+        if (vlog.video_url && (vlog.video_url.includes('youtube.com') || vlog.video_url.includes('youtu.be'))) {
             var ytId = extractYouTubeId(vlog.video_url);
-            playerWrap.innerHTML = '<iframe src="https://www.youtube.com/embed/' + ytId + '?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+            playerWrap.innerHTML = '<iframe src="https://www.youtube.com/embed/' + ytId + '?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:300px;min-height:300px;border:0;display:block;"></iframe>';
+        } else if (vlog.video_url) {
+            playerWrap.innerHTML = '<video src="' + vlog.video_url + '" controls autoplay playsinline style="width:100%;height:300px;min-height:300px;display:block;background:#000;object-fit:contain;"></video>';
         } else {
-            playerWrap.innerHTML = '<video src="' + vlog.video_url + '" controls autoplay style="width:100%; height:100%; object-fit:cover;"></video>';
+            playerWrap.innerHTML = '<div style="width:100%;height:300px;background:#111;display:flex;align-items:center;justify-content:center;color:#666;">No video available</div>';
         }
 
         var socialWrap = document.getElementById('vlogSocialLinks');
@@ -3496,6 +3531,7 @@ window.submitComment = submitComment;
 
 window.openVlogDetail = openVlogDetail;
 window.closeVlogDetail = closeVlogDetail;
+window.refreshVlogs = refreshVlogs;
 window.saveVlog = saveVlog;
 window.editVlog = editVlog;
 window.deleteVlog = deleteVlog;
